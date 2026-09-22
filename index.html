@@ -1002,7 +1002,7 @@
             <input type="text" id="input-cloud-api-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-1.5 border border-amber-300 rounded bg-white">
             <button onclick="saveCloudApiUrl()" class="px-3 py-1.5 bg-amber-600 text-white font-bold rounded">저장</button>
           </div>
-          <p class="text-[11px] text-amber-700">※ 한 번만 설정하면 이 브라우저에 저장되어 학생들의 제출본을 계속 실시간으로 가져옵니다.</p>
+          <p class="text-[11px] text-amber-700">※ 변경이 필요할 경우에만 새 주소를 입력하여 저장하세요.</p>
         </div>
 
         <!-- Dashboard Stats -->
@@ -1146,11 +1146,9 @@
 
   <script>
     // ==========================================
-    // 🌐 [중요] 구글 스프레드시트 웹 앱 API URL 설정
+    // 🌐 구글 스프레드시트 웹 앱 API URL (연동 완료)
     // ==========================================
-    // 선생님의 Google Apps Script 배포 URL을 아래 따옴표 안에 직접 붙여넣거나,
-    // [교사 관리] 화면의 [⚙️ 연동 URL 설정]에서 입력하실 수 있습니다.
-    const DEFAULT_GAS_URL = ""; 
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxTnvjzGLjEVvcXVku6dhV3lQt0SXlttyEq_7q2bvMjk4kJRvN0I2glKCJ6bkQdS6n6Dw/exec"; 
 
     const STORAGE_KEY_GAS_URL = 'tabinote_gas_api_url';
     const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
@@ -2256,7 +2254,6 @@
       const submitBtnText = document.getElementById('submit-btn-text');
 
       if (!gasUrl) {
-        // 클라우드 URL이 미설정된 경우
         showToast(`'${data.studentName}' 학생 제출 완료! (교사용 클라우드 URL 설정 필요)`, '⚠️');
         playBeep(600, 'sine', 0.2);
         return;
@@ -2266,7 +2263,7 @@
       submitBtnText.textContent = "클라우드 전송 중... ⏳";
 
       try {
-        // Google Apps Script는 text/plain으로 보내면 CORS 에러 없이 완벽 수신됨
+        // text/plain 방식으로 전송해 CORS 사전요청 차단 우회
         await fetch(gasUrl, {
           method: 'POST',
           mode: 'no-cors',
@@ -2371,7 +2368,6 @@
       const tbody = document.getElementById('admin-submissions-tbody');
       
       if (!url) {
-        // 클라우드 미연동 시 로컬 데이터 표시
         try {
           cachedSubmissionsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
         } catch(e) { cachedSubmissionsList = []; }
@@ -2387,7 +2383,7 @@
         const data = await response.json();
         
         if (Array.isArray(data)) {
-          // 최신 제출이 위로 오도록 역순 정렬
+          // 최신 제출이 상단에 노출되도록 역순 정렬
           cachedSubmissionsList = data.reverse();
           localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(cachedSubmissionsList));
           renderSubmissionsTable(cachedSubmissionsList);
@@ -2564,68 +2560,3 @@
   </script>
 </body>
 </html>
-```eof
-
----
-
-### 💡 3분 구글 스프레드시트 무료 클라우드 연동 가이드
-
-학생들이 서로 다른 기기에서 제출한 내용이 선생님 PC에 뜨도록 하려면 구글 시트를 무료 데이터베이스로 연결해야 합니다. 딱 한 번만 설정해 두시면 됩니다.
-
-#### 1단계: 구글 스프레드시트 생성 및 앱스 스크립트 열기
-1. [Google 드라이브](https://drive.google.com/)에서 **[새로 만들기] ➔ [Google 스프레드시트]**를 생성합니다. (제목 예: `일본어회화_기획서_제출함`)
-2. 상단 메뉴에서 **[확장 프로그램] ➔ [Apps Script]**를 클릭합니다.
-
-#### 2단계: 서버 코드 복사 & 붙여넣기
-편집창의 기존 내용을 모두 지우고, 아래 코드를 그대로 붙여넣은 후 저장(💾 아이콘)을 누릅니다:
-
-```javascript
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  lock.tryLock(10000);
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = JSON.parse(e.postData.contents);
-    
-    // 시트 첫 행 헤더가 없으면 자동 생성
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["제출일시", "학번/이름", "방문도시", "여행테마", "기간", "루트", "교통", "명소", "미식/간식", "숙소", "총예산", "점수", "전체데이터JSON"]);
-    }
-    
-    var foodsText = data.foods ? data.foods.map(function(f){ return "[" + f.type + "] " + f.name; }).join(", ") : "";
-    sheet.appendRow([
-      data.submittedAt,
-      data.studentName,
-      data.targetCity,
-      data.tripTheme,
-      data.duration,
-      data.route,
-      data.transportAirport + " / " + data.transportCity,
-      data.spot1 + " & " + data.spot2,
-      foodsText,
-      data.hotelType + " (" + data.hotelLocation + ")",
-      data.totalBudget,
-      data.score,
-      JSON.stringify(data)
-    ]);
-    return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ result: "error", error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var rows = sheet.getDataRange().getValues();
-  var list = [];
-  for (var i = 1; i < rows.length; i++) {
-    try {
-      if (rows[i][12]) {
-        list.push(JSON.parse(rows[i][12]));
-      }
-    } catch(err) {}
-  }
-  return ContentService.createTextOutput(JSON.stringify(list)).setMimeType(ContentService.MimeType.JSON);
-}
