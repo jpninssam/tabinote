@@ -1146,9 +1146,9 @@
 
   <script>
     // ==========================================
-    // 🌐 [연동 완료] 선생님의 구글 앱스 스크립트 웹 앱 URL
+    // 🌐 [스프레드시트 연동 완료] 새로 배포된 Apps Script Web App URL
     // ==========================================
-    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxTnvjzGLjEVvcXVku6dhV3lQt0SXlttyEq_7q2bvMjk4kJRvN0I2glKCJ6bkQdS6n6Dw/exec"; 
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxyOhnVnCdHHiFdv9Wbt6ZjSMsW9KGsPfPjnPvH3xWRQS0Kf0UhLCqD5VAhenRUm3lc9A/exec"; 
 
     const STORAGE_KEY_GAS_URL = 'tabinote_gas_api_url';
     const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
@@ -1156,10 +1156,9 @@
     const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
     const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
 
-    // 저장소 값이 비어 있어도 무조건 DEFAULT_GAS_URL을 기본으로 반환하도록 보장
+    // 로컬 값보다 새 배포 주소(DEFAULT_GAS_URL)를 최우선으로 안정적 반환
     function getActiveGasUrl() {
-      const stored = localStorage.getItem(STORAGE_KEY_GAS_URL);
-      return (stored && stored.trim() !== '') ? stored : DEFAULT_GAS_URL;
+      return DEFAULT_GAS_URL;
     }
 
     let audioCtx = null;
@@ -2532,7 +2531,7 @@
     }
 
     window.onload = function () {
-      // 페이지 열릴 때마다 기본 URL 강제 적용 (학생 기기 설정 불필요)
+      // 페이지 로드 시 새 주소로 강제 동기화
       localStorage.setItem(STORAGE_KEY_GAS_URL, DEFAULT_GAS_URL);
 
       updateCitySelectDropdown();
