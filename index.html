@@ -256,6 +256,7 @@
 
     <!-- TAB 3: 6-ELEMENT TRAVEL PLANNER -->
     <section id="tab-content-planner" class="tab-panel hidden space-y-6">
+      <!-- Live Score Badge Bar -->
       <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -306,6 +307,7 @@
 
       <!-- Main Planner Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Form inputs (2 cols) -->
         <div class="lg:col-span-2 space-y-5">
           <!-- Student Info Header -->
           <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -959,7 +961,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Teacher Admin Dashboard -->
+  <!-- MODAL: Teacher Admin Dashboard (실시간 클라우드 수합 대시보드) -->
   <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -977,17 +979,30 @@
         <!-- Cloud Status Bar -->
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-2">
-            <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
             <div>
-              <span id="cloud-status-title" class="font-bold text-slate-800">구글 스프레드시트 실시간 연동 활성</span>
-              <p id="cloud-status-desc" class="text-[11px] text-slate-500">학생들이 각 기기에서 제출한 기획서가 클라우드로 즉시 동기화됩니다.</p>
+              <span id="cloud-status-title" class="font-bold text-slate-800">클라우드 서버 상태: 확인 중</span>
+              <p id="cloud-status-desc" class="text-[11px] text-slate-500">구글 스프레드시트 웹 앱과 연동되어 각 기기 제출본을 실시간으로 가져옵니다.</p>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <button onclick="fetchCloudSubmissions()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center gap-1 transition shadow-sm">
               🔄 실시간 새로고침
             </button>
+            <button onclick="toggleGasUrlConfig()" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold transition">
+              ⚙️ 연동 URL 설정
+            </button>
           </div>
+        </div>
+
+        <!-- Hidden Cloud URL Config Bar -->
+        <div id="gas-url-config-box" class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
+          <label class="block font-bold text-amber-900">구글 웹 앱 배포 URL (Google Apps Script Web App URL)</label>
+          <div class="flex gap-2">
+            <input type="text" id="input-cloud-api-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-1.5 border border-amber-300 rounded bg-white">
+            <button onclick="saveCloudApiUrl()" class="px-3 py-1.5 bg-amber-600 text-white font-bold rounded">저장</button>
+          </div>
+          <p class="text-[11px] text-amber-700">※ 한 번만 설정하면 이 브라우저에 저장되어 학생들의 제출본을 계속 실시간으로 가져옵니다.</p>
         </div>
 
         <!-- Dashboard Stats -->
@@ -1029,9 +1044,9 @@
         </div>
 
         <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
-          <span>※ 학생 제출 데이터는 선생님의 구글 스프레드시트에 영구 저장됩니다.</span>
+          <span>※ 학생 제출 데이터는 클라우드 구글 시트에 실시간 영구 보관됩니다.</span>
           <button onclick="clearAllSubmissionsPrompt()" class="text-rose-600 hover:text-rose-700 font-semibold">
-            화면 목록 초기화
+            제출 내역 전체 초기화
           </button>
         </div>
       </div>
@@ -1042,7 +1057,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Evaluation Rubric (20 Points) -->
+  <!-- MODAL: Evaluation Rubric -->
   <div id="rubric-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
       <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -1130,8 +1145,22 @@
   </div>
 
   <script>
-    // 선생님의 Google Apps Script 배포 URL 내장
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyQaJ5WiCtuQU2MP3cdtEuf5_DFQguc78AvkXp3WHCasRKY4VjPf4mm2IJBNl4qSKcGdQ/exec";
+    // ==========================================
+    // 🌐 [중요] 구글 스프레드시트 웹 앱 API URL 설정
+    // ==========================================
+    // 선생님의 Google Apps Script 배포 URL을 아래 따옴표 안에 직접 붙여넣거나,
+    // [교사 관리] 화면의 [⚙️ 연동 URL 설정]에서 입력하실 수 있습니다.
+    const DEFAULT_GAS_URL = ""; 
+
+    const STORAGE_KEY_GAS_URL = 'tabinote_gas_api_url';
+    const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
+    const STORAGE_KEY_ARCHIVE = 'tabinote_saved_plans';
+    const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
+    const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
+
+    function getActiveGasUrl() {
+      return localStorage.getItem(STORAGE_KEY_GAS_URL) || DEFAULT_GAS_URL;
+    }
 
     let audioCtx = null;
     function playBeep(freq = 520, type = 'sine', duration = 0.12) {
@@ -1151,6 +1180,7 @@
       } catch (e) {}
     }
 
+    // Default Cities Data
     const BASE_CITIES = [
       {
         id: 'tokyo',
@@ -1267,11 +1297,6 @@
         budget: { flight: 390000, hotel: 310000, transit: 90000, food: 160000, extra: 100000 }
       }
     ];
-
-    const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
-    const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
-    const STORAGE_KEY_ARCHIVE = 'tabinote_saved_plans';
-    const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
 
     function getCustomCities() {
       try {
@@ -1470,6 +1495,7 @@
       }
     }
 
+    // Route Stops Management
     let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 숙소'];
 
     function renderRouteStops() {
@@ -1523,6 +1549,7 @@
       playBeep(600, 'sine', 0.1);
     }
 
+    // Food Items Management
     let currentFoodList = [
       { type: '점심', name: '오사카 타코야키 & 오코노미야키', note: '도톤보리 명물 거리' },
       { type: '디저트', name: '교토 말차 파르페 & 당고', note: '사찰 산책 후 달콤한 휴식' }
@@ -1627,6 +1654,7 @@
       });
     }
 
+    // Quizzes
     const QUIZ_ANSWERS = {
       1: { correct: 'X', exp: '정답입니다! 일본 차량은 왼쪽(좌측통행)으로 주행합니다.' },
       2: { correct: '신칸센', exp: '정답입니다! 1964년 개통된 일본의 대표 초고속열차는 신칸센(しんかんせん)입니다.' },
@@ -2171,7 +2199,9 @@
       reader.readAsText(file);
     }
 
-    // 학생 온라인 제출: 구글 앱스 스크립트로 POST 전송
+    // ==========================================
+    // 🚀 학생 기획서 온라인 클라우드 제출 로직
+    // ==========================================
     async function submitPlanToTeacher() {
       const data = getFormData();
       if (!data.studentName) {
@@ -2207,7 +2237,7 @@
         totalBudget: totalBudget
       };
 
-      // 기기 로컬 스토리지에 1차 저장
+      // 1. 해당 기기(태블릿) 로컬 백업 저장
       let submissions = [];
       try {
         submissions = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
@@ -2220,13 +2250,24 @@
       }
       localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(submissions));
 
+      // 2. 구글 스프레드시트 클라우드 서버로 실시간 POST 전송
+      const gasUrl = getActiveGasUrl();
       const submitBtn = document.getElementById('btn-submit-plan');
       const submitBtnText = document.getElementById('submit-btn-text');
+
+      if (!gasUrl) {
+        // 클라우드 URL이 미설정된 경우
+        showToast(`'${data.studentName}' 학생 제출 완료! (교사용 클라우드 URL 설정 필요)`, '⚠️');
+        playBeep(600, 'sine', 0.2);
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtnText.textContent = "클라우드 전송 중... ⏳";
 
       try {
-        await fetch(GAS_API_URL, {
+        // Google Apps Script는 text/plain으로 보내면 CORS 에러 없이 완벽 수신됨
+        await fetch(gasUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -2235,12 +2276,12 @@
 
         submitBtn.disabled = false;
         submitBtnText.textContent = "선생님께 기획서 온라인 제출하기 🚀";
-        showToast(`'${data.studentName}' 학생의 기획서가 온라인 제출되었습니다! 🚀`, '✅');
+        showToast(`'${data.studentName}' 학생의 기획서가 선생님 화면으로 전송되었습니다! 🚀`, '✅');
         playBeep(880, 'sine', 0.25);
       } catch (err) {
         submitBtn.disabled = false;
         submitBtnText.textContent = "선생님께 기획서 온라인 제출하기 🚀";
-        showToast('클라우드 통신 실패. 로컬에 저장되었습니다.', '⚠️');
+        showToast('클라우드 전송 중 통신 오류가 발생했습니다. 잠시 후 다시 시도하세요.', '⚠️');
       }
     }
 
@@ -2268,6 +2309,7 @@
       
       if (val === '2407') {
         toggleTeacherAuthModal(false);
+        checkCloudConnectionStatus();
         fetchCloudSubmissions();
         toggleTeacherAdminModal(true);
         showToast('교사 관리자 모드에 접속했습니다.', '👑');
@@ -2288,32 +2330,78 @@
       }
     }
 
+    function toggleGasUrlConfig() {
+      const box = document.getElementById('gas-url-config-box');
+      box.classList.toggle('hidden');
+      document.getElementById('input-cloud-api-url').value = getActiveGasUrl();
+    }
+
+    function saveCloudApiUrl() {
+      const url = document.getElementById('input-cloud-api-url').value.trim();
+      localStorage.setItem(STORAGE_KEY_GAS_URL, url);
+      showToast('클라우드 연동 URL이 저장되었습니다!', '💾');
+      checkCloudConnectionStatus();
+      fetchCloudSubmissions();
+    }
+
+    function checkCloudConnectionStatus() {
+      const url = getActiveGasUrl();
+      const dot = document.getElementById('cloud-status-dot');
+      const title = document.getElementById('cloud-status-title');
+      const desc = document.getElementById('cloud-status-desc');
+
+      if (url) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        title.textContent = "클라우드 서버 상태: 구글 시트 연동 활성";
+        desc.textContent = "학생들이 각자 태블릿에서 제출한 데이터가 이 PC로 실시간 동기화됩니다.";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+        title.textContent = "클라우드 서버 상태: 연동 URL 미설정 (로컬 저장소 모드)";
+        desc.textContent = "[⚙️ 연동 URL 설정] 버튼을 눌러 구글 스프레드시트 웹 앱 URL을 등록하세요.";
+      }
+    }
+
+    // ==========================================
+    // 📥 구글 스프레드시트에서 실시간 학생 제출본 조회
+    // ==========================================
     let cachedSubmissionsList = [];
 
-    // 구글 스프레드시트에서 학생 제출 전체 데이터 조회 (doGet 호출)
     async function fetchCloudSubmissions() {
+      const url = getActiveGasUrl();
       const tbody = document.getElementById('admin-submissions-tbody');
-      tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">구글 스프레드시트에서 학생 제출본을 실시간으로 가져오는 중입니다... ⏳</td></tr>`;
-
-      try {
-        const response = await fetch(`${GAS_API_URL}?t=${Date.now()}`);
-        if (!response.ok) throw new Error('응답 실패');
-        const data = await response.json();
-        
-        if (Array.isArray(data)) {
-          cachedSubmissionsList = data.reverse();
-          localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(cachedSubmissionsList));
-          renderSubmissionsTable(cachedSubmissionsList);
-          showToast(`구글 시트에서 총 ${cachedSubmissionsList.length}건의 기획서를 가져왔습니다!`, '🔄');
-        } else {
-          throw new Error('데이터 파싱 오류');
-        }
-      } catch (err) {
+      
+      if (!url) {
+        // 클라우드 미연동 시 로컬 데이터 표시
         try {
           cachedSubmissionsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
         } catch(e) { cachedSubmissionsList = []; }
         renderSubmissionsTable(cachedSubmissionsList);
-        showToast('클라우드 연결 대기: 기기 내 저장본을 표시합니다.', '⚠️');
+        return;
+      }
+
+      tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">구글 시트에서 학생 제출본을 실시간으로 가져오는 중입니다... ⏳</td></tr>`;
+
+      try {
+        const response = await fetch(`${url}?t=${Date.now()}`);
+        if (!response.ok) throw new Error('서버 응답 오류');
+        const data = await response.json();
+        
+        if (Array.isArray(data)) {
+          // 최신 제출이 위로 오도록 역순 정렬
+          cachedSubmissionsList = data.reverse();
+          localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(cachedSubmissionsList));
+          renderSubmissionsTable(cachedSubmissionsList);
+          showToast(`구글 시트에서 총 ${cachedSubmissionsList.length}명의 기획서를 가져왔습니다!`, '🔄');
+        } else {
+          throw new Error('응답 형식 불일치');
+        }
+      } catch (err) {
+        console.warn('Cloud fetch failed, fallback to local', err);
+        try {
+          cachedSubmissionsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
+        } catch(e) { cachedSubmissionsList = []; }
+        renderSubmissionsTable(cachedSubmissionsList);
+        showToast('클라우드 조회 실패: 로컬 보관 데이터를 표시합니다.', '⚠️');
       }
     }
 
@@ -2367,7 +2455,7 @@
     }
 
     function clearAllSubmissionsPrompt() {
-      if (confirm('화면의 목록을 비우시겠습니까? (구글 스프레드시트 원본 데이터는 보존됩니다)')) {
+      if (confirm('교사용 화면의 제출 목록을 초기화하시겠습니까? (구글 스프레드시트 원본 데이터는 보존됩니다)')) {
         localStorage.removeItem(STORAGE_KEY_TEACHER);
         cachedSubmissionsList = [];
         renderSubmissionsTable(cachedSubmissionsList);
@@ -2476,3 +2564,68 @@
   </script>
 </body>
 </html>
+```eof
+
+---
+
+### 💡 3분 구글 스프레드시트 무료 클라우드 연동 가이드
+
+학생들이 서로 다른 기기에서 제출한 내용이 선생님 PC에 뜨도록 하려면 구글 시트를 무료 데이터베이스로 연결해야 합니다. 딱 한 번만 설정해 두시면 됩니다.
+
+#### 1단계: 구글 스프레드시트 생성 및 앱스 스크립트 열기
+1. [Google 드라이브](https://drive.google.com/)에서 **[새로 만들기] ➔ [Google 스프레드시트]**를 생성합니다. (제목 예: `일본어회화_기획서_제출함`)
+2. 상단 메뉴에서 **[확장 프로그램] ➔ [Apps Script]**를 클릭합니다.
+
+#### 2단계: 서버 코드 복사 & 붙여넣기
+편집창의 기존 내용을 모두 지우고, 아래 코드를 그대로 붙여넣은 후 저장(💾 아이콘)을 누릅니다:
+
+```javascript
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    // 시트 첫 행 헤더가 없으면 자동 생성
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["제출일시", "학번/이름", "방문도시", "여행테마", "기간", "루트", "교통", "명소", "미식/간식", "숙소", "총예산", "점수", "전체데이터JSON"]);
+    }
+    
+    var foodsText = data.foods ? data.foods.map(function(f){ return "[" + f.type + "] " + f.name; }).join(", ") : "";
+    sheet.appendRow([
+      data.submittedAt,
+      data.studentName,
+      data.targetCity,
+      data.tripTheme,
+      data.duration,
+      data.route,
+      data.transportAirport + " / " + data.transportCity,
+      data.spot1 + " & " + data.spot2,
+      foodsText,
+      data.hotelType + " (" + data.hotelLocation + ")",
+      data.totalBudget,
+      data.score,
+      JSON.stringify(data)
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ result: "error", error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rows = sheet.getDataRange().getValues();
+  var list = [];
+  for (var i = 1; i < rows.length; i++) {
+    try {
+      if (rows[i][12]) {
+        list.push(JSON.parse(rows[i][12]));
+      }
+    } catch(err) {}
+  }
+  return ContentService.createTextOutput(JSON.stringify(list)).setMimeType(ContentService.MimeType.JSON);
+}
