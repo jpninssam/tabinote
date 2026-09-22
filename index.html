@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>타비노트 (Tabi Note) - 일본어 회화 일본 테마 여행 플래너</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2pdf.js CDN for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #print-sheet-area, #print-sheet-area * { visibility: visible; }
+      #print-sheet-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        background: white !important;
+        color: black !important;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white font-black text-xl shadow-md">
+            旅
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
+              타비노트 <span class="text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold">일본어 회화</span>
+            </h1>
+            <p class="text-xs text-slate-500 hidden sm:block">나만의 일본 테마 여행 기획 & 5분 발표 프로젝트</p>
+          </div>
+        </div>
+
+        <!-- Top Right Controls (Storage, Admin, Rubric) -->
+        <div class="flex items-center space-x-2">
+          <!-- Auto-save Status Indicator -->
+          <div id="save-status-badge" class="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="save-status-text">자동 저장 활성</span>
+          </div>
+
+          <!-- My Plans Archive Button -->
+          <button onclick="openArchiveModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-300">
+            📁 내 보관함
+          </button>
+
+          <!-- Evaluation Rubric Button -->
+          <button onclick="toggleRubricModal(true)" class="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow-sm">
+            <span class="text-amber-400">📋</span> 기준표(20점)
+          </button>
+
+          <!-- Teacher Admin Modal Button -->
+          <button onclick="openTeacherAdminModal()" class="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
+            👑 교사 관리
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs: Quiz tab is first -->
+      <nav class="flex space-x-2 sm:space-x-4 overflow-x-auto no-scrollbar border-t border-slate-100 py-2">
+        <button onclick="switchTab('traffic')" id="tab-btn-traffic" class="tab-btn active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
+          🚦 1. 교통 문화 & 퀴즈
+        </button>
+        <button onclick="switchTab('cities')" id="tab-btn-cities" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
+          🗾 2. JNTO 테마 & 명소
+        </button>
+        <button onclick="switchTab('planner')" id="tab-btn-planner" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
+          📝 3. 6대 요소 여행 플래너
+          <span id="nav-score-badge" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">0/6</span>
+        </button>
+        <button onclick="switchTab('presentation')" id="tab-btn-presentation" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
+          🎤 4. 5분 발표 & 상호 질문
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
+
+    <!-- TAB 1: TRAFFIC CULTURE & QUIZZES (Default Active) -->
+    <section id="tab-content-traffic" class="tab-panel block space-y-6">
+      <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md">
+        <div class="inline-flex items-center gap-1.5 bg-indigo-800/80 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+          <span>🚦 일본 자유여행 필수 교통 에티켓</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight">일본의 독특한 교통 문화 & 상식 마스터</h2>
+        <p class="mt-2 text-sm text-indigo-200 leading-relaxed max-w-3xl">
+          여행 계획서 작성 시 <strong>'이용 교통수단(공항↔도심, 시내 패스)'</strong>을 현실감 있게 작성하기 위해 꼭 알아야 할 실전 상식입니다. 내용을 확인한 후 아래 퀴즈를 풀어보세요!
+        </p>
+      </div>
+
+      <!-- Traffic Feature Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Feature 1: Road & Traffic Direction -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">1. 도로 & 주행 방향</span>
+            <span class="text-xs text-slate-400 font-mono">기초 상식</span>
+          </div>
+          <h4 class="text-base font-bold text-slate-900">운전석은 오른쪽, 자동차는 좌측통행!</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            한국과 정반대입니다. 차량 운전석이 오른쪽에 있고 도로는 <strong>좌측통행</strong>을 합니다. 횡단보도를 건널 때는 먼저 <strong>오른쪽</strong>을 살핀 후 건너는 습관이 필요합니다.
+          </p>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-900">
+            💡 <strong>포인트:</strong> 보행자 통행 및 에스컬레이터 서 있는 위치도 지역에 따라 도쿄는 왼쪽, 오사카는 오른쪽 등 고유한 문화가 있습니다.
+          </div>
+        </div>
+
+        <!-- Feature 2: City Bus Riding (Seiriken) -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">2. 시내버스 탑승법</span>
+            <span class="text-xs text-slate-400 font-mono">대중교통</span>
+          </div>
+          <h4 class="text-base font-bold text-slate-900">뒷문 승차 시 ‘정리권(整理券)’ 뽑기</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            일반적인 일본 시내버스는 <strong>뒷문으로 타고 앞문으로 내립니다.</strong> 탈 때 번호표(정리권)를 뽑고, 내릴 때 버스 앞 전광판 번호에 적힌 운임을 확인하여 기사님 옆 요금통에 지불합니다.
+          </p>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
+            💡 <strong>잔돈 주의:</strong> 기사님이 거스름돈을 직접 주지 않으므로, 요금통의 동전교환기(양폐기)로 미리 환전 후 정확한 금액을 넣어야 합니다.
+          </div>
+        </div>
+
+        <!-- Feature 3: Taxi Automatic Door -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">3. 택시 이용 에티켓</span>
+            <span class="text-xs text-slate-400 font-mono">주의 매너</span>
+          </div>
+          <h4 class="text-base font-bold text-slate-900">문 손대지 마세요! 뒷문은 자동문</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            일본 택시의 승객용 뒷문은 기사님이 운전석에서 여닫는 <strong>자동문</strong>입니다. 손으로 억지로 잡아당기거나 닫으면 고장의 원인이 될 수 있습니다.
+          </p>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
+            💡 <strong>예산 주의:</strong> 기본요금이 높고 심야 할증이 붙으면 경비 지출이 크므로 플래너 작성 시 지하철 패스 활용을 추천합니다.
+          </div>
+        </div>
+
+        <!-- Feature 4: Railway & Shinkansen -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold">4. 철도 & 고속열차</span>
+            <span class="text-xs text-slate-400 font-mono">철도 왕국</span>
+          </div>
+          <h4 class="text-base font-bold text-slate-900">신칸센(新幹線)과 IC 교통카드</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            1964년 도쿄 올림픽에 맞춰 개통된 고속철도 <strong>신칸센</strong>은 도쿄~오사카~나고야 간 신속한 이동을 돕습니다. 시내에서는 스이카(Suica), 이코카(ICOCA) 등 IC카드가 필수입니다.
+          </p>
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-xs text-purple-900">
+            💡 <strong>절약 꿀팁:</strong> 외국인 전용 패스(도쿄 지하철 24/48/72시간권, 오사카 주유패스 등)를 쓰면 교통비를 대폭 절약할 수 있습니다.
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 3-Quiz Box -->
+      <div class="bg-white rounded-xl border border-slate-300 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>⚡</span> 일본 교통 상식 퀴즈 3문항 (원클릭 풀이)
+          </h3>
+          <span id="quiz-score-indicator" class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+            정답: 0 / 3
+          </span>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Quiz 1 -->
+          <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold text-slate-800">Q1. 일본에서 자동차는 도로의 오른쪽으로 달린다.</p>
+              <p id="quiz-ans-1" class="text-xs font-medium mt-1 text-slate-500">결과를 선택하세요.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="checkQuiz(1, 'O')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">O</button>
+              <button onclick="checkQuiz(1, 'X')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">X</button>
+            </div>
+          </div>
+
+          <!-- Quiz 2 -->
+          <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold text-slate-800">Q2. 1964년 개통된 일본의 대표적인 초고속 열차의 명칭은?</p>
+              <p id="quiz-ans-2" class="text-xs font-medium mt-1 text-slate-500">선택지를 클릭하세요.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="checkQuiz(2, 'KTX')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">KTX</button>
+              <button onclick="checkQuiz(2, '신칸센')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">신칸센 (しんかんせん)</button>
+              <button onclick="checkQuiz(2, 'TGV')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">TGV</button>
+            </div>
+          </div>
+
+          <!-- Quiz 3 -->
+          <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold text-slate-800">Q3. 일본 택시를 이용할 때 탑승객이 직접 힘으로 문을 여닫는 것이 올바른 매너이다.</p>
+              <p id="quiz-ans-3" class="text-xs font-medium mt-1 text-slate-500">결과를 선택하세요.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="checkQuiz(3, 'O')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">O</button>
+              <button onclick="checkQuiz(3, 'X')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">X</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-200 flex justify-end">
+          <button onclick="switchTab('cities')" class="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow">
+            다음 단계: 2. 테마 & 여행지 탐색하기 ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: CITIES & ATTRACTIONS -->
+    <section id="tab-content-cities" class="tab-panel hidden space-y-6">
+      <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-600 rounded-2xl p-6 text-white shadow-md">
+        <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-3">
+          <span>✨ JNTO 일본정부관광국 공식 가이드 테마</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">당신만의 일본 테마 여행지를 골라보세요</h2>
+        <p class="mt-2 text-sm text-rose-100 leading-relaxed max-w-3xl">
+          온천 힐링, 애니·팝컬처, 미식 로드, 세계문화유산, 자연 휴양까지! 
+          마음에 드는 여행지의 <strong>[내 계획에 담기]</strong> 버튼을 누르면 플래너에 명소, 음식, 교통편이 자동 입력됩니다.
+        </p>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <button onclick="filterCities('all')" class="city-filter active text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white whitespace-nowrap">전체 보기 (12대 인기 여행지)</button>
+        <button onclick="filterCities('hotspring')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">♨️ 온천 & 료칸</button>
+        <button onclick="filterCities('popculture')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🎬 애니 & 테마파크</button>
+        <button onclick="filterCities('gourmet')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🍜 전국 미식 로드</button>
+        <button onclick="filterCities('heritage')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🏯 전통 & 세계유산</button>
+        <button onclick="filterCities('nature')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">❄️ 자연 & 휴양</button>
+      </div>
+
+      <!-- Grid Cards -->
+      <div id="cities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- TAB 3: 6-ELEMENT TRAVEL PLANNER -->
+    <section id="tab-content-planner" class="tab-panel hidden space-y-6">
+      <!-- Live Score Badge Bar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-800 text-xs font-bold">수행평가 1영역 (10점 만점)</span>
+              <h2 class="text-xl font-bold text-slate-900">여행 계획 필수 6요소 작성기</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              평가 기준표의 6대 필수 요소를 모두 채우면 10점 만점 달성! 작성 내용은 브라우저에 실시간 자동 보관됩니다.
+            </p>
+          </div>
+          <!-- Gauge -->
+          <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 gap-3">
+            <div class="text-right">
+              <div class="text-[11px] text-slate-500 font-medium">충족 요소</div>
+              <div id="elements-count-text" class="text-lg font-black text-rose-600">0 / 6 완료</div>
+            </div>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div>
+              <div class="text-[11px] text-slate-500 font-medium">예상 점수</div>
+              <div id="expected-score-text" class="text-lg font-black text-slate-900">3점 <span class="text-xs font-normal text-slate-400">/ 10점</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Checklist Indicators -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-4 pt-4 border-t border-slate-100">
+          <div id="check-elem-1" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+            <span class="check-icon">⬜</span> ① 전체 일정표
+          </div>
+          <div id="check-elem-2" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+            <span class="check-icon">⬜</span> ② 교통 수단
+          </div>
+          <div id="check-elem-3" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+            <span class="check-icon">⬜</span> ③ 관광지 2곳 이상
+          </div>
+          <div id="check-elem-4" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+            <span class="check-icon">⬜</span> ④ 음식 2개 이상
+          </div>
+          <div id="check-elem-5" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+            <span class="check-icon">⬜</span> ⑤ 숙소 형태
+          </div>
+          <div id="check-elem-6" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+            <span class="check-icon">⬜</span> ⑥ 예상 경비
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Planner Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Form inputs (2 cols) -->
+        <div class="lg:col-span-2 space-y-5">
+          <!-- Student Info Header -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">학번 및 이름 <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-student-name" placeholder="예: 2학년 3반 15번 김철수" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="onInputChanged()">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">여행 테마/제목 <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-trip-theme" placeholder="예: 오사카·교토 미식 & 세계유산 힐링" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="onInputChanged()">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">주요 방문 도시 <span class="text-rose-500">*</span></label>
+              <select id="input-target-city" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" onchange="onCitySelectChange(this.value)">
+                <option value="">도시/지역 선택</option>
+                <option value="도쿄">도쿄 (수도/트렌드/팝컬처)</option>
+                <option value="오사카">오사카 (미식의 도시/USJ)</option>
+                <option value="교토">교토 (천년 고도 사찰/단풍)</option>
+                <option value="후쿠오카">후쿠오카 & 유후인 (온천/야타이)</option>
+                <option value="삿포로">삿포로 (설국 축제/청정 해산물)</option>
+                <option value="나고야">나고야 (지브리 파크/히츠마부시)</option>
+                <option value="오키나와">오키나와 (에메랄드빛 바다 휴양)</option>
+                <option value="히로시마">히로시마 (미야지마 해상 도리이)</option>
+                <option value="기후">기후 시라카와고 (동화 합장촌)</option>
+                <option value="나라">나라 (사슴공원/도다이지)</option>
+                <option value="고베">고베 (항구 야경/아리마 온천)</option>
+                <option value="요코하마">요코하마 (차이나타운/항구)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Element 1: Total Schedule -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-700">필수 요소 1</span>
+              <span class="text-xs text-slate-400">전체 일정표 (기간 및 일차별 동선)</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">전체 일정 및 이동 루트</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">일정 기간</label>
+                <input type="text" id="input-schedule-duration" placeholder="예: 2박 3일" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] text-slate-500 mb-1">일차별 루트 요약</label>
+                <input type="text" id="input-schedule-route" placeholder="예: 1일차(간사이공항→도톤보리) → 2일차(교토 청수사) → 3일차(USJ)" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+              </div>
+            </div>
+            <textarea id="input-schedule-detail" rows="2" placeholder="일차별 상세 시간표나 세부 계획을 적어보세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()"></textarea>
+          </div>
+
+          <!-- Google Maps 1-2-3 Stops Interactive Timeline -->
+          <div class="bg-gradient-to-br from-slate-900 to-indigo-950 p-5 rounded-xl text-white shadow-md space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-3">
+              <div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/50 text-indigo-200">구글맵스 스마트 연동</span>
+                <h4 class="text-sm sm:text-base font-bold text-white mt-1 flex items-center gap-1.5">
+                  🗺️ 당일 여행 번호별 이동 동선 (1➔2➔3➔4➔5)
+                </h4>
+              </div>
+              <button onclick="openGoogleMapsRoute()" class="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow">
+                <span>Google 지도에서 전체 경로 보기 ➔</span>
+              </button>
+            </div>
+
+            <p class="text-xs text-slate-300">
+              출발지(공항/역)부터 주요 명소, 맛집, 숙소를 1, 2, 3번 순서로 입력하면 구글맵 길찾기 링크가 자동 생성됩니다.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
+              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
+                <span class="inline-block w-5 h-5 rounded-full bg-rose-500 text-white font-bold text-center leading-5 text-[11px]">1</span>
+                <span class="text-[10px] text-slate-400 block font-semibold">출발지 (공항/역)</span>
+                <input type="text" id="route-stop-1" value="간사이 국제공항" placeholder="예: 간사이공항" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
+              </div>
+              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
+                <span class="inline-block w-5 h-5 rounded-full bg-amber-500 text-slate-900 font-bold text-center leading-5 text-[11px]">2</span>
+                <span class="text-[10px] text-slate-400 block font-semibold">오전 명소</span>
+                <input type="text" id="route-stop-2" value="오사카성" placeholder="예: 오사카성" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
+              </div>
+              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
+                <span class="inline-block w-5 h-5 rounded-full bg-emerald-500 text-white font-bold text-center leading-5 text-[11px]">3</span>
+                <span class="text-[10px] text-slate-400 block font-semibold">점심 맛집</span>
+                <input type="text" id="route-stop-3" value="도톤보리" placeholder="예: 도톤보리" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
+              </div>
+              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
+                <span class="inline-block w-5 h-5 rounded-full bg-sky-500 text-white font-bold text-center leading-5 text-[11px]">4</span>
+                <span class="text-[10px] text-slate-400 block font-semibold">오후 명소</span>
+                <input type="text" id="route-stop-4" value="우메다 스카이빌딩" placeholder="예: 우메다 스카이빌딩" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
+              </div>
+              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
+                <span class="inline-block w-5 h-5 rounded-full bg-purple-500 text-white font-bold text-center leading-5 text-[11px]">5</span>
+                <span class="text-[10px] text-slate-400 block font-semibold">숙소 도착</span>
+                <input type="text" id="route-stop-5" value="난바역" placeholder="예: 난바역" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Element 2: Transportation -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">필수 요소 2</span>
+              <span class="text-xs text-slate-400">교통 수단 (공항↔도심, 시내 이동 구체적 명시)</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">구간별 이용 교통수단 및 패스</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">공항 ↔ 숙소/도심 이동</label>
+                <input type="text" id="input-transport-airport" placeholder="예: 간사이공항 난카이 라피트 특급 / 나리타 익스프레스" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">도심 내 이동 수단 / 패스</label>
+                <input type="text" id="input-transport-city" placeholder="예: 오사카 메트로 주유패스, 교토 시내버스 1일권" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Element 3: Attractions (Min 2) -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">필수 요소 3</span>
+              <span class="text-xs text-slate-400">관광지 (반드시 2곳 이상 선택 및 이유 작성)</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">방문 관광지 2곳 이상 & 선정 이유</h4>
+            <div class="space-y-3">
+              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                <div class="flex gap-2">
+                  <span class="text-xs font-bold text-slate-600 self-center">장소 1</span>
+                  <input type="text" id="input-spot-1" placeholder="예: 기요미즈데라(청수사)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+                </div>
+                <input type="text" id="input-spot-reason-1" placeholder="선택 이유: 8세기 말 절벽 위에 세워진 사찰에서 교토 전경을 감상하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                <div class="flex gap-2">
+                  <span class="text-xs font-bold text-slate-600 self-center">장소 2</span>
+                  <input type="text" id="input-spot-2" placeholder="예: 유니버설 스튜디오 재팬 (USJ)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+                </div>
+                <input type="text" id="input-spot-reason-2" placeholder="선택 이유: 슈퍼 닌텐도 월드 어트랙션과 해리포터 테마파크를 직접 체험하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Element 4: Local Foods (Min 2) -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700">필수 요소 4</span>
+              <span class="text-xs text-slate-400">현지 대표 음식 (반드시 2개 이상)</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">맛볼 현지 음식 2가지</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">음식 1</label>
+                <input type="text" id="input-food-1" placeholder="예: 오사카 타코야키 & 오코노미야키" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">음식 2</label>
+                <input type="text" id="input-food-2" placeholder="예: 교토 말차 파르페 & 두부 요리" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Element 5: Accommodation -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700">필수 요소 5</span>
+              <span class="text-xs text-slate-400">숙소 형태 및 대략적 위치 명시</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">숙소 형태 & 위치</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">숙소 유형</label>
+                <select id="input-hotel-type" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" onchange="onInputChanged()">
+                  <option value="">유형을 선택하세요</option>
+                  <option value="비즈니스 호텔">비즈니스 호텔 (가성비, 역 접근성)</option>
+                  <option value="전통 료칸(旅館)">전통 료칸 (온천, 가이세키 코스)</option>
+                  <option value="게스트하우스/호스텔">게스트하우스/호스텔 (저예산 배낭여행)</option>
+                  <option value="캡슐 호텔">캡슐 호텔 (이색 체험, 1인 여행)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">숙소 위치 (역세권)</label>
+                <input type="text" id="input-hotel-location" placeholder="예: 난바역 또는 우메다역 도보 5분 거리" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Element 6 & Budget Calculator Sidebar (1 col) -->
+        <div class="space-y-5">
+          <!-- Budget Calculator Card -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 sticky top-24">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">필수 요소 6</span>
+              <span class="text-xs text-slate-400">대략적인 여행 경비</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-bold text-slate-900">1인 예상 경비 계산기</h4>
+              <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">100엔 ≒ 920원</span>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <label class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>항공권 (원)</span>
+                  <span id="badge-flight-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+                </label>
+                <input type="number" id="budget-flight" placeholder="예: 350000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+              </div>
+
+              <div>
+                <label class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>숙박비 (원)</span>
+                  <span id="badge-hotel-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+                </label>
+                <input type="number" id="budget-hotel" placeholder="예: 200000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+              </div>
+
+              <div>
+                <label class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>현지 교통비 (패스/지하철)</span>
+                  <span id="badge-transit-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+                </label>
+                <input type="number" id="budget-transit" placeholder="예: 60000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+              </div>
+
+              <div>
+                <label class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>식비 및 간식비 (원)</span>
+                  <span id="badge-food-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+                </label>
+                <input type="number" id="budget-food" placeholder="예: 150000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+              </div>
+
+              <div>
+                <label class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>입장료 & 쇼핑/기타 (원)</span>
+                  <span id="badge-extra-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+                </label>
+                <input type="number" id="budget-extra" placeholder="예: 100000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+              </div>
+            </div>
+
+            <!-- Total Budget Summary -->
+            <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-1">
+              <div class="text-[11px] font-semibold text-rose-800">1인 총 예상 경비</div>
+              <div class="flex items-baseline justify-between">
+                <span id="total-budget-krw" class="text-xl font-black text-rose-600">0 원</span>
+                <span id="total-budget-jpy" class="text-xs font-mono text-rose-700">약 0 円</span>
+              </div>
+            </div>
+
+            <!-- Online Submission to Teacher Button -->
+            <button onclick="submitPlanToTeacher()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black py-3 rounded-lg transition shadow-md">
+              <span>선생님께 기획서 온라인 제출하기 🚀</span>
+            </button>
+
+            <!-- Export / PDF / Canva Buttons -->
+            <div class="pt-2 space-y-2">
+              <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span id="btn-pdf-label">기획서 PDF 파일 다운로드 (.pdf)</span>
+              </button>
+
+              <button onclick="openCanvaGuideModal()" class="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-lg transition shadow-sm">
+                <span>🎨 캔바·미리캔버스 5분 발표 자료 가이드</span>
+              </button>
+
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="triggerPrintPlan()" class="flex items-center justify-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold py-2 rounded-lg transition">
+                  🖨️ 인쇄 / 미리보기
+                </button>
+                <button onclick="copyPlanToClipboard()" class="flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold py-2 rounded-lg transition">
+                  📋 텍스트 복사
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PRESENTATION & QUESTIONS -->
+    <section id="tab-content-presentation" class="tab-panel hidden space-y-6">
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-6 text-white shadow-md">
+        <div class="inline-flex items-center gap-1.5 bg-emerald-500/50 px-3 py-1 rounded-full text-xs font-medium mb-3">
+          <span>🎤 수행평가 발표(5점) & 질문(5점) 대비</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">발표 브리핑 & 상호 질문 시뮬레이터</h2>
+        <p class="mt-2 text-sm text-emerald-100 leading-relaxed max-w-3xl">
+          내가 기획한 내용을 바탕으로 자동 구성된 1분 스피치 대본을 연습하고, 
+          동료 학생의 발표 때 던질 수 있는 <strong>예리하고 적절한 질문(5점 만점 요건)</strong>을 준비해 보세요.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left: Speech Script -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">발표 5점 만점 대비</span>
+              <h3 class="text-base font-bold text-slate-900 mt-1">나의 1분 발표 스크립트</h3>
+            </div>
+            <button onclick="refreshSpeechScript()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1">
+              🔄 대본 새로고침
+            </button>
+          </div>
+
+          <div id="speech-script-box" class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 font-normal">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
+            📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글맵스로 확인한 대중교통 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
+          </div>
+        </div>
+
+        <!-- Right: Mutual Questions Bank -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">참여/경청 5점 만점 대비</span>
+              <h3 class="text-base font-bold text-slate-900 mt-1">동료 발표 질문 추천 뱅크</h3>
+            </div>
+            <span class="text-xs text-slate-400">질문 1회 이상 주도적 질문</span>
+          </div>
+
+          <p class="text-xs text-slate-600">
+            친구의 발표를 들은 후 아래 카드를 클릭하면 내 메모장에 질문이 자동 복사됩니다.
+          </p>
+
+          <div class="space-y-3">
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">교통 및 동선 질문</span>
+                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+              </div>
+              <p class="text-xs text-slate-800 font-medium">"구글맵으로 확인하신 1번부터 5번 동선 중 환승 시간이 가장 촉박한 구간은 어디이고 어떻게 대처할 계획인가요?"</p>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">명소 & 문화 질문</span>
+                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+              </div>
+              <p class="text-xs text-slate-800 font-medium">"선정하신 두 명소 중 계절이나 시간대에 따라 더 특별한 경험을 할 수 있는 현지 꿀팁이 있나요?"</p>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">예산 & 가성비 질문</span>
+                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+              </div>
+              <p class="text-xs text-slate-800 font-medium">"총예산 안에서 교통 패스나 사전 예약 할인을 활용해 경비를 가장 알뜰하게 아낀 항목은 무엇인가요?"</p>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">음식 & 에티켓 질문</span>
+                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+              </div>
+              <p class="text-xs text-slate-800 font-medium">"소개해주신 대표 음식을 주문하거나 먹을 때 주의해야 할 일본 특유의 식사 에티켓이 있는지 궁금합니다."</p>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">내가 질문할 내용 메모</label>
+            <textarea id="my-peer-question" rows="2" placeholder="위 질문 카드를 클릭하거나 직접 질문할 내용을 메모하세요..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-400" oninput="onInputChanged()"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- A4 PRINT WORKSHEET (Print Fallback) -->
+  <div id="print-sheet-area" class="hidden">
+    <div style="border: 2px solid #333; padding: 25px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+      <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 15px;">
+        <h2 style="font-size: 20px; font-weight: bold; margin: 0;">[일본어 회화] 나만의 일본 테마 여행 기획서</h2>
+        <p style="font-size: 12px; color: #555; margin: 5px 0 0 0;">평가 영역: 여행 계획(10점) + 발표(5점) + 경청/질의(5점) = 20점 만점</p>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px;">
+        <div><strong>작성자:</strong> <span id="print-student-name">-</span></div>
+        <div><strong>여행 테마:</strong> <span id="print-trip-theme">-</span></div>
+        <div><strong>목적지:</strong> <span id="print-target-city">-</span></div>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
+        <tr>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0; width: 22%;">① 전체 일정표</th>
+          <td style="border: 1px solid #999; padding: 8px;" id="print-schedule">-</td>
+        </tr>
+        <tr>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">② 교통 수단</th>
+          <td style="border: 1px solid #999; padding: 8px;" id="print-transport">-</td>
+        </tr>
+        <tr>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">③ 관광지 2곳 이상</th>
+          <td style="border: 1px solid #999; padding: 8px;" id="print-spots">-</td>
+        </tr>
+        <tr>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">④ 대표 음식 2가지</th>
+          <td style="border: 1px solid #999; padding: 8px;" id="print-foods">-</td>
+        </tr>
+        <tr>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑤ 숙소 형태 & 위치</th>
+          <td style="border: 1px solid #999; padding: 8px;" id="print-hotel">-</td>
+        </tr>
+        <tr>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑥ 대략적인 경비</th>
+          <td style="border: 1px solid #999; padding: 8px;" id="print-budget">-</td>
+        </tr>
+      </table>
+
+      <div style="border: 1px dashed #666; padding: 10px; margin-top: 15px; font-size: 12px; background: #fafafa;">
+        <strong>[동료 발표 질문 메모]</strong>
+        <p style="margin: 5px 0;" id="print-question">-</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEDICATED PDF EXPORT TEMPLATE (Rendered off-screen for html2pdf) -->
+  <div id="pdf-render-wrapper" class="fixed -left-[9999px] top-0 w-[794px] bg-white text-slate-900 font-sans p-8 box-border" style="min-height: 1120px;">
+    <div class="border-b-2 border-slate-900 pb-4 mb-5 flex items-center justify-between">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-rose-100 text-rose-800 text-xs font-bold mb-1">
+          일본어 회화 수행평가 과제물
+        </div>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight">나만의 일본 테마 여행 기획서</h1>
+        <p class="text-xs text-slate-500 mt-0.5">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
+      </div>
+      <div class="text-right">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-black text-2xl shadow">
+          旅
+        </div>
+        <div class="text-[10px] text-slate-400 font-mono mt-1">TABI NOTE</div>
+      </div>
+    </div>
+
+    <!-- Student Meta Box -->
+    <div class="grid grid-cols-3 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 text-xs">
+      <div>
+        <span class="text-slate-400 block font-semibold text-[10px]">작성자 (학번/성명)</span>
+        <span id="pdf-student-name" class="font-bold text-slate-900 text-sm">-</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block font-semibold text-[10px]">여행 테마</span>
+        <span id="pdf-trip-theme" class="font-bold text-rose-700 text-sm">-</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block font-semibold text-[10px]">목적지</span>
+        <span id="pdf-target-city" class="font-bold text-slate-900 text-sm">-</span>
+      </div>
+    </div>
+
+    <!-- 6 Elements Table -->
+    <div class="border border-slate-300 rounded-xl overflow-hidden mb-5 text-xs">
+      <div class="bg-slate-900 text-white px-3 py-2 font-bold flex justify-between items-center text-xs">
+        <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
+        <span id="pdf-checklist-badge" class="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px]">0/6 충족</span>
+      </div>
+      <table class="w-full border-collapse">
+        <tr class="border-b border-slate-200">
+          <td class="w-28 bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">① 전체 일정표</td>
+          <td class="p-3 text-slate-800" id="pdf-schedule-content">-</td>
+        </tr>
+        <tr class="border-b border-slate-200">
+          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">② 교통 수단</td>
+          <td class="p-3 text-slate-800" id="pdf-transport-content">-</td>
+        </tr>
+        <tr class="border-b border-slate-200">
+          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">③ 관광지 2곳 이상</td>
+          <td class="p-3 text-slate-800" id="pdf-spots-content">-</td>
+        </tr>
+        <tr class="border-b border-slate-200">
+          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">④ 대표 음식 2가지</td>
+          <td class="p-3 text-slate-800" id="pdf-foods-content">-</td>
+        </tr>
+        <tr class="border-b border-slate-200">
+          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑤ 숙소 형태 & 위치</td>
+          <td class="p-3 text-slate-800" id="pdf-hotel-content">-</td>
+        </tr>
+        <tr>
+          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑥ 예상 여행 경비</td>
+          <td class="p-3 text-slate-800" id="pdf-budget-content">-</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Google Maps Route Timeline in PDF -->
+    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs">
+      <span class="font-bold text-slate-900 block mb-1">🗺️ 구글 지도 1~5번 경유지 경로</span>
+      <p id="pdf-route-timeline" class="text-slate-700">-</p>
+    </div>
+
+    <!-- Presentation & Q&A Box -->
+    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs space-y-2">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
+        <span class="font-bold text-slate-900">🎤 5분 발표 및 동료 평가 준비</span>
+        <span class="text-[10px] text-slate-500">캔바/미리캔버스 슬라이드 기초 자료</span>
+      </div>
+      <div>
+        <span class="font-semibold text-indigo-700">· 동료 발표 경청 후 질문 예정 내용:</span>
+        <p id="pdf-question-content" class="mt-0.5 text-slate-700 pl-2">미작성</p>
+      </div>
+    </div>
+
+    <div class="border-t-2 border-dashed border-slate-300 pt-4 flex items-center justify-between text-[11px] text-slate-600">
+      <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 음식 [ ] 숙소 [ ] 경비</div>
+      <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
+    </div>
+  </div>
+
+  <!-- MODAL: Canva / MiriCanvas 5-Minute Presentation Slide Guide -->
+  <div id="canva-guide-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">
+            🎨
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">캔바 · 미리캔버스 5분 발표 슬라이드 가이드</h3>
+            <p class="text-xs text-slate-500">내 계획서 내용이 반영된 6장 슬라이드 구성안 & 원클릭 복사</p>
+          </div>
+        </div>
+        <button onclick="toggleCanvaModal(false)" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs sm:text-sm">
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900 flex items-start gap-2">
+          <span class="text-base">💡</span>
+          <div>
+            <strong>선생님의 발표 꿀팁:</strong> 캔바나 미리캔버스에서 <strong>[프레젠테이션]</strong> 템플릿을 선택하고, 아래 슬라이드별 내용을 복사하여 넣으면 5분 발표 슬라이드가 순식간에 완성됩니다!
+          </div>
+        </div>
+        <div class="space-y-3" id="canva-slides-container"></div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <button onclick="copyAllSlidesScript()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+          <span>📋 전체 6장 슬라이드 한 번에 복사</span>
+        </button>
+        <button onclick="toggleCanvaModal(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: My Saved Plans Archive (Local Storage & JSON Backup) -->
+  <div id="archive-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📁</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">내 기획서 보관함 (개인별 기록 관리)</h3>
+            <p class="text-xs text-slate-500">작성 중인 기획서를 저장하고 언제든 다시 불러올 수 있습니다.</p>
+          </div>
+        </div>
+        <button onclick="toggleArchiveModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div class="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <div>
+            <span class="text-xs font-bold text-slate-800 block">현재 작성 내용 보관함에 새 저장</span>
+            <span class="text-[11px] text-slate-500">다른 테마로 새로운 계획을 작성할 때 유용합니다.</span>
+          </div>
+          <button onclick="saveCurrentPlanAsNewSlot()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition">
+            + 새 기획서로 저장
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-700">저장된 기획서 목록</h4>
+          <div id="saved-plans-list" class="space-y-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- File Backup / Restore (School <-> Home transport) -->
+        <div class="pt-3 border-t border-slate-200">
+          <h4 class="text-xs font-bold text-slate-700 mb-1">학교 ↔ 집 이동용 파일 백업</h4>
+          <p class="text-[11px] text-slate-500 mb-2">학교 컴퓨터에서 작성한 내용을 파일로 저장해 집에서 그대로 열어보세요.</p>
+          <div class="flex gap-2">
+            <button onclick="exportBackupFile()" class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">
+              💾 백업 파일 다운로드 (.json)
+            </button>
+            <label class="flex-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg text-center cursor-pointer transition border border-slate-300">
+              📂 백업 파일 불러오기
+              <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="importBackupFile(event)">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button onclick="toggleArchiveModal(false)" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Teacher Auth Modal (Safe Custom Dialog replacing prompt) -->
+  <div id="teacher-auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xl">
+          👑
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">교사 인증</h3>
+          <p class="text-xs text-slate-500">관리자 비밀번호를 입력해 주세요.</p>
+        </div>
+      </div>
+      <div>
+        <input type="password" id="teacher-pw-input" placeholder="비밀번호 4자리" class="w-full text-center tracking-widest text-lg font-bold px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none" onkeydown="if(event.key==='Enter') verifyTeacherPassword()">
+        <p id="teacher-pw-error" class="text-xs text-rose-600 font-semibold mt-1.5 hidden text-center">비밀번호가 올바르지 않습니다.</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="toggleTeacherAuthModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
+          취소
+        </button>
+        <button onclick="verifyTeacherPassword()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shadow-sm">
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Teacher Admin Dashboard -->
+  <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base">👑</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">교사용 실시간 제출 관리 대시보드</h3>
+            <p class="text-xs text-slate-500">학생들이 제출한 여행 계획서 수합 및 6대 요소 채점 현황</p>
+          </div>
+        </div>
+        <button onclick="toggleTeacherAdminModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
+            <span class="text-[11px] text-slate-500 block">총 제출 인원</span>
+            <span id="admin-total-submissions" class="text-xl font-black text-slate-900">0명</span>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl">
+            <span class="text-[11px] text-emerald-700 block">10점 만점 충족 인원</span>
+            <span id="admin-perfect-submissions" class="text-xl font-black text-emerald-700">0명</span>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-200 p-3.5 rounded-xl flex items-center justify-between">
+            <div>
+              <span class="text-[11px] text-indigo-700 block">데이터 내보내기</span>
+              <span class="text-xs font-bold text-indigo-900">CSV 엑셀</span>
+            </div>
+            <button onclick="exportSubmissionsCSV()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-sm">
+              다운로드 📥
+            </button>
+          </div>
+        </div>
+
+        <!-- Submissions Table -->
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-3">제출 시각</th>
+                <th class="p-3">학번 / 이름</th>
+                <th class="p-3">목적지 & 테마</th>
+                <th class="p-3">6대 요소 점수</th>
+                <th class="p-3">총 예산</th>
+                <th class="p-3 text-right">상세/관리</th>
+              </tr>
+            </thead>
+            <tbody id="admin-submissions-tbody" class="divide-y divide-slate-100">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
+          <span>※ 학생 제출 데이터는 브라우저 교사용 저장소에 안전하게 유지됩니다.</span>
+          <button onclick="clearAllSubmissionsPrompt()" class="text-rose-600 hover:text-rose-700 font-semibold">
+            제출 내역 전체 초기화
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button onclick="toggleTeacherAdminModal(false)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Evaluation Rubric (20 Points) -->
+  <div id="rubric-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">📋</span>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">일본어 회화 여행 계획 수행평가 채점 기준표</h3>
+            <p class="text-xs text-slate-500">성취기준 [12일회01-05] 연계 | 총 배점 20점 만점</p>
+          </div>
+        </div>
+        <button onclick="toggleRubricModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs sm:text-sm">
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
+            <span>1. 여행 계획서 작성하기 (필수 6요소 완성도)</span>
+            <span class="text-rose-600">배점 10점</span>
+          </div>
+          <table class="w-full text-left border-collapse text-xs">
+            <tr class="border-t border-slate-200 bg-rose-50/50">
+              <td class="p-2.5 font-semibold text-rose-900 w-24">10점 (만점)</td>
+              <td class="p-2.5 text-slate-700"><strong>필수 요소 6가지</strong>(전체 일정표, 교통 수단, 관광지 2곳 이상, 음식 2개 이상, 숙소, 대략적인 여행 경비)를 <strong>모두 포함</strong>하여 구체적이고 상세하게 작성함.</td>
+            </tr>
+            <tr class="border-t border-slate-200">
+              <td class="p-2.5 font-semibold text-slate-800">9점</td>
+              <td class="p-2.5 text-slate-600">필수 요소 중 5가지를 포함하여 상세히 작성함.</td>
+            </tr>
+            <tr class="border-t border-slate-200">
+              <td class="p-2.5 font-semibold text-slate-800">8점</td>
+              <td class="p-2.5 text-slate-600">필수 요소 중 4가지를 포함하여 비교적 상세히 작성함.</td>
+            </tr>
+            <tr class="border-t border-slate-200">
+              <td class="p-2.5 font-semibold text-slate-800">7점 ~ 5점</td>
+              <td class="p-2.5 text-slate-600">필수 요소 중 3~1가지만 포함하여 단편적으로 작성함.</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
+            <span>2. 여행 계획 발표하기 (유창성 & 전달력)</span>
+            <span class="text-emerald-600">배점 5점</span>
+          </div>
+          <table class="w-full text-left border-collapse text-xs">
+            <tr class="border-t border-slate-200 bg-emerald-50/50">
+              <td class="p-2.5 font-semibold text-emerald-900 w-24">5점 (만점)</td>
+              <td class="p-2.5 text-slate-700">조사한 여행 계획을 바탕으로 자신의 의견이나 생각을 적절하고 <strong>유창하게 발표</strong>할 수 있다.</td>
+            </tr>
+            <tr class="border-t border-slate-200">
+              <td class="p-2.5 font-semibold text-slate-800">4점 ~ 2점</td>
+              <td class="p-2.5 text-slate-600">비교적 적절하게 전달하거나 일부만을 단편적으로 발표함.</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
+            <span>3. 경청 및 상호작용 (동료 피드백 & 질문)</span>
+            <span class="text-blue-600">배점 5점</span>
+          </div>
+          <table class="w-full text-left border-collapse text-xs">
+            <tr class="border-t border-slate-200 bg-blue-50/50">
+              <td class="p-2.5 font-semibold text-blue-900 w-24">5점 (만점)</td>
+              <td class="p-2.5 text-slate-700">다른 학생의 발표를 바른 자세로 경청하고, 발표 내용과 관련된 <strong>적절한 질문을 1회 이상 주도적으로 하여 상호작용에 적극 참여함</strong>.</td>
+            </tr>
+            <tr class="border-t border-slate-200">
+              <td class="p-2.5 font-semibold text-slate-800">3점 ~ 1점</td>
+              <td class="p-2.5 text-slate-600">경청하나 질문을 하지 않고 수동적이거나 집중하지 않음.</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button onclick="toggleRubricModal(false)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">확인 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-message" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 text-xs sm:text-sm flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <span id="toast-icon">✨</span>
+    <span id="toast-text">알림 내용</span>
+  </div>
+
+  <script>
+    let audioCtx = null;
+    function playBeep(freq = 520, type = 'sine', duration = 0.12) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    const CITIES_DATA = [
+      {
+        id: 'tokyo',
+        name: '도쿄 (とうきょう)',
+        categories: ['popculture', 'gourmet'],
+        badge: '수도 / 트렌드 & 팝컬처',
+        badgeColor: 'bg-rose-100 text-rose-800',
+        desc: '트렌드의 중심지 시부야와 애니메이션·굿즈 성지 아키하바라, 일본 전통과 미래가 공존하는 메트로폴리스.',
+        spot: '도쿄 스카이트리 & 아키하바라 전자상가',
+        spotReason: '도쿄 전경을 한눈에 내려다보고 글로벌 서브컬처 문화 및 굿즈 샵을 탐방하기 위해',
+        food: '에도마에 스시 & 츠키지 장어덮밥',
+        transitAirport: '나리타 익스프레스(NEX) 특급',
+        transitCity: '도쿄 서브웨이 72시간 패스',
+        stops: ['나리타 국제공항', '도쿄 스카이트리', '츠키지 장외시장', '아키하바라', '신주쿠역 호텔']
+      },
+      {
+        id: 'osaka',
+        name: '오사카 (おおさか)',
+        categories: ['gourmet', 'popculture'],
+        badge: '미식의 천국 / 테마파크',
+        badgeColor: 'bg-amber-100 text-amber-800',
+        desc: '"쿠이다오레(먹다가 망한다)"의 본고장! 활기찬 상인 문화와 유니버설 스튜디오 재팬(USJ)의 도시.',
+        spot: '유니버설 스튜디오 재팬(USJ) & 도톤보리',
+        spotReason: '슈퍼 닌텐도 월드 어트랙션 체험과 글리코상 네온사인 야경 감상',
+        food: '타코야키 & 오코노미야키 & 쿠시카츠',
+        transitAirport: '간사이공항 난카이 라피트 특급',
+        transitCity: '오사카 메트로 주유패스 (1일권)',
+        stops: ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 호텔']
+      },
+      {
+        id: 'kyoto',
+        name: '교토 (きょうと)',
+        categories: ['heritage'],
+        badge: '천년의 고도 / 유네스코 세계유산',
+        badgeColor: 'bg-emerald-100 text-emerald-800',
+        desc: '1,000년 동안 일본의 수도였으며 17개 유네스코 세계유산과 사찰, 정취 가득한 골목길이 숨 쉬는 역사 도시.',
+        spot: '기요미즈데라(청수사) & 후시미이나리 신사',
+        spotReason: '절벽 위 웅장한 목조 사찰의 사계절 풍경과 붉은 도리이가 끝없이 이어지는 숲길 산책',
+        food: '교토 가이세키 정식 & 우지 말차 파르페',
+        transitAirport: '간사이공항 하루카 특급열차 (교토 직통)',
+        transitCity: '교토 시내버스 1일권 및 한큐/게이한 전철',
+        stops: ['교토역', '후시미이나리 신사', '기온거리 말차 디저트', '기요미즈데라', '가와라마치 료칸']
+      },
+      {
+        id: 'fukuoka',
+        name: '후쿠오카 & 유후인 (ふくおか)',
+        categories: ['hotspring', 'gourmet'],
+        badge: '온천 힐링 / 야타이 미식',
+        badgeColor: 'bg-red-100 text-red-800',
+        desc: '한국에서 가장 가까운 규슈의 관문. 나카스 강변 포장마차(야타이)와 유후인의 고즈넉한 온천 료칸 투어.',
+        spot: '유후인 킨린호수 & 나카스 야타이 거리',
+        spotReason: '물안개 피어오르는 온천 마을 힐링과 강변 포장마차의 정겨운 심야 미식 체험',
+        food: '하카타 돈코츠 라멘 & 모츠나베(곱창전골)',
+        transitAirport: '후쿠오카 공항 지하철 (하카타역 5분 직통)',
+        transitCity: '특급 유후인노모리 관광열차 & 산큐패스',
+        stops: ['후쿠오카 공항', '오호리 공원', '하카타 잇푸도 라멘 본점', '유후인 킨린호수', '유후인 료칸']
+      },
+      {
+        id: 'nagoya',
+        name: '나고야 (なごや)',
+        categories: ['popculture', 'gourmet'],
+        badge: '지브리 파크 / 나고야메시',
+        badgeColor: 'bg-indigo-100 text-indigo-800',
+        desc: '애니메이션 팬들의 성지 지브리 파크와 장어덮밥(히츠마부시), 테바사키 등 독창적인 미식의 도시.',
+        spot: '지브리 파크 & 나고야 성',
+        spotReason: '토토로와 센과 치히로 명작 세계관 체험 및 역사적 금샤치 관람',
+        food: '히츠마부시(장어덮밥) & 미소카츠',
+        transitAirport: '주부국제공항 메이테쓰 뮤스카이 특급',
+        transitCity: '나고야 지하철 24시간권 & 리니모(자기부상열차)',
+        stops: ['주부국제공항', '나고야 성', '호라이켄 히츠마부시', '지브리 파크', '사카에역 호텔']
+      },
+      {
+        id: 'sapporo',
+        name: '삿포로 (さっぽろ)',
+        categories: ['nature', 'gourmet'],
+        badge: '설국 축제 / 청정 미식',
+        badgeColor: 'bg-sky-100 text-sky-800',
+        desc: '겨울에는 유키마쓰리(눈축제), 여름에는 시원한 라벤더 언덕과 신선한 털게·스프카레가 반기는 북해도.',
+        spot: '오도리 공원 & 오타루 운하',
+        spotReason: '세계적인 눈조각상 축제 관람과 가스등이 낭만적인 오타루 운하 야경 감상',
+        food: '삿포로 미소라멘 & 징기스칸(양고기) & 스프카레',
+        transitAirport: '신치토세 공항 쾌속 에어포트 열차',
+        transitCity: 'JR 홋카이도 레일 패스 & 삿포로 지하철 1일권',
+        stops: ['신치토세 공항', '오도리 공원', '스스키노 라멘골목', '오타루 운하', '삿포로역 호텔']
+      },
+      {
+        id: 'okinawa',
+        name: '오키나와 (おきなわ)',
+        categories: ['nature'],
+        badge: '에메랄드빛 해변 / 아열대 휴양',
+        badgeColor: 'bg-teal-100 text-teal-800',
+        desc: '환상적인 산호초 바다와 독특한 류큐 왕국 문화를 품은 일본 최고의 해양 리조트 휴양지.',
+        spot: '츄라우미 수족관 & 만좌모 절벽',
+        spotReason: '거대한 고래상어가 헤엄치는 초대형 수조 관람과 에메랄드빛 바다 절경 감상',
+        food: '오키나와 소바 & 타코라이스 & 블루씰 아이스크림',
+        transitAirport: '나하 공항 유이레일(모노레일)',
+        transitCity: '오키나와 렌터카 해안 드라이브',
+        stops: ['나하 공항', '국제거리', '만좌모', '츄라우미 수족관', '온나손 해변 리조트']
+      },
+      {
+        id: 'hiroshima',
+        name: '히로시마 & 미야지마 (ひろしま)',
+        categories: ['heritage', 'gourmet'],
+        badge: '해상 신사 / 평화의 도시',
+        badgeColor: 'bg-purple-100 text-purple-800',
+        desc: '밀물 때 바다 위에 붉은 도리이가 떠오르는 미야지마 이쓰쿠시마 신사와 평화기념공원의 유서 깊은 지역.',
+        spot: '이쓰쿠시마 신사(미야지마) & 평화기념공원',
+        spotReason: '바다 위에 세워진 신비로운 신사와 평화의 소중함을 되새기는 세계유산 답사',
+        food: '히로시마풍 오코노미야키 & 미야지마 굴 구이',
+        transitAirport: '히로시마 공항 리무진 버스',
+        transitCity: '산요 신칸센 및 미야지마구치 페리',
+        stops: ['히로시마역', '평화기념공원', '오코노미무라', '미야지마 이쓰쿠시마 신사', '히로시마역 호텔']
+      },
+      {
+        id: 'shirakawago',
+        name: '기후 시라카와고 (ぎふ)',
+        categories: ['heritage', 'hotspring'],
+        badge: '동화 속 합장촌 / 온천',
+        badgeColor: 'bg-amber-100 text-amber-900',
+        desc: '폭설을 견디기 위해 지어진 독특한 갓쇼즈쿠리 지붕 전통 가옥이 모여 있는 유네스코 세계유산 산골 마을.',
+        spot: '시라카와고 전통마을 전망대 & 게로 온천',
+        spotReason: '애니메이션 동화 속 풍경 같은 전통 가옥 보존 지구와 일본 3대 명천 온천욕 체험',
+        food: '히다규(소고기 구이) & 호바미소 정식',
+        transitAirport: '나고야 주부공항 입국 후 JR 특급 히다',
+        transitCity: '다카야마~시라카와고 직행 고속버스 (노히버스)',
+        stops: ['다카야마역', '다카야마 진야', '히다규 정식 전문점', '시라카와고 전망대', '게로 온천 료칸']
+      },
+      {
+        id: 'nara',
+        name: '나라 (なら)',
+        categories: ['heritage', 'nature'],
+        badge: '사슴 공원 / 고대 사찰',
+        badgeColor: 'bg-orange-100 text-orange-800',
+        desc: '도시 전체가 지붕 없는 박물관! 1,200여 마리의 사슴과 세계 최대 목조건축 다이부츠덴이 공존하는 고도.',
+        spot: '나라 사슴공원 & 도다이지(동대사)',
+        spotReason: '사슴 센베 주기 교감 체험과 거대한 청동 대불의 웅장함을 직접 마주하기 위해',
+        food: '감잎 스시(가키노하 스시) & 모찌 떡',
+        transitAirport: '간사이공항 리무진 버스 (나라 직통 85분)',
+        transitCity: '킨테츠 특급 전철 (난바/교토역 35분 연계)',
+        stops: ['긴테쓰 나라역', '도다이지 대불전', '나카타니도 모찌', '나라 사슴공원', '나라 전통 료칸']
+      },
+      {
+        id: 'kobe',
+        name: '고베 (こうべ)',
+        categories: ['gourmet', 'hotspring'],
+        badge: '100만불 야경 / 아리마 온천',
+        badgeColor: 'bg-blue-100 text-blue-800',
+        desc: '서양식 이국적인 항구 풍경과 세계 최고급 고베규, 일본에서 가장 오래된 온천인 아리마 온천을 품은 낭만 도시.',
+        spot: '고베 하버랜드 & 아리마 온천마을',
+        spotReason: '낭만적인 항구 야경과 철분 가득한 붉은 금탕(킨노유) 온천 힐링',
+        food: '고베 비프 철판 스테이크 & 고베 디저트 케이크',
+        transitAirport: '간사이공항 고속 페리 (베이셔틀 30분 직통)',
+        transitCity: 'JR 신쾌속 열차 및 시티루프 순환버스',
+        stops: ['산노미야역', '기타노 이진칸', '고베규 스테이크하우스', '아리마 온천 킨노유', '하버랜드 야경 호텔']
+      },
+      {
+        id: 'yokohama',
+        name: '요코하마 (よこはま)',
+        categories: ['gourmet', 'popculture'],
+        badge: '차이나타운 / 미래형 항구',
+        badgeColor: 'bg-emerald-100 text-emerald-900',
+        desc: '동양 최대 규모의 차이나타운과 현대적인 미래 수변 도시 미나토미라이21이 어우러진 도쿄 근교 핫플레이스.',
+        spot: '요코하마 차이나타운 & 붉은 벽돌 창고(아카렌가)',
+        spotReason: '길거리 만두와 중화 미식 투어 및 로맨틱한 해변 쇼핑가 산책',
+        food: '샤오롱바오 & 요코하마 이에케이 라멘',
+        transitAirport: '하네다 공항 게이큐선 전철 (직통 약 25분)',
+        transitCity: '도큐 도요코선 특급 (시부야 직통 30분)',
+        stops: ['요코하마역', '미나토미라이21', '차이나타운 딤섬거리', '아카렌가 창고', '코스모월드 관람차 호텔']
+      }
+    ];
+
+    function renderCities(filter = 'all') {
+      const container = document.getElementById('cities-grid');
+      container.innerHTML = '';
+
+      const filtered = filter === 'all' 
+        ? CITIES_DATA 
+        : CITIES_DATA.filter(c => c.categories.includes(filter));
+
+      filtered.forEach(city => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${city.badgeColor}">${city.badge}</span>
+              <span class="text-xs text-slate-400 font-mono">JNTO Pick</span>
+            </div>
+            <h4 class="text-base font-bold text-slate-900">${city.name}</h4>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${city.desc}</p>
+            
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-2 text-xs">
+              <div class="flex items-start gap-1.5">
+                <span class="text-amber-500 font-semibold shrink-0">🏛️ 명소:</span>
+                <span class="text-slate-800 font-medium">${city.spot}</span>
+              </div>
+              <div class="flex items-start gap-1.5">
+                <span class="text-rose-500 font-semibold shrink-0">🍜 음식:</span>
+                <span class="text-slate-800 font-medium">${city.food}</span>
+              </div>
+              <div class="flex items-start gap-1.5">
+                <span class="text-indigo-500 font-semibold shrink-0">🚆 교통:</span>
+                <span class="text-slate-600 text-[11px]">${city.transitAirport} / ${city.transitCity}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3">
+            <button onclick="applyCityToPlan('${city.id}')" class="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 border border-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
+              <span>➕ 이 여행지를 내 계획에 담기</span>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterCities(category) {
+      document.querySelectorAll('.city-filter').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-900', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-600');
+      });
+      event.target.classList.add('active', 'bg-slate-900', 'text-white');
+      event.target.classList.remove('bg-white', 'text-slate-600');
+      renderCities(category);
+      playBeep(440, 'triangle', 0.08);
+    }
+
+    function applyCityToPlan(cityId) {
+      const city = CITIES_DATA.find(c => c.id === cityId);
+      if (!city) return;
+
+      document.getElementById('input-target-city').value = city.name.split(' ')[0];
+      document.getElementById('input-trip-theme').value = `${city.name.split(' ')[0]} ${city.badge.split('/')[0].trim()} 여행`;
+      document.getElementById('input-transport-airport').value = city.transitAirport;
+      document.getElementById('input-transport-city').value = city.transitCity;
+      document.getElementById('input-spot-1').value = city.spot.split('&')[0].trim();
+      document.getElementById('input-spot-reason-1').value = city.spotReason;
+      
+      const secondSpot = city.spot.split('&')[1];
+      if (secondSpot) {
+        document.getElementById('input-spot-2').value = secondSpot.trim();
+        document.getElementById('input-spot-reason-2').value = '현지 고유의 정취와 트렌드를 직접 체험하기 위해';
+      }
+
+      document.getElementById('input-food-1').value = city.food.split('&')[0].trim();
+      if (city.food.split('&')[1]) {
+        document.getElementById('input-food-2').value = city.food.split('&')[1].trim();
+      }
+
+      if (city.stops && city.stops.length >= 5) {
+        for (let i = 1; i <= 5; i++) {
+          const stopInput = document.getElementById(`route-stop-${i}`);
+          if (stopInput) stopInput.value = city.stops[i - 1];
+        }
+      }
+
+      showToast(`'${city.name.split(' ')[0]}' 정보를 플래너에 자동 입력했습니다!`, '🎒');
+      playBeep(660, 'sine', 0.15);
+      onInputChanged();
+      switchTab('planner');
+    }
+
+    function onCitySelectChange(val) {
+      if (!val) return;
+      const matched = CITIES_DATA.find(c => c.name.startsWith(val));
+      if (matched) {
+        applyCityToPlan(matched.id);
+      } else {
+        onInputChanged();
+      }
+    }
+
+    const QUIZ_ANSWERS = {
+      1: { correct: 'X', exp: '정답입니다! 일본 차량은 왼쪽(좌측통행)으로 주행합니다.' },
+      2: { correct: '신칸센', exp: '정답입니다! 1964년 개통된 일본의 대표 초고속열차는 신칸센(しんかんせん)입니다.' },
+      3: { correct: 'X', exp: '정답입니다! 일본 택시 뒷문은 자동문이므로 손으로 열거나 닫지 않습니다.' }
+    };
+    let quizScore = { 1: false, 2: false, 3: false };
+
+    function checkQuiz(qNum, selected) {
+      const info = QUIZ_ANSWERS[qNum];
+      const targetFeedback = document.getElementById(`quiz-ans-${qNum}`);
+      if (selected === info.correct) {
+        quizScore[qNum] = true;
+        targetFeedback.textContent = `⭕ ${info.exp}`;
+        targetFeedback.className = "text-xs font-semibold mt-1 text-emerald-600";
+        playBeep(784, 'sine', 0.15);
+      } else {
+        quizScore[qNum] = false;
+        targetFeedback.textContent = `❌ 오답입니다. 본문 설명을 다시 읽어보세요!`;
+        targetFeedback.className = "text-xs font-semibold mt-1 text-rose-600";
+        playBeep(220, 'square', 0.2);
+      }
+
+      const totalCorrect = Object.values(quizScore).filter(Boolean).length;
+      document.getElementById('quiz-score-indicator').textContent = `정답: ${totalCorrect} / 3`;
+      if (totalCorrect === 3) {
+        showToast('교통 상식 퀴즈 3문항을 모두 맞혔습니다! 👏', '🎉');
+      }
+    }
+
+    function openGoogleMapsRoute() {
+      const stops = [];
+      for (let i = 1; i <= 5; i++) {
+        const val = document.getElementById(`route-stop-${i}`).value.trim();
+        if (val) stops.push(val);
+      }
+
+      if (stops.length < 2) {
+        showToast('출발지와 목적지를 최소 2곳 이상 입력해 주세요!', '⚠️');
+        return;
+      }
+
+      const city = document.getElementById('input-target-city').value.trim() || 'Japan';
+      const encodedStops = stops.map(s => encodeURIComponent(`${s}, ${city}`));
+      
+      const origin = encodedStops[0];
+      const destination = encodedStops[encodedStops.length - 1];
+      const waypoints = encodedStops.slice(1, -1).join('|');
+
+      let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
+      if (waypoints) {
+        url += `&waypoints=${waypoints}`;
+      }
+
+      window.open(url, '_blank');
+      showToast('Google 지도에서 1~5번 대중교통 이동 경로를 열었습니다!', '🗺️');
+      playBeep(600, 'sine', 0.1);
+    }
+
+    const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
+    const STORAGE_KEY_ARCHIVE = 'tabinote_saved_plans';
+    const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
+
+    function getFormData() {
+      return {
+        studentName: document.getElementById('input-student-name').value.trim(),
+        tripTheme: document.getElementById('input-trip-theme').value.trim(),
+        targetCity: document.getElementById('input-target-city').value.trim(),
+        duration: document.getElementById('input-schedule-duration').value.trim(),
+        route: document.getElementById('input-schedule-route').value.trim(),
+        scheduleDetail: document.getElementById('input-schedule-detail').value.trim(),
+        transportAirport: document.getElementById('input-transport-airport').value.trim(),
+        transportCity: document.getElementById('input-transport-city').value.trim(),
+        spot1: document.getElementById('input-spot-1').value.trim(),
+        spotReason1: document.getElementById('input-spot-reason-1').value.trim(),
+        spot2: document.getElementById('input-spot-2').value.trim(),
+        spotReason2: document.getElementById('input-spot-reason-2').value.trim(),
+        food1: document.getElementById('input-food-1').value.trim(),
+        food2: document.getElementById('input-food-2').value.trim(),
+        hotelType: document.getElementById('input-hotel-type').value,
+        hotelLocation: document.getElementById('input-hotel-location').value.trim(),
+        budgetFlight: Number(document.getElementById('budget-flight').value) || 0,
+        budgetHotel: Number(document.getElementById('budget-hotel').value) || 0,
+        budgetTransit: Number(document.getElementById('budget-transit').value) || 0,
+        budgetFood: Number(document.getElementById('budget-food').value) || 0,
+        budgetExtra: Number(document.getElementById('budget-extra').value) || 0,
+        routeStops: [
+          document.getElementById('route-stop-1').value.trim(),
+          document.getElementById('route-stop-2').value.trim(),
+          document.getElementById('route-stop-3').value.trim(),
+          document.getElementById('route-stop-4').value.trim(),
+          document.getElementById('route-stop-5').value.trim()
+        ],
+        peerQuestion: document.getElementById('my-peer-question').value.trim(),
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function setFormData(data) {
+      if (!data) return;
+      if (data.studentName !== undefined) document.getElementById('input-student-name').value = data.studentName;
+      if (data.tripTheme !== undefined) document.getElementById('input-trip-theme').value = data.tripTheme;
+      if (data.targetCity !== undefined) document.getElementById('input-target-city').value = data.targetCity;
+      if (data.duration !== undefined) document.getElementById('input-schedule-duration').value = data.duration;
+      if (data.route !== undefined) document.getElementById('input-schedule-route').value = data.route;
+      if (data.scheduleDetail !== undefined) document.getElementById('input-schedule-detail').value = data.scheduleDetail;
+      if (data.transportAirport !== undefined) document.getElementById('input-transport-airport').value = data.transportAirport;
+      if (data.transportCity !== undefined) document.getElementById('input-transport-city').value = data.transportCity;
+      if (data.spot1 !== undefined) document.getElementById('input-spot-1').value = data.spot1;
+      if (data.spotReason1 !== undefined) document.getElementById('input-spot-reason-1').value = data.spotReason1;
+      if (data.spot2 !== undefined) document.getElementById('input-spot-2').value = data.spot2;
+      if (data.spotReason2 !== undefined) document.getElementById('input-spot-reason-2').value = data.spotReason2;
+      if (data.food1 !== undefined) document.getElementById('input-food-1').value = data.food1;
+      if (data.food2 !== undefined) document.getElementById('input-food-2').value = data.food2;
+      if (data.hotelType !== undefined) document.getElementById('input-hotel-type').value = data.hotelType;
+      if (data.hotelLocation !== undefined) document.getElementById('input-hotel-location').value = data.hotelLocation;
+      if (data.budgetFlight !== undefined) document.getElementById('budget-flight').value = data.budgetFlight || '';
+      if (data.budgetHotel !== undefined) document.getElementById('budget-hotel').value = data.budgetHotel || '';
+      if (data.budgetTransit !== undefined) document.getElementById('budget-transit').value = data.budgetTransit || '';
+      if (data.budgetFood !== undefined) document.getElementById('budget-food').value = data.budgetFood || '';
+      if (data.budgetExtra !== undefined) document.getElementById('budget-extra').value = data.budgetExtra || '';
+      if (data.peerQuestion !== undefined) document.getElementById('my-peer-question').value = data.peerQuestion;
+      
+      if (data.routeStops && Array.isArray(data.routeStops)) {
+        for (let i = 1; i <= 5; i++) {
+          if (data.routeStops[i - 1] !== undefined) {
+            document.getElementById(`route-stop-${i}`).value = data.routeStops[i - 1];
+          }
+        }
+      }
+
+      calculateTotalBudget();
+    }
+
+    let autoSaveTimeout = null;
+    function onInputChanged() {
+      calculateTotalBudget();
+      
+      clearTimeout(autoSaveTimeout);
+      autoSaveTimeout = setTimeout(() => {
+        try {
+          const data = getFormData();
+          localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(data));
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('save-status-text').textContent = `자동 저장됨 (${timeStr})`;
+        } catch (e) {}
+      }, 500);
+    }
+
+    function calculateTotalBudgetRaw() {
+      const f = Number(document.getElementById('budget-flight').value) || 0;
+      const h = Number(document.getElementById('budget-hotel').value) || 0;
+      const t = Number(document.getElementById('budget-transit').value) || 0;
+      const fd = Number(document.getElementById('budget-food').value) || 0;
+      const e = Number(document.getElementById('budget-extra').value) || 0;
+      return f + h + t + fd + e;
+    }
+
+    function calculateTotalBudget() {
+      const f = Number(document.getElementById('budget-flight').value) || 0;
+      const h = Number(document.getElementById('budget-hotel').value) || 0;
+      const t = Number(document.getElementById('budget-transit').value) || 0;
+      const fd = Number(document.getElementById('budget-food').value) || 0;
+      const e = Number(document.getElementById('budget-extra').value) || 0;
+
+      document.getElementById('badge-flight-amt').textContent = f ? `${f.toLocaleString()}원` : '0원';
+      document.getElementById('badge-hotel-amt').textContent = h ? `${h.toLocaleString()}원` : '0원';
+      document.getElementById('badge-transit-amt').textContent = t ? `${t.toLocaleString()}원` : '0원';
+      document.getElementById('badge-food-amt').textContent = fd ? `${fd.toLocaleString()}원` : '0원';
+      document.getElementById('badge-extra-amt').textContent = e ? `${e.toLocaleString()}원` : '0원';
+
+      const total = f + h + t + fd + e;
+      const jpy = Math.round(total / 9.2);
+
+      document.getElementById('total-budget-krw').textContent = `${total.toLocaleString()} 원`;
+      document.getElementById('total-budget-jpy').textContent = `약 ${jpy.toLocaleString()} 円`;
+
+      updatePlanState();
+    }
+
+    function updatePlanState() {
+      const hasSched = (document.getElementById('input-schedule-duration').value.trim() !== '') &&
+                       (document.getElementById('input-schedule-route').value.trim() !== '');
+      
+      const hasTransit = (document.getElementById('input-transport-airport').value.trim() !== '') ||
+                         (document.getElementById('input-transport-city').value.trim() !== '');
+
+      const hasSpots = (document.getElementById('input-spot-1').value.trim() !== '') &&
+                       (document.getElementById('input-spot-2').value.trim() !== '');
+
+      const hasFoods = (document.getElementById('input-food-1').value.trim() !== '') &&
+                       (document.getElementById('input-food-2').value.trim() !== '');
+
+      const hasHotel = (document.getElementById('input-hotel-type').value !== '') &&
+                       (document.getElementById('input-hotel-location').value.trim() !== '');
+
+      const hasBudget = calculateTotalBudgetRaw() > 0;
+
+      const states = [hasSched, hasTransit, hasSpots, hasFoods, hasHotel, hasBudget];
+      const fulfilled = states.filter(Boolean).length;
+
+      for (let i = 1; i <= 6; i++) {
+        const ok = states[i - 1];
+        const el = document.getElementById(`check-elem-${i}`);
+        if (ok) {
+          el.className = "check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold";
+          el.querySelector('.check-icon').textContent = '✅';
+        } else {
+          el.className = "check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs";
+          el.querySelector('.check-icon').textContent = '⬜';
+        }
+      }
+
+      document.getElementById('elements-count-text').textContent = `${fulfilled} / 6 완료`;
+      document.getElementById('nav-score-badge').textContent = `${fulfilled}/6`;
+
+      let score = 3;
+      if (fulfilled === 6) score = 10;
+      else if (fulfilled === 5) score = 9;
+      else if (fulfilled === 4) score = 8;
+      else if (fulfilled === 3) score = 7;
+      else if (fulfilled === 2) score = 6;
+      else if (fulfilled === 1) score = 5;
+
+      const scoreEl = document.getElementById('expected-score-text');
+      scoreEl.innerHTML = `${score}점 <span class="text-xs font-normal text-slate-400">/ 10점</span>`;
+      scoreEl.className = score === 10 ? "text-lg font-black text-emerald-600" : "text-lg font-black text-rose-600";
+
+      refreshSpeechScript();
+    }
+
+    function refreshSpeechScript() {
+      const name = document.getElementById('input-student-name').value.trim() || '[발표자 성명]';
+      const city = document.getElementById('input-target-city').value.trim() || '일본';
+      const theme = document.getElementById('input-trip-theme').value.trim() || '나만의 테마 여행';
+      const dur = document.getElementById('input-schedule-duration').value.trim() || '2박 3일';
+      const route = document.getElementById('input-schedule-route').value.trim() || '주요 동선';
+      const transit = document.getElementById('input-transport-airport').value.trim() || '공항 직통 철도';
+      const spot1 = document.getElementById('input-spot-1').value.trim() || '첫 번째 명소';
+      const spot2 = document.getElementById('input-spot-2').value.trim() || '두 번째 명소';
+      const reason1 = document.getElementById('input-spot-reason-1').value.trim() || '역사와 문화를 직접 체험하기 위해';
+      const food1 = document.getElementById('input-food-1').value.trim() || '현지 대표 미식';
+      const hotel = document.getElementById('input-hotel-type').value || '숙소';
+      const total = calculateTotalBudgetRaw();
+
+      const box = document.getElementById('speech-script-box');
+      box.innerHTML = `
+        <p><strong>[도입: 10초]</strong><br>
+        "안녕하십니까! 이번 일본어 회화 여행 계획 발표를 맡은 <strong>${name}</strong>입니다. 제가 선정한 여행 테마는 <strong>'${theme}'</strong>이며, 목적지는 <strong>${city}</strong>입니다."</p>
+
+        <p><strong>[일정 & 교통 동선: 20초]</strong><br>
+        "저희의 일정은 총 <strong>${dur}</strong> 동안 진행되며, 핵심 루트는 <strong>${route}</strong>입니다. 현지 도착 후에는 <strong>${transit}</strong>을(를) 활용하여 도심으로 빠르고 경제적으로 이동할 계획입니다."</p>
+
+        <p><strong>[관광 명소 2곳 & 미식: 20초]</strong><br>
+        "주요 방문 명소는 2곳 이상으로, 먼저 <strong>${spot1}</strong>을(를) 찾아가 ${reason1} 시간을 갖습니다. 이어서 <strong>${spot2}</strong>을(를) 둘러보며 현지의 별미인 <strong>${food1}</strong>을(를) 맛볼 예정입니다."</p>
+
+        <p><strong>[숙소 & 예산 마무리: 10초]</strong><br>
+        "숙소는 효율적인 이동을 위해 <strong>${hotel}</strong>을(를) 예약하였으며, 1인 총 예상 경비는 약 <strong>${total ? total.toLocaleString() + '원' : '예산 산출 중'}</strong>입니다. 발표를 경청해 주셔서 감사드리며, 질문 있으시면 편하게 말씀해 주세요!"</p>
+      `;
+    }
+
+    function selectQuestion(cardEl) {
+      const qText = cardEl.querySelector('p').textContent.replace(/"/g, '');
+      document.getElementById('my-peer-question').value = qText;
+      onInputChanged();
+      showToast('질문이 내 메모장에 복사되었습니다!', '💬');
+      playBeep(520, 'sine', 0.1);
+    }
+
+    const CANVA_SLIDE_TEMPLATES = [
+      {
+        num: 1,
+        title: "슬라이드 1: 표지 (Title Slide)",
+        time: "0:00 ~ 0:40",
+        getSlideText: d => `[일본어 회화 발표] 나만의 일본 테마 여행\n\n· 여행 테마: ${d.tripTheme || '나만의 테마 여행'}\n· 방문 도시: 일본 ${d.targetCity || '추천 도시'}\n· 발표자: ${d.studentName || '이름 미입력'}`,
+        tip: "캔바/미리캔버스 검색창에 '일본 여행' 또는 '여행 발표'를 검색해 감성적인 표지 템플릿을 고르세요."
+      },
+      {
+        num: 2,
+        title: "슬라이드 2: 왜 이 도시인가? & 전체 일정표",
+        time: "0:40 ~ 1:30",
+        getSlideText: d => `· 여행 기간: ${d.duration || '2박 3일'}\n· 핵심 이동 루트: ${d.route || '1일차 → 2일차 → 3일차'}\n· 테마 선정 이유: ${d.targetCity || '일본'}만의 고유한 매력과 테마를 직접 체험하기 위해 선정`,
+        tip: "지도 일러스트나 화살표 타임라인 그래픽을 활용하면 일정이 한눈에 들어옵니다."
+      },
+      {
+        num: 3,
+        title: "슬라이드 3: 스마트 교통 노하우 & 구글맵스 1~5번 동선",
+        time: "1:30 ~ 2:20",
+        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글맵 1~5번 이동 동선:\n  1번 ${d.routeStops[0]} ➔ 2번 ${d.routeStops[1]} ➔ 3번 ${d.routeStops[2]} ➔ 4번 ${d.routeStops[3]} ➔ 5번 ${d.routeStops[4]}`,
+        tip: "기차, 지하철, 시내버스 아이콘 스티커를 번호 옆에 나란히 배치해 보세요."
+      },
+      {
+        num: 4,
+        title: "슬라이드 4: 대표 명소 2곳 (하이라이트)",
+        time: "2:20 ~ 3:30",
+        getSlideText: d => `1. ${d.spot1 || '대표 명소 1'}\n   - 선정 이유: ${d.spotReason1 || '풍경과 역사를 감상하기 위해'}\n2. ${d.spot2 || '대표 명소 2'}\n   - 선정 이유: ${d.spotReason2 || '문화와 체험을 즐기기 위해'}`,
+        tip: "고화질 사진 2장을 좌우로 배치하고 핵심 키워드 2~3줄로 설명하세요."
+      },
+      {
+        num: 5,
+        title: "슬라이드 5: 오감만족 미식 로드 & 힐링 숙소",
+        time: "3:30 ~ 4:20",
+        getSlideText: d => `· 현지 대표 음식 2선:\n  1) ${d.food1 || '대표 음식 1'}\n  2) ${d.food2 || '대표 음식 2'}\n· 숙소 형태 & 위치: ${d.hotelType || '호텔'} (${d.hotelLocation || '역세권'})`,
+        tip: "음식 사진과 료칸/호텔 사진을 배치하여 청중의 시선을 사로잡으세요."
+      },
+      {
+        num: 6,
+        title: "슬라이드 6: 1인 예상 경비 분석 & Q&A",
+        time: "4:20 ~ 5:00",
+        getSlideText: d => {
+          const tot = (d.budgetFlight||0) + (d.budgetHotel||0) + (d.budgetTransit||0) + (d.budgetFood||0) + (d.budgetExtra||0);
+          return `· 1인 총 예상 경비: 약 ${tot.toLocaleString()}원 (약 ${(Math.round(tot/9.2)).toLocaleString()}円)\n· 경비 절약 팁: 대중교통 패스 및 사전 예약 할인 혜택 활용\n· "경청해 주셔서 감사합니다. 질문 있으신가요?"`;
+        },
+        tip: "파이차트(원형 그래프)로 항공/숙소/식비 비율을 시각화하면 가산점 효과!"
+      }
+    ];
+
+    function renderCanvaSlides() {
+      const container = document.getElementById('canva-slides-container');
+      container.innerHTML = '';
+      const data = getFormData();
+
+      CANVA_SLIDE_TEMPLATES.forEach((tpl, idx) => {
+        const text = tpl.getSlideText(data);
+        const card = document.createElement('div');
+        card.className = "p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-900 text-xs sm:text-sm">${tpl.title}</span>
+            <span class="text-[11px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-semibold">${tpl.time}</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-xs text-slate-800 whitespace-pre-wrap">${text}</div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+            <span>💡 <strong>팁:</strong> ${tpl.tip}</span>
+            <button onclick="copySlideByIndex(${idx})" class="text-indigo-600 hover:text-indigo-800 font-bold shrink-0 ml-2">
+              슬라이드 내용 복사 📋
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function copySlideByIndex(idx) {
+      const data = getFormData();
+      const text = CANVA_SLIDE_TEMPLATES[idx].getSlideText(data);
+      copyTextToClipboard(text, '슬라이드 내용이 복사되었습니다! 캔바에 붙여넣으세요.');
+    }
+
+    function copyAllSlidesScript() {
+      const data = getFormData();
+      let full = `[캔바/미리캔버스 5분 발표 슬라이드 전체 대본]\n\n`;
+      CANVA_SLIDE_TEMPLATES.forEach(tpl => {
+        full += `--- ${tpl.title} (${tpl.time}) ---\n${tpl.getSlideText(data)}\n\n`;
+      });
+      copyTextToClipboard(full, '전체 6장 슬라이드 내용이 모두 복사되었습니다!');
+    }
+
+    function openCanvaGuideModal() {
+      renderCanvaSlides();
+      toggleCanvaModal(true);
+    }
+
+    function toggleCanvaModal(show) {
+      const m = document.getElementById('canva-guide-modal');
+      if (show) {
+        m.classList.remove('hidden');
+        playBeep(520, 'sine', 0.1);
+      } else {
+        m.classList.add('hidden');
+      }
+    }
+
+    function downloadPlanPDF() {
+      const data = getFormData();
+      const name = data.studentName || '학생';
+      const city = data.targetCity || '일본';
+      const theme = data.tripTheme || '테마여행';
+
+      document.getElementById('pdf-student-name').textContent = name;
+      document.getElementById('pdf-trip-theme').textContent = theme;
+      document.getElementById('pdf-target-city').textContent = city;
+
+      document.getElementById('pdf-schedule-content').innerHTML = `<strong>기간:</strong> ${data.duration || '미작성'}<br><strong>동선:</strong> ${data.route || '미작성'}${data.scheduleDetail ? '<br><strong>상세:</strong> ' + data.scheduleDetail : ''}`;
+      document.getElementById('pdf-transport-content').innerHTML = `<strong>공항↔도심:</strong> ${data.transportAirport || '미작성'}<br><strong>시내 이동/패스:</strong> ${data.transportCity || '미작성'}`;
+      document.getElementById('pdf-spots-content').innerHTML = `1. <strong>${data.spot1 || '명소 1'}</strong> (이유: ${data.spotReason1 || '미작성'})<br>2. <strong>${data.spot2 || '명소 2'}</strong> (이유: ${data.spotReason2 || '미작성'})`;
+      document.getElementById('pdf-foods-content').innerHTML = `1. ${data.food1 || '음식 1'}<br>2. ${data.food2 || '음식 2'}`;
+      document.getElementById('pdf-hotel-content').innerHTML = `<strong>유형:</strong> ${data.hotelType || '미선택'} / <strong>위치:</strong> ${data.hotelLocation || '미작성'}`;
+
+      const total = calculateTotalBudgetRaw();
+      const approxJpy = Math.round(total / 9.2);
+      document.getElementById('pdf-budget-content').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span class="text-[10px] text-slate-500">※ 항공·숙박·교통·식비 포함</span>`;
+
+      document.getElementById('pdf-route-timeline').textContent = `1번 ${data.routeStops[0]} ➔ 2번 ${data.routeStops[1]} ➔ 3번 ${data.routeStops[2]} ➔ 4번 ${data.routeStops[3]} ➔ 5번 ${data.routeStops[4]}`;
+      document.getElementById('pdf-question-content').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 교통 또는 추천 맛집에 대해 질문 예정';
+
+      document.getElementById('pdf-checklist-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
+
+      const element = document.getElementById('pdf-render-wrapper');
+      const btn = document.getElementById('btn-download-pdf');
+      const label = document.getElementById('btn-pdf-label');
+
+      const sanitizedName = name.replace(/[^가-힣a-zA-Z0-9]/g, '_');
+      const sanitizedCity = city.replace(/[^가-힣a-zA-Z0-9]/g, '_');
+      const filename = `[일본어회화]_${sanitizedName}_${sanitizedCity}_여행기획서.pdf`;
+
+      btn.disabled = true;
+      label.textContent = "PDF 생성 중... ⏳";
+      playBeep(440, 'sine', 0.1);
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+          btn.disabled = false;
+          label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
+          showToast(`'${filename}' 다운로드가 완료되었습니다!`, '📄');
+          playBeep(880, 'sine', 0.2);
+        }).catch(() => {
+          btn.disabled = false;
+          label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
+          triggerPrintPlan();
+        });
+      } else {
+        btn.disabled = false;
+        label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
+        triggerPrintPlan();
+      }
+    }
+
+    function triggerPrintPlan() {
+      const data = getFormData();
+      document.getElementById('print-student-name').textContent = data.studentName || '미작성';
+      document.getElementById('print-trip-theme').textContent = data.tripTheme || '미작성';
+      document.getElementById('print-target-city').textContent = data.targetCity || '미작성';
+      document.getElementById('print-schedule').innerHTML = `기간: ${data.duration || '-'}<br>동선: ${data.route || '-'}`;
+      document.getElementById('print-transport').innerHTML = `공항: ${data.transportAirport || '-'}<br>시내: ${data.transportCity || '-'}`;
+      document.getElementById('print-spots').innerHTML = `1. ${data.spot1 || '-'} (${data.spotReason1 || '-' })<br>2. ${data.spot2 || '-'} (${data.spotReason2 || '-' })`;
+      document.getElementById('print-foods').innerHTML = `1. ${data.food1 || '-'}<br>2. ${data.food2 || '-'}`;
+      document.getElementById('print-hotel').innerHTML = `${data.hotelType || '-'} (${data.hotelLocation || '-'})`;
+      
+      const tot = calculateTotalBudgetRaw();
+      document.getElementById('print-budget').textContent = `약 ${tot.toLocaleString()} 원`;
+      document.getElementById('print-question').textContent = data.peerQuestion || '동료 발표 경청 후 질문 예정';
+
+      window.print();
+    }
+
+    function copyPlanToClipboard() {
+      const d = getFormData();
+      const tot = calculateTotalBudgetRaw();
+      const txt = `[일본어 회화 여행 계획서]\n- 작성자: ${d.studentName || '미작성'}\n- 테마: ${d.tripTheme || '미작성'} (${d.targetCity || '미작성'})\n\n1. 일정: ${d.duration || '-'} / ${d.route || '-'}\n2. 교통: 공항(${d.transportAirport || '-'}), 시내(${d.transportCity || '-'})\n3. 관광지: 1) ${d.spot1 || '-'}, 2) ${d.spot2 || '-'}\n4. 음식: 1) ${d.food1 || '-'}, 2) ${d.food2 || '-'}\n5. 숙소: ${d.hotelType || '-'} (${d.hotelLocation || '-'})\n6. 총 예산: 약 ${tot.toLocaleString()}원`;
+      copyTextToClipboard(txt, '계획서 텍스트가 복사되었습니다!');
+    }
+
+    function openArchiveModal() {
+      renderSavedPlansList();
+      toggleArchiveModal(true);
+    }
+
+    function toggleArchiveModal(show) {
+      const m = document.getElementById('archive-modal');
+      if (show) {
+        m.classList.remove('hidden');
+        playBeep(520, 'sine', 0.1);
+      } else {
+        m.classList.add('hidden');
+      }
+    }
+
+    function getSavedPlans() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_ARCHIVE) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCurrentPlanAsNewSlot() {
+      const current = getFormData();
+      if (!current.studentName && !current.tripTheme) {
+        showToast('저장할 학생 이름 또는 테마를 먼저 입력해 주세요!', '⚠️');
+        return;
+      }
+      const plans = getSavedPlans();
+      current.id = 'plan_' + Date.now();
+      plans.unshift(current);
+      localStorage.setItem(STORAGE_KEY_ARCHIVE, JSON.stringify(plans));
+      renderSavedPlansList();
+      showToast('새 기획서로 보관함에 저장되었습니다!', '💾');
+      playBeep(700, 'sine', 0.1);
+    }
+
+    function renderSavedPlansList() {
+      const container = document.getElementById('saved-plans-list');
+      const plans = getSavedPlans();
+      container.innerHTML = '';
+
+      if (plans.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic p-3 text-center bg-slate-50 rounded-lg">보관함에 저장된 다른 기획서가 없습니다.</p>`;
+        return;
+      }
+
+      plans.forEach((p, index) => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition text-xs";
+        const dateStr = p.savedAt ? new Date(p.savedAt).toLocaleDateString() : '날짜 미상';
+        item.innerHTML = `
+          <div>
+            <div class="font-bold text-slate-900">${p.tripTheme || '무제 여행'} <span class="text-rose-600 font-semibold">(${p.targetCity || '도시미정'})</span></div>
+            <div class="text-[11px] text-slate-500">${p.studentName || '이름없음'} · ${dateStr}</div>
+          </div>
+          <div class="flex gap-1.5">
+            <button onclick="loadPlanFromArchive(${index})" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold text-[11px]">불러오기</button>
+            <button onclick="deletePlanFromArchive(${index})" class="px-2 py-1 bg-slate-200 hover:bg-rose-100 hover:text-rose-700 text-slate-600 rounded text-[11px]">삭제</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function loadPlanFromArchive(index) {
+      const plans = getSavedPlans();
+      const plan = plans[index];
+      if (plan) {
+        setFormData(plan);
+        localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(plan));
+        toggleArchiveModal(false);
+        showToast(`'${plan.tripTheme}' 기획서를 불러왔습니다!`, '📂');
+        playBeep(600, 'sine', 0.1);
+      }
+    }
+
+    function deletePlanFromArchive(index) {
+      const plans = getSavedPlans();
+      plans.splice(index, 1);
+      localStorage.setItem(STORAGE_KEY_ARCHIVE, JSON.stringify(plans));
+      renderSavedPlansList();
+      showToast('기획서가 삭제되었습니다.', '🗑️');
+    }
+
+    function exportBackupFile() {
+      const data = getFormData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const name = (data.studentName || '학생').replace(/[^가-힣a-zA-Z0-9]/g, '_');
+      a.href = url;
+      a.download = `[타비노트_백업]_${name}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('백업 파일(.json)이 다운로드되었습니다!', '💾');
+      playBeep(700, 'sine', 0.1);
+    }
+
+    function importBackupFile(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          setFormData(parsed);
+          localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(parsed));
+          toggleArchiveModal(false);
+          showToast('백업 파일을 성공적으로 불러왔습니다!', '🎉');
+          playBeep(880, 'sine', 0.15);
+        } catch (err) {
+          showToast('올바른 타비노트 백업 JSON 파일이 아닙니다.', '⚠️');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function submitPlanToTeacher() {
+      const data = getFormData();
+      if (!data.studentName) {
+        showToast('학번과 이름을 반드시 입력해 주세요!', '⚠️');
+        switchTab('planner');
+        document.getElementById('input-student-name').focus();
+        return;
+      }
+
+      let submissions = [];
+      try {
+        submissions = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
+      } catch (e) {}
+
+      // Calculate score
+      const hasSched = (data.duration !== '') && (data.route !== '');
+      const hasTransit = (data.transportAirport !== '') || (data.transportCity !== '');
+      const hasSpots = (data.spot1 !== '') && (data.spot2 !== '');
+      const hasFoods = (data.food1 !== '') && (data.food2 !== '');
+      const hasHotel = (data.hotelType !== '') && (data.hotelLocation !== '');
+      const totalBudget = (data.budgetFlight||0) + (data.budgetHotel||0) + (data.budgetTransit||0) + (data.budgetFood||0) + (data.budgetExtra||0);
+      const hasBudget = totalBudget > 0;
+      const fulfilled = [hasSched, hasTransit, hasSpots, hasFoods, hasHotel, hasBudget].filter(Boolean).length;
+
+      let score = 3;
+      if (fulfilled === 6) score = 10;
+      else if (fulfilled === 5) score = 9;
+      else if (fulfilled === 4) score = 8;
+      else if (fulfilled === 3) score = 7;
+      else if (fulfilled === 2) score = 6;
+      else if (fulfilled === 1) score = 5;
+
+      const record = {
+        ...data,
+        submittedAt: new Date().toLocaleString(),
+        fulfilledCount: fulfilled,
+        score: score,
+        totalBudget: totalBudget
+      };
+
+      // Replace previous submission from same student name or add
+      const existingIdx = submissions.findIndex(s => s.studentName === data.studentName);
+      if (existingIdx >= 0) {
+        submissions[existingIdx] = record;
+      } else {
+        submissions.unshift(record);
+      }
+
+      localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(submissions));
+      showToast(`'${data.studentName}' 학생의 기획서가 온라인 제출되었습니다! 🚀`, '✅');
+      playBeep(880, 'sine', 0.25);
+    }
+
+    function openTeacherAdminModal() {
+      const authModal = document.getElementById('teacher-auth-modal');
+      const pwInput = document.getElementById('teacher-pw-input');
+      const errText = document.getElementById('teacher-pw-error');
+      
+      errText.classList.add('hidden');
+      pwInput.value = '';
+      authModal.classList.remove('hidden');
+      setTimeout(() => pwInput.focus(), 100);
+      playBeep(520, 'sine', 0.1);
+    }
+
+    function toggleTeacherAuthModal(show) {
+      const modal = document.getElementById('teacher-auth-modal');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function verifyTeacherPassword() {
+      const val = document.getElementById('teacher-pw-input').value.trim();
+      const errText = document.getElementById('teacher-pw-error');
+      
+      if (val === '2407') {
+        toggleTeacherAuthModal(false);
+        renderTeacherSubmissions();
+        toggleTeacherAdminModal(true);
+        showToast('교사 관리자 모드에 접속했습니다.', '👑');
+        playBeep(880, 'sine', 0.15);
+      } else {
+        errText.classList.remove('hidden');
+        playBeep(220, 'square', 0.2);
+      }
+    }
+
+    function toggleTeacherAdminModal(show) {
+      const m = document.getElementById('teacher-admin-modal');
+      if (show) {
+        m.classList.remove('hidden');
+        playBeep(520, 'sine', 0.1);
+      } else {
+        m.classList.add('hidden');
+      }
+    }
+
+    function getSubmissions() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function renderTeacherSubmissions() {
+      const subs = getSubmissions();
+      document.getElementById('admin-total-submissions').textContent = `${subs.length}명`;
+      const perfect = subs.filter(s => s.fulfilledCount === 6).length;
+      document.getElementById('admin-perfect-submissions').textContent = `${perfect}명`;
+
+      const tbody = document.getElementById('admin-submissions-tbody');
+      tbody.innerHTML = '';
+
+      if (subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">아직 온라인으로 제출된 학생 기획서가 없습니다.</td></tr>`;
+        return;
+      }
+
+      subs.forEach((s, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-3 text-slate-500 text-[11px]">${s.submittedAt}</td>
+          <td class="p-3 font-bold text-slate-900">${s.studentName}</td>
+          <td class="p-3">
+            <span class="font-semibold text-rose-700">${s.targetCity || '-'}</span>
+            <span class="text-slate-500 block text-[11px]">${s.tripTheme || '-'}</span>
+          </td>
+          <td class="p-3">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${s.score === 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${s.score}점 (${s.fulfilledCount}/6)
+            </span>
+          </td>
+          <td class="p-3 font-mono font-medium">${(s.totalBudget||0).toLocaleString()}원</td>
+          <td class="p-3 text-right">
+            <button onclick="loadStudentSubmission(${idx})" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[11px] font-semibold">
+              열람
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function loadStudentSubmission(idx) {
+      const subs = getSubmissions();
+      const target = subs[idx];
+      if (target) {
+        setFormData(target);
+        toggleTeacherAdminModal(false);
+        switchTab('planner');
+        showToast(`'${target.studentName}' 학생의 제출본을 화면에 불러왔습니다.`, '👁️');
+      }
+    }
+
+    function clearAllSubmissionsPrompt() {
+      localStorage.removeItem(STORAGE_KEY_TEACHER);
+      renderTeacherSubmissions();
+      showToast('제출 내역이 모두 초기화되었습니다.', '🗑️');
+    }
+
+    function exportSubmissionsCSV() {
+      const subs = getSubmissions();
+      if (subs.length === 0) {
+        showToast('내보낼 제출 내역이 없습니다.', '⚠️');
+        return;
+      }
+
+      let csv = "\uFEFF학번및이름,제출일시,목적지,여행테마,기간,루트,교통수단,명소1,명소2,음식1,음식2,숙소,총예산(원),6대요소충족수,예상점수\n";
+      subs.forEach(s => {
+        csv += `"${s.studentName}","${s.submittedAt}","${s.targetCity}","${s.tripTheme}","${s.duration}","${s.route}","${s.transportAirport} / ${s.transportCity}","${s.spot1}","${s.spot2}","${s.food1}","${s.food2}","${s.hotelType} ${s.hotelLocation}","${s.totalBudget}","${s.fulfilledCount}","${s.score}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `[일본어회화_수행평가]_학생제출현황_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('제출 현황 CSV 파일이 다운로드되었습니다!', '📊');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
+        btn.classList.add('text-slate-600', 'border-transparent');
+      });
+
+      const activePanel = document.getElementById(`tab-content-${tabId}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
+        activeBtn.classList.remove('text-slate-600', 'border-transparent');
+      }
+
+      playBeep(480, 'sine', 0.08);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleRubricModal(show) {
+      const modal = document.getElementById('rubric-modal');
+      if (show) {
+        modal.classList.remove('hidden');
+        playBeep(520, 'sine', 0.1);
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function copyTextToClipboard(text, successMsg) {
+      const tempArea = document.createElement("textarea");
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg, '📋');
+        playBeep(600, 'sine', 0.08);
+      } catch (e) {
+        showToast('복사에 실패했습니다.', '⚠️');
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    function showToast(msg, icon = '✨') {
+      const toast = document.getElementById('toast-message');
+      document.getElementById('toast-text').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    window.onload = function () {
+      renderCities('all');
+      
+      // Restore cached draft from LocalStorage
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_CURRENT);
+        if (saved) {
+          setFormData(JSON.parse(saved));
+        } else {
+          calculateTotalBudget();
+        }
+      } catch (e) {
+        calculateTotalBudget();
+      }
+    };
+  </script>
+</body>
+</html>
