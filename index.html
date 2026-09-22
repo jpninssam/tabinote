@@ -1146,7 +1146,7 @@
 
   <script>
     // ==========================================
-    // 🌐 구글 스프레드시트 웹 앱 API URL (연동 완료)
+    // 🌐 [연동 완료] 선생님의 구글 앱스 스크립트 웹 앱 URL
     // ==========================================
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxTnvjzGLjEVvcXVku6dhV3lQt0SXlttyEq_7q2bvMjk4kJRvN0I2glKCJ6bkQdS6n6Dw/exec"; 
 
@@ -1156,8 +1156,10 @@
     const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
     const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
 
+    // 저장소 값이 비어 있어도 무조건 DEFAULT_GAS_URL을 기본으로 반환하도록 보장
     function getActiveGasUrl() {
-      return localStorage.getItem(STORAGE_KEY_GAS_URL) || DEFAULT_GAS_URL;
+      const stored = localStorage.getItem(STORAGE_KEY_GAS_URL);
+      return (stored && stored.trim() !== '') ? stored : DEFAULT_GAS_URL;
     }
 
     let audioCtx = null;
@@ -2253,17 +2255,10 @@
       const submitBtn = document.getElementById('btn-submit-plan');
       const submitBtnText = document.getElementById('submit-btn-text');
 
-      if (!gasUrl) {
-        showToast(`'${data.studentName}' 학생 제출 완료! (교사용 클라우드 URL 설정 필요)`, '⚠️');
-        playBeep(600, 'sine', 0.2);
-        return;
-      }
-
       submitBtn.disabled = true;
       submitBtnText.textContent = "클라우드 전송 중... ⏳";
 
       try {
-        // text/plain 방식으로 전송해 CORS 사전요청 차단 우회
         await fetch(gasUrl, {
           method: 'POST',
           mode: 'no-cors',
@@ -2329,13 +2324,19 @@
 
     function toggleGasUrlConfig() {
       const box = document.getElementById('gas-url-config-box');
-      box.classList.toggle('hidden');
-      document.getElementById('input-cloud-api-url').value = getActiveGasUrl();
+      if (box.classList.contains('hidden') || box.style.display === 'none') {
+        box.classList.remove('hidden');
+        box.style.display = 'block';
+        document.getElementById('input-cloud-api-url').value = getActiveGasUrl();
+      } else {
+        box.classList.add('hidden');
+        box.style.display = 'none';
+      }
     }
 
     function saveCloudApiUrl() {
       const url = document.getElementById('input-cloud-api-url').value.trim();
-      localStorage.setItem(STORAGE_KEY_GAS_URL, url);
+      localStorage.setItem(STORAGE_KEY_GAS_URL, url || DEFAULT_GAS_URL);
       showToast('클라우드 연동 URL이 저장되었습니다!', '💾');
       checkCloudConnectionStatus();
       fetchCloudSubmissions();
@@ -2367,14 +2368,6 @@
       const url = getActiveGasUrl();
       const tbody = document.getElementById('admin-submissions-tbody');
       
-      if (!url) {
-        try {
-          cachedSubmissionsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
-        } catch(e) { cachedSubmissionsList = []; }
-        renderSubmissionsTable(cachedSubmissionsList);
-        return;
-      }
-
       tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">구글 시트에서 학생 제출본을 실시간으로 가져오는 중입니다... ⏳</td></tr>`;
 
       try {
@@ -2383,7 +2376,6 @@
         const data = await response.json();
         
         if (Array.isArray(data)) {
-          // 최신 제출이 상단에 노출되도록 역순 정렬
           cachedSubmissionsList = data.reverse();
           localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(cachedSubmissionsList));
           renderSubmissionsTable(cachedSubmissionsList);
@@ -2540,6 +2532,9 @@
     }
 
     window.onload = function () {
+      // 페이지 열릴 때마다 기본 URL 강제 적용 (학생 기기 설정 불필요)
+      localStorage.setItem(STORAGE_KEY_GAS_URL, DEFAULT_GAS_URL);
+
       updateCitySelectDropdown();
       renderCities('all');
       renderRouteStops();
