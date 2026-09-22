@@ -6,6 +6,9 @@
   <title>타비노트 (Tabi Note) - 일본어 회화 일본 테마 여행 플래너</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet Map CSS & JS (구글맵 스타일 무키 연동 지도 엔진) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -31,9 +34,23 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* =================================================== */
-    /* 🖨️ A4 PDF 인쇄 전용 스타일 (이미지 포함 선명 출력) */
-    /* =================================================== */
+    /* 지도 마커 커스텀 번호 뱃지 */
+    .custom-map-marker {
+      background: linear-gradient(135deg, #e11d48, #f59e0b);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 13px;
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
     @media print {
       @page {
         size: A4 portrait;
@@ -361,17 +378,17 @@
           </div>
 
           <!-- =================================================== -->
-          <!-- 🗺️ 구글 지도 1,2,3 경로 + 캡처 이미지 등록 칸 신설 -->
+          <!-- 🗺️ [신규] 플래너 화면 내 실시간 1, 2, 3 번호 인터랙티브 지도 -->
           <!-- =================================================== -->
           <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-2xl text-white shadow-lg space-y-4 border border-indigo-900/50">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-black px-2 py-0.5 rounded bg-rose-500 text-white">Google Maps 실시간 연동</span>
-                  <span class="text-xs text-indigo-300 font-semibold">1 ➔ 2 ➔ 3 순차 이동</span>
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded bg-rose-500 text-white">실시간 지도 시뮬레이터</span>
+                  <span class="text-xs text-indigo-300 font-semibold">1 ➔ 2 ➔ 3 순차 번호 마커 연동</span>
                 </div>
                 <h4 class="text-sm sm:text-base font-extrabold text-white mt-1 flex items-center gap-1.5">
-                  🗺️ 구글 지도 번호별 이동 동선 & 경로 캡처
+                  🗺️ 1, 2, 3 번호별 여행 경로 지도 (화면 내 직접 탐색)
                 </h4>
               </div>
               <div class="flex items-center gap-2">
@@ -379,63 +396,27 @@
                   + 경유지 추가
                 </button>
                 <button onclick="openGoogleMapsNumberedRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black px-3.5 py-2 rounded-xl transition shadow-lg shadow-rose-900/50 ring-2 ring-rose-400/30">
-                  <span>Google 지도에서 경로 열기 ➔</span>
+                  <span>Google 지도 앱으로 열기 ➔</span>
                 </button>
               </div>
             </div>
 
-            <!-- 경유지 입력 리스트 -->
+            <!-- 경유지 입력 텍스트 리스트 -->
             <div id="route-stops-container" class="space-y-2"></div>
 
-            <!-- 번호별 동선 실시간 미리보기 바 (Timeline Preview) -->
-            <div class="bg-slate-950/60 border border-indigo-500/30 p-3 rounded-xl space-y-1.5">
-              <div class="flex items-center justify-between text-[11px] text-indigo-300 font-semibold">
-                <span>📍 실시간 번호 순서 (1 ➔ 2 ➔ 3...):</span>
-                <span class="text-[10px] text-slate-400">우측 📍 버튼으로 단독 위치 확인 가능</span>
+            <!-- 실시간 지도 뷰어 컨테이너 (1, 2, 3 번호 핀 & 연결 점선 자동 렌더링) -->
+            <div class="rounded-xl overflow-hidden border-2 border-indigo-500/40 shadow-inner relative">
+              <div id="live-interactive-map" style="height: 340px; width: 100%; background: #0f172a;"></div>
+              <div class="absolute bottom-2 left-2 z-[400] bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 shadow">
+                💡 지도 위의 <strong>[①, ②, ③...]</strong> 번호 핀을 누르면 장소명이 뜹니다. 마우스로 자유롭게 확대/이동해 보세요!
               </div>
-              <div id="route-numbered-chips" class="flex flex-wrap items-center gap-1.5 pt-1"></div>
             </div>
 
-            <!-- 📸 [새로 추가된 기능] 구글맵 캡처 이미지 등록 & 미리보기 칸 -->
-            <div class="mt-4 pt-4 border-t border-slate-800 space-y-3">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h5 class="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5">
-                    <span>📸</span> 구글 지도 경로 캡처 이미지 등록 (PDF에 포함)
-                  </h5>
-                  <p class="text-[11px] text-slate-400 mt-0.5">
-                    구글 지도에서 1, 2, 3번 경로가 표시된 화면을 캡처하여 아래에 등록하세요.
-                  </p>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <label class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold cursor-pointer transition shadow-sm">
-                    📂 이미지 파일 선택
-                    <input type="file" id="map-capture-input" accept="image/*" class="hidden" onchange="handleMapImageUpload(event)">
-                  </label>
-                  <button onclick="removeMapCaptureImage()" id="btn-remove-map-img" class="hidden px-2.5 py-1.5 bg-slate-800 hover:bg-rose-900/80 text-rose-300 border border-rose-800/50 rounded-lg text-xs font-semibold transition">
-                    삭제
-                  </button>
-                </div>
-              </div>
-
-              <!-- 이미지 드래그/업로드 드롭존 및 미리보기 -->
-              <div id="map-image-dropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-400 rounded-xl p-4 text-center bg-slate-950/40 transition">
-                <div id="map-image-placeholder" class="py-4 space-y-2">
-                  <span class="text-2xl block">🗺️</span>
-                  <p class="text-xs text-slate-300 font-medium">
-                    캡처한 지도 이미지를 <strong>여기로 드래그</strong>하거나 <strong>[파일 선택]</strong> 버튼을 누르세요.
-                  </p>
-                  <p class="text-[11px] text-slate-500">
-                    (클립보드에 이미지가 복사되어 있다면 이 페이지에서 <strong>Ctrl + V</strong>로 바로 붙여넣기도 가능합니다!)
-                  </p>
-                </div>
-                <div id="map-image-preview-wrapper" class="hidden">
-                  <img id="map-image-preview" src="" alt="구글 지도 경로 캡처본" class="max-h-72 w-auto mx-auto rounded-lg shadow-md border border-slate-700 object-contain">
-                  <p class="text-[11px] text-emerald-400 font-medium mt-2">
-                    ✅ 구글 지도 경로 이미지가 등록되었습니다. (기획서 PDF 출력 시 자동 삽입됩니다)
-                  </p>
-                </div>
-              </div>
+            <div class="bg-slate-950/60 border border-indigo-500/30 p-2.5 rounded-xl flex items-center justify-between text-[11px] text-indigo-300">
+              <span>📍 <strong>동선 순서:</strong> <span id="route-summary-text" class="text-slate-200 font-medium">1 ➔ 2 ➔ 3 순차 연결 중</span></span>
+              <button onclick="recenterMapToStops()" class="px-2 py-1 bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 rounded border border-indigo-700 text-[10px] font-semibold transition">
+                🎯 지도 중심 맞추기
+              </button>
             </div>
           </div>
 
@@ -612,7 +593,6 @@
 
             <!-- Export / PDF / Canva Buttons -->
             <div class="pt-2 space-y-2">
-              <!-- 원클릭 인쇄/PDF 저장 버튼 -->
               <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -661,7 +641,7 @@
           <div id="speech-script-box" class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 font-normal"></div>
 
           <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
-            📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글 지도 번호별 경로로 확인한 대중교통 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
+            📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글 지도 1, 2, 3 번호 동선으로 확인한 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
           </div>
         </div>
 
@@ -779,7 +759,7 @@
   </div>
 
   <!-- =================================================== -->
-  <!-- 📄 정밀 A4 레이아웃 (지도 캡처 이미지 포함 인쇄 영역) -->
+  <!-- 📄 정밀 A4 레이아웃 (인쇄/PDF 저장 영역) -->
   <!-- =================================================== -->
   <div id="print-sheet-area" class="hidden">
     <div style="max-width: 760px; margin: 0 auto; padding: 18px; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; line-height: 1.45;">
@@ -849,15 +829,10 @@
         </table>
       </div>
 
-      <!-- Google Maps Route Timeline (텍스트 + 캡처 이미지 동시 표시) -->
+      <!-- Google Maps Route Timeline (텍스트 순차 동선) -->
       <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 12px; font-size: 11px;">
-        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 이동 경로 (순차 동선 & 지도 캡처)</strong>
-        <p id="print-route-timeline" style="margin: 0 0 6px 0; color: #334155; line-height: 1.5;">-</p>
-        
-        <!-- 출력용 지도 이미지 컨테이너 -->
-        <div id="print-map-image-container" style="display: none; text-align: center; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
-          <img id="print-map-image" src="" alt="구글 지도 경로 캡처본" style="max-height: 240px; width: auto; max-width: 100%; border: 1px solid #94a3b8; border-radius: 6px; margin: 0 auto; display: block;">
-        </div>
+        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 1, 2, 3 번호별 여행 경로 동선</strong>
+        <p id="print-route-timeline" style="margin: 0; color: #334155; line-height: 1.6;">-</p>
       </div>
 
       <!-- Presentation & Mutual Questions -->
@@ -874,7 +849,7 @@
 
       <!-- Signature Footer -->
       <div style="border-top: 2px dashed #94a3b8; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #475569;">
-        <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비 [ ] 지도캡처</div>
+        <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
         <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
       </div>
 
@@ -1115,6 +1090,52 @@
       } catch (e) {}
     }
 
+    // 주요 도시별 경유지 좌표 프리셋 (1, 2, 3 번호 핀 및 연결선 생성용)
+    const CITY_COORDINATES = {
+      '오사카': [
+        { name: '간사이 국제공항', lat: 34.4347, lng: 135.2442 },
+        { name: '오사카성', lat: 34.6873, lng: 135.5262 },
+        { name: '도톤보리 맛집거리', lat: 34.6687, lng: 135.5013 },
+        { name: '유니버설 스튜디오 재팬', lat: 34.6654, lng: 135.4323 },
+        { name: '난바역 호텔', lat: 34.6630, lng: 135.5020 }
+      ],
+      '도쿄': [
+        { name: '나리타 국제공항', lat: 35.7720, lng: 140.3929 },
+        { name: '도쿄 스카이트리', lat: 35.7101, lng: 139.8107 },
+        { name: '츠키지 장외시장', lat: 35.6655, lng: 139.7707 },
+        { name: '아키하바라 전자상가', lat: 35.6984, lng: 139.7731 },
+        { name: '신주쿠역 호텔', lat: 35.6896, lng: 139.7006 }
+      ],
+      '교토': [
+        { name: '교토역', lat: 34.9858, lng: 135.7588 },
+        { name: '후시미이나리 신사', lat: 34.9671, lng: 135.7727 },
+        { name: '기온거리', lat: 35.0037, lng: 135.7772 },
+        { name: '기요미즈데라(청수사)', lat: 34.9949, lng: 135.7850 },
+        { name: '가와라마치 료칸', lat: 35.0039, lng: 135.7699 }
+      ],
+      '후쿠오카': [
+        { name: '후쿠오카 공항', lat: 33.5859, lng: 130.4507 },
+        { name: '오호리 공원', lat: 33.5857, lng: 130.3764 },
+        { name: '하카타 라멘 본점', lat: 33.5902, lng: 130.4207 },
+        { name: '나카스 야타이 거리', lat: 33.5932, lng: 130.4046 },
+        { name: '하카타역 호텔', lat: 33.5904, lng: 130.4206 }
+      ],
+      '삿포로': [
+        { name: '신치토세 공항', lat: 42.7752, lng: 141.6923 },
+        { name: '오도리 공원', lat: 43.0598, lng: 141.3533 },
+        { name: '스스키노 라멘골목', lat: 43.0554, lng: 141.3532 },
+        { name: '오타루 운하', lat: 43.1994, lng: 141.0022 },
+        { name: '삿포로역 호텔', lat: 43.0687, lng: 141.3508 }
+      ],
+      '오키나와': [
+        { name: '나하 공항', lat: 26.2064, lng: 127.6465 },
+        { name: '국제거리', lat: 26.2162, lng: 127.6896 },
+        { name: '만좌모 절벽', lat: 26.5049, lng: 127.8504 },
+        { name: '츄라우미 수족관', lat: 26.6943, lng: 127.8779 },
+        { name: '온나손 해변 리조트', lat: 26.4950, lng: 127.8420 }
+      ]
+    };
+
     // Default Cities Data
     const BASE_CITIES = [
       {
@@ -1171,7 +1192,7 @@
         ],
         transitAirport: '간사이공항 하루카 특급열차 (교토 직통)',
         transitCity: '교토 시내버스 1일권 및 한큐/게이한 전철',
-        stops: ['교토역', '후시미이나리 신사', '기온거리 말차 디저트', '기요미즈데라', '가와라마치 료칸'],
+        stops: ['교토역', '후시미이나리 신사', '기온거리', '기요미즈데라', '가와라마치 료칸'],
         budget: { flight: 350000, hotel: 260000, transit: 60000, food: 170000, extra: 100000 }
       },
       {
@@ -1190,7 +1211,7 @@
         ],
         transitAirport: '후쿠오카 공항 지하철 (하카타역 5분 직통)',
         transitCity: '특급 유후인노모리 관광열차 & 산큐패스',
-        stops: ['후쿠오카 공항', '오호리 공원', '하카타 라멘 본점', '유후인 킨린호수', '유후인 료칸'],
+        stops: ['후쿠오카 공항', '오호리 공원', '하카타 라멘 본점', '나카스 야타이 거리', '하카타역 호텔'],
         budget: { flight: 260000, hotel: 240000, transit: 50000, food: 150000, extra: 90000 }
       },
       {
@@ -1228,7 +1249,7 @@
         ],
         transitAirport: '나하 공항 유이레일(모노레일)',
         transitCity: '오키나와 렌터카 해안 드라이브',
-        stops: ['나하 공항', '국제거리', '만좌모', '츄라우미 수족관', '온나손 해변 리조트'],
+        stops: ['나하 공항', '국제거리', '만좌모 절벽', '츄라우미 수족관', '온나손 해변 리조트'],
         budget: { flight: 390000, hotel: 310000, transit: 90000, food: 160000, extra: 100000 }
       }
     ];
@@ -1411,8 +1432,9 @@
       }
 
       renderHotelOptions();
+      updateMapWithCurrentCityAndStops();
 
-      showToast(`'${cityNameOnly}' 정보와 도시 맞춤 예산이 플래너에 자동 반영되었습니다!`, '🎒');
+      showToast(`'${cityNameOnly}' 정보와 지도 경로가 자동 반영되었습니다!`, '🎒');
       playBeep(660, 'sine', 0.15);
       onInputChanged();
       switchTab('planner');
@@ -1426,15 +1448,114 @@
         applyCityToPlan(matched.id);
       } else {
         renderHotelOptions();
+        updateMapWithCurrentCityAndStops();
         onInputChanged();
       }
     }
 
     // ==========================================
-    // 🗺️ Route Stops Management (1, 2, 3 번호 경로)
+    // 🗺️ 실시간 인터랙티브 지도 엔진 (Leaflet Map)
     // ==========================================
-    let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 숙소'];
-    let currentMapCaptureImageData = ''; // 지도 캡처 이미지 데이터 (Base64)
+    let leafletMapInstance = null;
+    let mapMarkerLayerGroup = null;
+    let mapPolylineLayer = null;
+
+    function initInteractiveMap() {
+      if (leafletMapInstance) return;
+
+      const mapContainer = document.getElementById('live-interactive-map');
+      if (!mapContainer) return;
+
+      // 기본 중심: 오사카 난바 부근
+      leafletMapInstance = L.map('live-interactive-map', {
+        center: [34.6937, 135.5023],
+        zoom: 12,
+        scrollWheelZoom: true
+      });
+
+      // 구글 지도 스타일 타일 레이어
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© Google / OpenStreetMap contributors'
+      }).addTo(leafletMapInstance);
+
+      mapMarkerLayerGroup = L.layerGroup().addTo(leafletMapInstance);
+      updateMapWithCurrentCityAndStops();
+    }
+
+    function updateMapWithCurrentCityAndStops() {
+      if (!leafletMapInstance) return;
+
+      mapMarkerLayerGroup.clearLayers();
+      if (mapPolylineLayer) {
+        leafletMapInstance.removeLayer(mapPolylineLayer);
+        mapPolylineLayer = null;
+      }
+
+      const city = document.getElementById('input-target-city').value.trim() || '오사카';
+      let coordsList = CITY_COORDINATES[city];
+
+      // 좌표 프리셋이 없는 소도시의 경우 기본 중심 좌표 기준 방사형 분산 배치
+      if (!coordsList) {
+        const baseLat = 35.6762;
+        const baseLng = 139.6503;
+        coordsList = currentRouteStops.map((name, i) => ({
+          name: name,
+          lat: baseLat + (i * 0.02 - 0.04),
+          lng: baseLng + (i * 0.03 - 0.06)
+        }));
+      }
+
+      const latlngs = [];
+      currentRouteStops.forEach((stopName, idx) => {
+        const preset = coordsList[idx] || {
+          name: stopName,
+          lat: coordsList[0].lat + (idx * 0.015),
+          lng: coordsList[0].lng + (idx * 0.02)
+        };
+
+        const numIcon = L.divIcon({
+          className: 'custom-map-marker',
+          html: `<span>${idx + 1}</span>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+
+        const marker = L.marker([preset.lat, preset.lng], { icon: numIcon })
+          .bindPopup(`<strong style="font-size:12px; color:#0f172a;">${idx + 1}번: ${stopName}</strong><br><span style="font-size:10px; color:#64748b;">${city} 추천 여행지</span>`);
+
+        mapMarkerLayerGroup.addLayer(marker);
+        latlngs.push([preset.lat, preset.lng]);
+      });
+
+      // 1 ➔ 2 ➔ 3... 번호 순서를 잇는 붉은색 연결 경로선
+      if (latlngs.length > 1) {
+        mapPolylineLayer = L.polyline(latlngs, {
+          color: '#e11d48',
+          weight: 4,
+          opacity: 0.85,
+          dashArray: '8, 8'
+        }).addTo(leafletMapInstance);
+
+        leafletMapInstance.fitBounds(mapPolylineLayer.getBounds(), { padding: [40, 40] });
+      }
+
+      const summaryText = currentRouteStops.map((s, i) => `${i + 1}번 ${s}`).join(' ➔ ');
+      const summaryEl = document.getElementById('route-summary-text');
+      if (summaryEl) summaryEl.textContent = summaryText;
+    }
+
+    function recenterMapToStops() {
+      if (mapPolylineLayer && leafletMapInstance) {
+        leafletMapInstance.fitBounds(mapPolylineLayer.getBounds(), { padding: [40, 40] });
+        playBeep(600, 'sine', 0.08);
+      }
+    }
+
+    // ==========================================
+    // 🗺️ 경유지 리스트 관리
+    // ==========================================
+    let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 호텔'];
 
     function renderRouteStops() {
       const container = document.getElementById('route-stops-container');
@@ -1446,7 +1567,7 @@
           <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 text-white font-black text-xs shrink-0 shadow">
             ${index + 1}
           </span>
-          <input type="text" value="${stop}" placeholder="${index + 1}번 방문지 (명소/식당/역)" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-white text-xs focus:ring-1 focus:ring-rose-400 focus:outline-none" oninput="currentRouteStops[${index}] = this.value; onInputChanged();">
+          <input type="text" value="${stop}" placeholder="${index + 1}번 방문지 (명소/식당/역)" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-white text-xs focus:ring-1 focus:ring-rose-400 focus:outline-none" oninput="currentRouteStops[${index}] = this.value; onInputChanged(); updateMapWithCurrentCityAndStops();">
           <button onclick="openSingleSpotMap('${stop}')" title="이 장소만 구글 지도에서 확인" class="text-slate-400 hover:text-amber-300 text-xs px-2 py-1 shrink-0 transition">
             📍
           </button>
@@ -1455,24 +1576,6 @@
           ` : ''}
         `;
         container.appendChild(row);
-      });
-
-      renderNumberedChipsPreview();
-    }
-
-    function renderNumberedChipsPreview() {
-      const chipsBox = document.getElementById('route-numbered-chips');
-      if (!chipsBox) return;
-      chipsBox.innerHTML = '';
-      currentRouteStops.forEach((stop, idx) => {
-        const chip = document.createElement('div');
-        chip.className = "inline-flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-full px-2.5 py-1 text-[11px] text-slate-200 font-medium";
-        chip.innerHTML = `
-          <span class="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-black inline-flex items-center justify-center">${idx + 1}</span>
-          <span>${stop || `장소 ${idx + 1}`}</span>
-          ${idx < currentRouteStops.length - 1 ? '<span class="text-indigo-400 text-[10px] ml-1">➔</span>' : ''}
-        `;
-        chipsBox.appendChild(chip);
       });
     }
 
@@ -1490,6 +1593,7 @@
     function addRouteStop() {
       currentRouteStops.push(`경유지 ${currentRouteStops.length + 1}`);
       renderRouteStops();
+      updateMapWithCurrentCityAndStops();
       onInputChanged();
       playBeep(520, 'sine', 0.08);
     }
@@ -1498,6 +1602,7 @@
       if (currentRouteStops.length <= 2) return;
       currentRouteStops.splice(idx, 1);
       renderRouteStops();
+      updateMapWithCurrentCityAndStops();
       onInputChanged();
     }
 
@@ -1508,98 +1613,19 @@
         return;
       }
       const city = document.getElementById('input-target-city').value.trim() || 'Japan';
-      
       const origin = encodeURIComponent(`${validStops[0]}, ${city}`);
       const destination = encodeURIComponent(`${validStops[validStops.length - 1]}, ${city}`);
       
       let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
-      
       if (validStops.length > 2) {
         const intermediate = validStops.slice(1, -1).map(s => encodeURIComponent(`${s}, ${city}`)).join('|');
         url += `&waypoints=${intermediate}`;
       }
 
       window.open(url, '_blank');
-      showToast('구글 지도에서 경로를 열었습니다! 캡처 후 아래 칸에 등록하세요 📸', '🗺️');
+      showToast('구글 지도 길찾기 앱을 열었습니다!', '🗺️');
       playBeep(660, 'sine', 0.12);
     }
-
-    // ==========================================
-    // 📸 지도 캡처 이미지 처리 (파일/붙여넣기/미리보기)
-    // ==========================================
-    function handleMapImageUpload(event) {
-      const file = event.target.files[0];
-      if (file) processImageFile(file);
-    }
-
-    function processImageFile(file) {
-      if (!file.type.startsWith('image/')) {
-        showToast('이미지 파일만 등록할 수 있습니다.', '⚠️');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        setMapCaptureImage(e.target.result);
-        onInputChanged();
-        showToast('구글 지도 경로 캡처 이미지가 성공적으로 등록되었습니다!', '📸');
-        playBeep(784, 'sine', 0.15);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function setMapCaptureImage(dataUrl) {
-      currentMapCaptureImageData = dataUrl || '';
-      const previewWrapper = document.getElementById('map-image-preview-wrapper');
-      const placeholder = document.getElementById('map-image-placeholder');
-      const previewImg = document.getElementById('map-image-preview');
-      const removeBtn = document.getElementById('btn-remove-map-img');
-
-      if (dataUrl) {
-        previewImg.src = dataUrl;
-        previewWrapper.classList.remove('hidden');
-        placeholder.classList.add('hidden');
-        removeBtn.classList.remove('hidden');
-      } else {
-        previewImg.src = '';
-        previewWrapper.classList.add('hidden');
-        placeholder.classList.remove('hidden');
-        removeBtn.classList.add('hidden');
-        document.getElementById('map-capture-input').value = '';
-      }
-    }
-
-    function removeMapCaptureImage() {
-      setMapCaptureImage('');
-      onInputChanged();
-      showToast('등록된 지도 이미지를 삭제했습니다.', '🗑️');
-    }
-
-    // 클립보드 이미지 바로 붙여넣기 (Ctrl + V)
-    window.addEventListener('paste', function(e) {
-      if (e.clipboardData && e.clipboardData.items) {
-        for (let i = 0; i < e.clipboardData.items.length; i++) {
-          if (e.clipboardData.items[i].type.indexOf('image') !== -1) {
-            const file = e.clipboardData.items[i].getAsFile();
-            processImageFile(file);
-            break;
-          }
-        }
-      }
-    });
-
-    // 드래그 앤 드롭 지원
-    const dropzone = document.getElementById('map-image-dropzone');
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropzone.addEventListener(eventName, e => { e.preventDefault(); dropzone.classList.add('border-indigo-400', 'bg-indigo-950/20'); }, false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropzone.addEventListener(eventName, e => { e.preventDefault(); dropzone.classList.remove('border-indigo-400', 'bg-indigo-950/20'); }, false);
-    });
-    dropzone.addEventListener('drop', e => {
-      const dt = e.dataTransfer;
-      const file = dt.files[0];
-      if (file) processImageFile(file);
-    }, false);
 
     // Food Items Management
     let currentFoodList = [
@@ -1759,7 +1785,6 @@
         budgetFood: Number(document.getElementById('budget-food').value) || 0,
         budgetExtra: Number(document.getElementById('budget-extra').value) || 0,
         routeStops: [...currentRouteStops],
-        mapCaptureImage: currentMapCaptureImageData,
         peerQuestion: document.getElementById('my-peer-question').value.trim(),
         savedAt: new Date().toISOString()
       };
@@ -1788,12 +1813,6 @@
       if (data.budgetExtra !== undefined) document.getElementById('budget-extra').value = data.budgetExtra || '';
       if (data.peerQuestion !== undefined) document.getElementById('my-peer-question').value = data.peerQuestion;
 
-      if (data.mapCaptureImage) {
-        setMapCaptureImage(data.mapCaptureImage);
-      } else {
-        setMapCaptureImage('');
-      }
-
       if (data.foods && Array.isArray(data.foods)) {
         currentFoodList = data.foods;
         renderFoodList();
@@ -1806,12 +1825,12 @@
 
       renderHotelOptions();
       calculateTotalBudget();
+      updateMapWithCurrentCityAndStops();
     }
 
     let autoSaveTimeout = null;
     function onInputChanged() {
       calculateTotalBudget();
-      renderNumberedChipsPreview();
       clearTimeout(autoSaveTimeout);
       autoSaveTimeout = setTimeout(() => {
         try {
@@ -1965,8 +1984,8 @@
         num: 3,
         title: "슬라이드 3: 구글 지도 번호별 이동 경로 (1➔2➔3...)",
         time: "1:30 ~ 2:20",
-        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글 지도 순차 동선:\n  ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}`,
-        tip: "구글 지도 번호 경로를 캡처해 슬라이드에 넣으면 전달력이 크게 올라갑니다."
+        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 순차 이동 동선:\n  ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}`,
+        tip: "지도 위의 1, 2, 3 번호 핀 경로를 설명하면 전달력이 크게 올라갑니다."
       },
       {
         num: 4,
@@ -2051,7 +2070,7 @@
     }
 
     // ==========================================
-    // 📄 브라우저 네이티브 인쇄 및 PDF 저장 (지도 이미지 포함)
+    // 📄 브라우저 네이티브 인쇄 및 PDF 저장
     // ==========================================
     function downloadPlanPDF() {
       const data = getFormData();
@@ -2072,20 +2091,7 @@
       const approxJpy = Math.round(total / 9.2);
       document.getElementById('print-budget').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span style="font-size:10px; color:#64748b;">※ 항공·숙박·교통·식비 포함</span>`;
       
-      // 번호형 1, 2, 3... 이동 동선 매핑
       document.getElementById('print-route-timeline').textContent = data.routeStops.map((s, i) => `[${i+1}] ${s}`).join(' ➔ ');
-      
-      // 지도 캡처 이미지 매핑
-      const printImgContainer = document.getElementById('print-map-image-container');
-      const printImg = document.getElementById('print-map-image');
-      if (data.mapCaptureImage) {
-        printImg.src = data.mapCaptureImage;
-        printImgContainer.style.display = 'block';
-      } else {
-        printImg.src = '';
-        printImgContainer.style.display = 'none';
-      }
-
       document.getElementById('print-question').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
       document.getElementById('print-score-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
 
@@ -2505,6 +2511,14 @@
         activeBtn.classList.remove('text-slate-600', 'border-transparent');
       }
 
+      // 플래너 탭을 열 때 지도 크기를 다시 계산하여 깨짐 방지
+      if (tabId === 'planner' && leafletMapInstance) {
+        setTimeout(() => {
+          leafletMapInstance.invalidateSize();
+          recenterMapToStops();
+        }, 150);
+      }
+
       playBeep(480, 'sine', 0.08);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2555,6 +2569,9 @@
       renderRouteStops();
       renderFoodList();
       renderHotelOptions();
+
+      // 지도 초기화
+      setTimeout(initInteractiveMap, 200);
 
       try {
         const saved = localStorage.getItem(STORAGE_KEY_CURRENT);
