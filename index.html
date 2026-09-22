@@ -32,12 +32,12 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* =================================================== */
-    /* 🖨️ A4 PDF 인쇄 전용 스타일 (백지 현상 원천 차단)   */
+    /* 🖨️ A4 PDF 인쇄 전용 스타일 (이미지 포함 선명 출력) */
     /* =================================================== */
     @media print {
       @page {
         size: A4 portrait;
-        margin: 12mm;
+        margin: 10mm;
       }
       body * {
         visibility: hidden !important;
@@ -361,7 +361,7 @@
           </div>
 
           <!-- =================================================== -->
-          <!-- 🗺️ Google Maps 1, 2, 3... 번호 경로 시각화 영역       -->
+          <!-- 🗺️ 구글 지도 1,2,3 경로 + 캡처 이미지 등록 칸 신설 -->
           <!-- =================================================== -->
           <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-2xl text-white shadow-lg space-y-4 border border-indigo-900/50">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
@@ -371,7 +371,7 @@
                   <span class="text-xs text-indigo-300 font-semibold">1 ➔ 2 ➔ 3 순차 이동</span>
                 </div>
                 <h4 class="text-sm sm:text-base font-extrabold text-white mt-1 flex items-center gap-1.5">
-                  🗺️ 구글 지도 1, 2, 3 번호별 경로 시뮬레이터
+                  🗺️ 구글 지도 번호별 이동 동선 & 경로 캡처
                 </h4>
               </div>
               <div class="flex items-center gap-2">
@@ -379,14 +379,10 @@
                   + 경유지 추가
                 </button>
                 <button onclick="openGoogleMapsNumberedRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black px-3.5 py-2 rounded-xl transition shadow-lg shadow-rose-900/50 ring-2 ring-rose-400/30">
-                  <span>Google 지도에서 번호별 경로 열기 ➔</span>
+                  <span>Google 지도에서 경로 열기 ➔</span>
                 </button>
               </div>
             </div>
-
-            <p class="text-xs text-slate-300 leading-relaxed">
-              공항, 주요 명소, 맛집, 숙소를 방문 순서대로 입력하세요. <strong>[Google 지도에서 번호별 경로 열기]</strong>를 누르면 구글 지도 위에 <strong>1(A), 2(B), 3(C)... 순서로 핀이 찍히며 환승/대중교통 이동선이 연결</strong>됩니다.
-            </p>
 
             <!-- 경유지 입력 리스트 -->
             <div id="route-stops-container" class="space-y-2"></div>
@@ -394,10 +390,52 @@
             <!-- 번호별 동선 실시간 미리보기 바 (Timeline Preview) -->
             <div class="bg-slate-950/60 border border-indigo-500/30 p-3 rounded-xl space-y-1.5">
               <div class="flex items-center justify-between text-[11px] text-indigo-300 font-semibold">
-                <span>📍 실시간 동선 미리보기 (Preview):</span>
+                <span>📍 실시간 번호 순서 (1 ➔ 2 ➔ 3...):</span>
                 <span class="text-[10px] text-slate-400">우측 📍 버튼으로 단독 위치 확인 가능</span>
               </div>
               <div id="route-numbered-chips" class="flex flex-wrap items-center gap-1.5 pt-1"></div>
+            </div>
+
+            <!-- 📸 [새로 추가된 기능] 구글맵 캡처 이미지 등록 & 미리보기 칸 -->
+            <div class="mt-4 pt-4 border-t border-slate-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h5 class="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5">
+                    <span>📸</span> 구글 지도 경로 캡처 이미지 등록 (PDF에 포함)
+                  </h5>
+                  <p class="text-[11px] text-slate-400 mt-0.5">
+                    구글 지도에서 1, 2, 3번 경로가 표시된 화면을 캡처하여 아래에 등록하세요.
+                  </p>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <label class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold cursor-pointer transition shadow-sm">
+                    📂 이미지 파일 선택
+                    <input type="file" id="map-capture-input" accept="image/*" class="hidden" onchange="handleMapImageUpload(event)">
+                  </label>
+                  <button onclick="removeMapCaptureImage()" id="btn-remove-map-img" class="hidden px-2.5 py-1.5 bg-slate-800 hover:bg-rose-900/80 text-rose-300 border border-rose-800/50 rounded-lg text-xs font-semibold transition">
+                    삭제
+                  </button>
+                </div>
+              </div>
+
+              <!-- 이미지 드래그/업로드 드롭존 및 미리보기 -->
+              <div id="map-image-dropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-400 rounded-xl p-4 text-center bg-slate-950/40 transition">
+                <div id="map-image-placeholder" class="py-4 space-y-2">
+                  <span class="text-2xl block">🗺️</span>
+                  <p class="text-xs text-slate-300 font-medium">
+                    캡처한 지도 이미지를 <strong>여기로 드래그</strong>하거나 <strong>[파일 선택]</strong> 버튼을 누르세요.
+                  </p>
+                  <p class="text-[11px] text-slate-500">
+                    (클립보드에 이미지가 복사되어 있다면 이 페이지에서 <strong>Ctrl + V</strong>로 바로 붙여넣기도 가능합니다!)
+                  </p>
+                </div>
+                <div id="map-image-preview-wrapper" class="hidden">
+                  <img id="map-image-preview" src="" alt="구글 지도 경로 캡처본" class="max-h-72 w-auto mx-auto rounded-lg shadow-md border border-slate-700 object-contain">
+                  <p class="text-[11px] text-emerald-400 font-medium mt-2">
+                    ✅ 구글 지도 경로 이미지가 등록되었습니다. (기획서 PDF 출력 시 자동 삽입됩니다)
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -574,6 +612,7 @@
 
             <!-- Export / PDF / Canva Buttons -->
             <div class="pt-2 space-y-2">
+              <!-- 원클릭 인쇄/PDF 저장 버튼 -->
               <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -622,7 +661,7 @@
           <div id="speech-script-box" class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 font-normal"></div>
 
           <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
-            📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글맵스로 확인한 대중교통 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
+            📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글 지도 번호별 경로로 확인한 대중교통 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
           </div>
         </div>
 
@@ -740,19 +779,19 @@
   </div>
 
   <!-- =================================================== -->
-  <!-- 📄 정밀 A4 레이아웃 (백지 없는 브라우저 엔진 인쇄 영역) -->
+  <!-- 📄 정밀 A4 레이아웃 (지도 캡처 이미지 포함 인쇄 영역) -->
   <!-- =================================================== -->
   <div id="print-sheet-area" class="hidden">
-    <div style="max-width: 760px; margin: 0 auto; padding: 20px; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; line-height: 1.5;">
+    <div style="max-width: 760px; margin: 0 auto; padding: 18px; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; line-height: 1.45;">
       
       <!-- Header -->
-      <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
+      <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
           <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #be123c; background-color: #ffe4e6; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px;">
             일본어 회화 수행평가 과제물
           </span>
-          <h2 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.5px;">나만의 일본 테마 여행 기획서</h2>
-          <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
+          <h2 style="font-size: 20px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.5px;">나만의 일본 테마 여행 기획서</h2>
+          <p style="font-size: 10px; color: #64748b; margin: 2px 0 0 0;">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 20px; font-weight: 900; color: #f43f5e; line-height: 1;">旅</div>
@@ -761,76 +800,81 @@
       </div>
 
       <!-- Student Meta Box -->
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 11px;">
         <div>
-          <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600;">작성자 (학번/성명)</span>
-          <strong id="print-student-name" style="color: #0f172a; font-size: 13px;">-</strong>
+          <span style="color: #64748b; font-size: 9px; display: block; font-weight: 600;">작성자 (학번/성명)</span>
+          <strong id="print-student-name" style="color: #0f172a; font-size: 12px;">-</strong>
         </div>
         <div>
-          <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600;">여행 테마</span>
-          <strong id="print-trip-theme" style="color: #be123c; font-size: 13px;">-</strong>
+          <span style="color: #64748b; font-size: 9px; display: block; font-weight: 600;">여행 테마</span>
+          <strong id="print-trip-theme" style="color: #be123c; font-size: 12px;">-</strong>
         </div>
         <div>
-          <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600;">목적지</span>
-          <strong id="print-target-city" style="color: #0f172a; font-size: 13px;">-</strong>
+          <span style="color: #64748b; font-size: 9px; display: block; font-weight: 600;">목적지</span>
+          <strong id="print-target-city" style="color: #0f172a; font-size: 12px;">-</strong>
         </div>
       </div>
 
       <!-- 6 Elements Table -->
-      <div style="border: 1px solid #94a3b8; border-radius: 8px; overflow: hidden; margin-bottom: 14px; font-size: 11px;">
-        <div style="background-color: #0f172a; color: #ffffff; padding: 6px 12px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+      <div style="border: 1px solid #94a3b8; border-radius: 8px; overflow: hidden; margin-bottom: 12px; font-size: 11px;">
+        <div style="background-color: #0f172a; color: #ffffff; padding: 5px 10px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
           <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
-          <span id="print-score-badge" style="background-color: #10b981; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 10px;">0/6 충족</span>
+          <span id="print-score-badge" style="background-color: #10b981; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 9px;">0/6 충족</span>
         </div>
         <table style="width: 100%; border-collapse: collapse;">
           <tr style="border-bottom: 1px solid #cbd5e1;">
-            <th style="width: 125px; background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">① 전체 일정표</th>
-            <td style="padding: 8px 10px; color: #1e293b;" id="print-schedule">-</td>
+            <th style="width: 120px; background-color: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">① 전체 일정표</th>
+            <td style="padding: 6px 10px; color: #1e293b;" id="print-schedule">-</td>
           </tr>
           <tr style="border-bottom: 1px solid #cbd5e1;">
-            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">② 교통 수단</th>
-            <td style="padding: 8px 10px; color: #1e293b;" id="print-transport">-</td>
+            <th style="background-color: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">② 교통 수단</th>
+            <td style="padding: 6px 10px; color: #1e293b;" id="print-transport">-</td>
           </tr>
           <tr style="border-bottom: 1px solid #cbd5e1;">
-            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">③ 관광지 2곳 이상</th>
-            <td style="padding: 8px 10px; color: #1e293b;" id="print-spots">-</td>
+            <th style="background-color: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">③ 관광지 2곳 이상</th>
+            <td style="padding: 6px 10px; color: #1e293b;" id="print-spots">-</td>
           </tr>
           <tr style="border-bottom: 1px solid #cbd5e1;">
-            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">④ 대표 미식 & 간식</th>
-            <td style="padding: 8px 10px; color: #1e293b;" id="print-foods">-</td>
+            <th style="background-color: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">④ 대표 미식 & 간식</th>
+            <td style="padding: 6px 10px; color: #1e293b;" id="print-foods">-</td>
           </tr>
           <tr style="border-bottom: 1px solid #cbd5e1;">
-            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">⑤ 숙소 형태 & 위치</th>
-            <td style="padding: 8px 10px; color: #1e293b;" id="print-hotel">-</td>
+            <th style="background-color: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">⑤ 숙소 형태 & 위치</th>
+            <td style="padding: 6px 10px; color: #1e293b;" id="print-hotel">-</td>
           </tr>
           <tr>
-            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">⑥ 예상 여행 경비</th>
-            <td style="padding: 8px 10px; color: #1e293b;" id="print-budget">-</td>
+            <th style="background-color: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">⑥ 예상 여행 경비</th>
+            <td style="padding: 6px 10px; color: #1e293b;" id="print-budget">-</td>
           </tr>
         </table>
       </div>
 
-      <!-- Google Maps Route Timeline (번호형 1, 2, 3...) -->
-      <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 14px; font-size: 11px;">
-        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 경유지 이동 동선 (순차 경로)</strong>
-        <p id="print-route-timeline" style="margin: 0; color: #334155; line-height: 1.6;">-</p>
+      <!-- Google Maps Route Timeline (텍스트 + 캡처 이미지 동시 표시) -->
+      <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 12px; font-size: 11px;">
+        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 이동 경로 (순차 동선 & 지도 캡처)</strong>
+        <p id="print-route-timeline" style="margin: 0 0 6px 0; color: #334155; line-height: 1.5;">-</p>
+        
+        <!-- 출력용 지도 이미지 컨테이너 -->
+        <div id="print-map-image-container" style="display: none; text-align: center; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+          <img id="print-map-image" src="" alt="구글 지도 경로 캡처본" style="max-height: 240px; width: auto; max-width: 100%; border: 1px solid #94a3b8; border-radius: 6px; margin: 0 auto; display: block;">
+        </div>
       </div>
 
       <!-- Presentation & Mutual Questions -->
-      <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 16px; font-size: 11px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 6px;">
+      <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; background-color: #f8fafc; margin-bottom: 12px; font-size: 11px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-bottom: 4px;">
           <strong style="color: #0f172a;">🎤 5분 발표 및 동료 평가 준비</strong>
-          <span style="font-size: 10px; color: #64748b;">슬라이드 기초 자료</span>
+          <span style="font-size: 9px; color: #64748b;">슬라이드 기초 자료</span>
         </div>
         <div>
           <span style="font-weight: 700; color: #4338ca;">· 동료 발표 경청 후 질문 예정 내용:</span>
-          <p id="print-question" style="margin: 3px 0 0 0; color: #334155; padding-left: 6px;">미작성</p>
+          <p id="print-question" style="margin: 2px 0 0 0; color: #334155; padding-left: 6px;">미작성</p>
         </div>
       </div>
 
       <!-- Signature Footer -->
-      <div style="border-top: 2px dashed #94a3b8; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #475569;">
-        <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
+      <div style="border-top: 2px dashed #94a3b8; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #475569;">
+        <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비 [ ] 지도캡처</div>
         <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
       </div>
 
@@ -1390,6 +1434,7 @@
     // 🗺️ Route Stops Management (1, 2, 3 번호 경로)
     // ==========================================
     let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 숙소'];
+    let currentMapCaptureImageData = ''; // 지도 캡처 이미지 데이터 (Base64)
 
     function renderRouteStops() {
       const container = document.getElementById('route-stops-container');
@@ -1456,9 +1501,6 @@
       onInputChanged();
     }
 
-    // ==========================================
-    // 🗺️ 구글 지도 1, 2, 3 번호별 다중 경유지 경로 열기
-    // ==========================================
     function openGoogleMapsNumberedRoute() {
       const validStops = currentRouteStops.map(s => s.trim()).filter(Boolean);
       if (validStops.length < 2) {
@@ -1467,22 +1509,97 @@
       }
       const city = document.getElementById('input-target-city').value.trim() || 'Japan';
       
-      // 구글맵 길찾기 정식 Waypoint 파라미터 조합
       const origin = encodeURIComponent(`${validStops[0]}, ${city}`);
       const destination = encodeURIComponent(`${validStops[validStops.length - 1]}, ${city}`);
       
       let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
       
-      // 중간 경유지들 (1번 다음부터 마지막 전까지를 pipe | 로 연결)
       if (validStops.length > 2) {
         const intermediate = validStops.slice(1, -1).map(s => encodeURIComponent(`${s}, ${city}`)).join('|');
         url += `&waypoints=${intermediate}`;
       }
 
       window.open(url, '_blank');
-      showToast('구글 지도에서 1, 2, 3... 번호별 경유지 경로를 열었습니다!', '🗺️');
+      showToast('구글 지도에서 경로를 열었습니다! 캡처 후 아래 칸에 등록하세요 📸', '🗺️');
       playBeep(660, 'sine', 0.12);
     }
+
+    // ==========================================
+    // 📸 지도 캡처 이미지 처리 (파일/붙여넣기/미리보기)
+    // ==========================================
+    function handleMapImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) processImageFile(file);
+    }
+
+    function processImageFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('이미지 파일만 등록할 수 있습니다.', '⚠️');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        setMapCaptureImage(e.target.result);
+        onInputChanged();
+        showToast('구글 지도 경로 캡처 이미지가 성공적으로 등록되었습니다!', '📸');
+        playBeep(784, 'sine', 0.15);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setMapCaptureImage(dataUrl) {
+      currentMapCaptureImageData = dataUrl || '';
+      const previewWrapper = document.getElementById('map-image-preview-wrapper');
+      const placeholder = document.getElementById('map-image-placeholder');
+      const previewImg = document.getElementById('map-image-preview');
+      const removeBtn = document.getElementById('btn-remove-map-img');
+
+      if (dataUrl) {
+        previewImg.src = dataUrl;
+        previewWrapper.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        removeBtn.classList.remove('hidden');
+      } else {
+        previewImg.src = '';
+        previewWrapper.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        removeBtn.classList.add('hidden');
+        document.getElementById('map-capture-input').value = '';
+      }
+    }
+
+    function removeMapCaptureImage() {
+      setMapCaptureImage('');
+      onInputChanged();
+      showToast('등록된 지도 이미지를 삭제했습니다.', '🗑️');
+    }
+
+    // 클립보드 이미지 바로 붙여넣기 (Ctrl + V)
+    window.addEventListener('paste', function(e) {
+      if (e.clipboardData && e.clipboardData.items) {
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          if (e.clipboardData.items[i].type.indexOf('image') !== -1) {
+            const file = e.clipboardData.items[i].getAsFile();
+            processImageFile(file);
+            break;
+          }
+        }
+      }
+    });
+
+    // 드래그 앤 드롭 지원
+    const dropzone = document.getElementById('map-image-dropzone');
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, e => { e.preventDefault(); dropzone.classList.add('border-indigo-400', 'bg-indigo-950/20'); }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, e => { e.preventDefault(); dropzone.classList.remove('border-indigo-400', 'bg-indigo-950/20'); }, false);
+    });
+    dropzone.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      if (file) processImageFile(file);
+    }, false);
 
     // Food Items Management
     let currentFoodList = [
@@ -1642,6 +1759,7 @@
         budgetFood: Number(document.getElementById('budget-food').value) || 0,
         budgetExtra: Number(document.getElementById('budget-extra').value) || 0,
         routeStops: [...currentRouteStops],
+        mapCaptureImage: currentMapCaptureImageData,
         peerQuestion: document.getElementById('my-peer-question').value.trim(),
         savedAt: new Date().toISOString()
       };
@@ -1669,6 +1787,12 @@
       if (data.budgetFood !== undefined) document.getElementById('budget-food').value = data.budgetFood || '';
       if (data.budgetExtra !== undefined) document.getElementById('budget-extra').value = data.budgetExtra || '';
       if (data.peerQuestion !== undefined) document.getElementById('my-peer-question').value = data.peerQuestion;
+
+      if (data.mapCaptureImage) {
+        setMapCaptureImage(data.mapCaptureImage);
+      } else {
+        setMapCaptureImage('');
+      }
 
       if (data.foods && Array.isArray(data.foods)) {
         currentFoodList = data.foods;
@@ -1927,7 +2051,7 @@
     }
 
     // ==========================================
-    // 📄 브라우저 네이티브 인쇄 및 PDF 저장
+    // 📄 브라우저 네이티브 인쇄 및 PDF 저장 (지도 이미지 포함)
     // ==========================================
     function downloadPlanPDF() {
       const data = getFormData();
@@ -1950,6 +2074,18 @@
       
       // 번호형 1, 2, 3... 이동 동선 매핑
       document.getElementById('print-route-timeline').textContent = data.routeStops.map((s, i) => `[${i+1}] ${s}`).join(' ➔ ');
+      
+      // 지도 캡처 이미지 매핑
+      const printImgContainer = document.getElementById('print-map-image-container');
+      const printImg = document.getElementById('print-map-image');
+      if (data.mapCaptureImage) {
+        printImg.src = data.mapCaptureImage;
+        printImgContainer.style.display = 'block';
+      } else {
+        printImg.src = '';
+        printImgContainer.style.display = 'none';
+      }
+
       document.getElementById('print-question').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
       document.getElementById('print-score-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
 
