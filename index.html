@@ -67,32 +67,28 @@
           </div>
         </div>
 
-        <!-- Top Right Controls (Storage, Admin, Rubric) -->
+        <!-- Top Right Controls -->
         <div class="flex items-center space-x-2">
-          <!-- Auto-save Status Indicator -->
           <div id="save-status-badge" class="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span id="save-status-text">자동 저장 활성</span>
           </div>
 
-          <!-- My Plans Archive Button -->
           <button onclick="openArchiveModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-300">
             📁 내 보관함
           </button>
 
-          <!-- Evaluation Rubric Button -->
           <button onclick="toggleRubricModal(true)" class="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow-sm">
             <span class="text-amber-400">📋</span> 기준표(20점)
           </button>
 
-          <!-- Teacher Admin Modal Button -->
           <button onclick="openTeacherAdminModal()" class="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
             👑 교사 관리
           </button>
         </div>
       </div>
 
-      <!-- Navigation Tabs: Quiz tab is first -->
+      <!-- Navigation Tabs -->
       <nav class="flex space-x-2 sm:space-x-4 overflow-x-auto no-scrollbar border-t border-slate-100 py-2">
         <button onclick="switchTab('traffic')" id="tab-btn-traffic" class="tab-btn active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
           🚦 1. 교통 문화 & 퀴즈
@@ -113,7 +109,7 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
 
-    <!-- TAB 1: TRAFFIC CULTURE & QUIZZES (Default Active) -->
+    <!-- TAB 1: TRAFFIC CULTURE & QUIZZES -->
     <section id="tab-content-traffic" class="tab-panel block space-y-6">
       <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md">
         <div class="inline-flex items-center gap-1.5 bg-indigo-800/80 px-3 py-1 rounded-full text-xs font-semibold mb-3">
@@ -121,13 +117,11 @@
         </div>
         <h2 class="text-2xl sm:text-3xl font-black tracking-tight">일본의 독특한 교통 문화 & 상식 마스터</h2>
         <p class="mt-2 text-sm text-indigo-200 leading-relaxed max-w-3xl">
-          여행 계획서 작성 시 <strong>'이용 교통수단(공항↔도심, 시내 패스)'</strong>을 현실감 있게 작성하기 위해 꼭 알아야 할 실전 상식입니다. 내용을 확인한 후 아래 퀴즈를 풀어보세요!
+          여행 계획서 작성 시 <strong>'이용 교통수단(공항↔도심, 시내 패스)'</strong>을 현실감 있게 작성하기 위해 꼭 알아야 할 실전 상식입니다.
         </p>
       </div>
 
-      <!-- Traffic Feature Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <!-- Feature 1: Road & Traffic Direction -->
         <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">1. 도로 & 주행 방향</span>
@@ -137,12 +131,8 @@
           <p class="text-xs text-slate-600 leading-relaxed">
             한국과 정반대입니다. 차량 운전석이 오른쪽에 있고 도로는 <strong>좌측통행</strong>을 합니다. 횡단보도를 건널 때는 먼저 <strong>오른쪽</strong>을 살핀 후 건너는 습관이 필요합니다.
           </p>
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-900">
-            💡 <strong>포인트:</strong> 보행자 통행 및 에스컬레이터 서 있는 위치도 지역에 따라 도쿄는 왼쪽, 오사카는 오른쪽 등 고유한 문화가 있습니다.
-          </div>
         </div>
 
-        <!-- Feature 2: City Bus Riding (Seiriken) -->
         <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">2. 시내버스 탑승법</span>
@@ -150,14 +140,10 @@
           </div>
           <h4 class="text-base font-bold text-slate-900">뒷문 승차 시 ‘정리권(整理券)’ 뽑기</h4>
           <p class="text-xs text-slate-600 leading-relaxed">
-            일반적인 일본 시내버스는 <strong>뒷문으로 타고 앞문으로 내립니다.</strong> 탈 때 번호표(정리권)를 뽑고, 내릴 때 버스 앞 전광판 번호에 적힌 운임을 확인하여 기사님 옆 요금통에 지불합니다.
+            일반적인 시내버스는 <strong>뒷문으로 타고 앞문으로 내립니다.</strong> 탈 때 번호표(정리권)를 뽑고, 내릴 때 전광판 번호에 적힌 운임을 기사님 옆 요금통에 지불합니다.
           </p>
-          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
-            💡 <strong>잔돈 주의:</strong> 기사님이 거스름돈을 직접 주지 않으므로, 요금통의 동전교환기(양폐기)로 미리 환전 후 정확한 금액을 넣어야 합니다.
-          </div>
         </div>
 
-        <!-- Feature 3: Taxi Automatic Door -->
         <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">3. 택시 이용 에티켓</span>
@@ -165,14 +151,10 @@
           </div>
           <h4 class="text-base font-bold text-slate-900">문 손대지 마세요! 뒷문은 자동문</h4>
           <p class="text-xs text-slate-600 leading-relaxed">
-            일본 택시의 승객용 뒷문은 기사님이 운전석에서 여닫는 <strong>자동문</strong>입니다. 손으로 억지로 잡아당기거나 닫으면 고장의 원인이 될 수 있습니다.
+            일본 택시의 승객용 뒷문은 기사님이 운전석에서 여닫는 <strong>자동문</strong>입니다. 손으로 무리하게 힘을 주어 닫지 않도록 주의합니다.
           </p>
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
-            💡 <strong>예산 주의:</strong> 기본요금이 높고 심야 할증이 붙으면 경비 지출이 크므로 플래너 작성 시 지하철 패스 활용을 추천합니다.
-          </div>
         </div>
 
-        <!-- Feature 4: Railway & Shinkansen -->
         <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold">4. 철도 & 고속열차</span>
@@ -180,15 +162,12 @@
           </div>
           <h4 class="text-base font-bold text-slate-900">신칸센(新幹線)과 IC 교통카드</h4>
           <p class="text-xs text-slate-600 leading-relaxed">
-            1964년 도쿄 올림픽에 맞춰 개통된 고속철도 <strong>신칸센</strong>은 도쿄~오사카~나고야 간 신속한 이동을 돕습니다. 시내에서는 스이카(Suica), 이코카(ICOCA) 등 IC카드가 필수입니다.
+            1964년 도쿄 올림픽에 맞춰 개통된 고속철도 <strong>신칸센</strong>은 전국 주요 대도시를 초고속으로 연결합니다. 스이카, 이코카 등 IC 카드와 외국인 전용 교통 패스를 적극 활용해 보세요.
           </p>
-          <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-xs text-purple-900">
-            💡 <strong>절약 꿀팁:</strong> 외국인 전용 패스(도쿄 지하철 24/48/72시간권, 오사카 주유패스 등)를 쓰면 교통비를 대폭 절약할 수 있습니다.
-          </div>
         </div>
       </div>
 
-      <!-- Interactive 3-Quiz Box -->
+      <!-- Quiz Box -->
       <div class="bg-white rounded-xl border border-slate-300 p-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -200,7 +179,6 @@
         </div>
 
         <div class="space-y-4">
-          <!-- Quiz 1 -->
           <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <p class="text-sm font-bold text-slate-800">Q1. 일본에서 자동차는 도로의 오른쪽으로 달린다.</p>
@@ -212,7 +190,6 @@
             </div>
           </div>
 
-          <!-- Quiz 2 -->
           <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <p class="text-sm font-bold text-slate-800">Q2. 1964년 개통된 일본의 대표적인 초고속 열차의 명칭은?</p>
@@ -225,7 +202,6 @@
             </div>
           </div>
 
-          <!-- Quiz 3 -->
           <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <p class="text-sm font-bold text-slate-800">Q3. 일본 택시를 이용할 때 탑승객이 직접 힘으로 문을 여닫는 것이 올바른 매너이다.</p>
@@ -248,25 +224,30 @@
 
     <!-- TAB 2: CITIES & ATTRACTIONS -->
     <section id="tab-content-cities" class="tab-panel hidden space-y-6">
-      <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-600 rounded-2xl p-6 text-white shadow-md">
-        <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-3">
-          <span>✨ JNTO 일본정부관광국 공식 가이드 테마</span>
+      <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-3">
+            <span>✨ JNTO 일본정부관광국 공식 추천 테마 & 자유 등록</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">당신만의 일본 테마 여행지를 골라보세요</h2>
+          <p class="mt-2 text-sm text-rose-100 leading-relaxed max-w-2xl">
+            추천 도시 외에도 가고 싶은 일본의 소도시나 명소가 있다면 <strong>[+ 나만의 도시 직접 추가]</strong>로 등록할 수 있습니다!
+          </p>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">당신만의 일본 테마 여행지를 골라보세요</h2>
-        <p class="mt-2 text-sm text-rose-100 leading-relaxed max-w-3xl">
-          온천 힐링, 애니·팝컬처, 미식 로드, 세계문화유산, 자연 휴양까지! 
-          마음에 드는 여행지의 <strong>[내 계획에 담기]</strong> 버튼을 누르면 플래너에 명소, 음식, 교통편이 자동 입력됩니다.
-        </p>
+        <button onclick="openCustomCityModal()" class="shrink-0 bg-white text-rose-600 hover:bg-rose-50 font-bold px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm flex items-center gap-2 transition">
+          <span class="text-base">📍</span> + 나만의 도시/소도시 직접 추가
+        </button>
       </div>
 
       <!-- Filter Buttons -->
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        <button onclick="filterCities('all')" class="city-filter active text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white whitespace-nowrap">전체 보기 (12대 인기 여행지)</button>
+        <button onclick="filterCities('all')" class="city-filter active text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white whitespace-nowrap">전체 보기</button>
         <button onclick="filterCities('hotspring')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">♨️ 온천 & 료칸</button>
         <button onclick="filterCities('popculture')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🎬 애니 & 테마파크</button>
         <button onclick="filterCities('gourmet')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🍜 전국 미식 로드</button>
         <button onclick="filterCities('heritage')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🏯 전통 & 세계유산</button>
         <button onclick="filterCities('nature')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">❄️ 자연 & 휴양</button>
+        <button onclick="filterCities('custom')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-indigo-600 hover:bg-indigo-50 whitespace-nowrap">⭐ 내가 추가한 도시</button>
       </div>
 
       <!-- Grid Cards -->
@@ -286,7 +267,7 @@
               <h2 class="text-xl font-bold text-slate-900">여행 계획 필수 6요소 작성기</h2>
             </div>
             <p class="text-xs text-slate-500 mt-1">
-              평가 기준표의 6대 필수 요소를 모두 채우면 10점 만점 달성! 작성 내용은 브라우저에 실시간 자동 보관됩니다.
+              도시를 변경하면 항공료와 숙박비 등 <strong>예상 예산 프리셋이 자동 재계산</strong>됩니다.
             </p>
           </div>
           <!-- Gauge -->
@@ -344,18 +325,7 @@
               <label class="block text-xs font-semibold text-slate-600 mb-1">주요 방문 도시 <span class="text-rose-500">*</span></label>
               <select id="input-target-city" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" onchange="onCitySelectChange(this.value)">
                 <option value="">도시/지역 선택</option>
-                <option value="도쿄">도쿄 (수도/트렌드/팝컬처)</option>
-                <option value="오사카">오사카 (미식의 도시/USJ)</option>
-                <option value="교토">교토 (천년 고도 사찰/단풍)</option>
-                <option value="후쿠오카">후쿠오카 & 유후인 (온천/야타이)</option>
-                <option value="삿포로">삿포로 (설국 축제/청정 해산물)</option>
-                <option value="나고야">나고야 (지브리 파크/히츠마부시)</option>
-                <option value="오키나와">오키나와 (에메랄드빛 바다 휴양)</option>
-                <option value="히로시마">히로시마 (미야지마 해상 도리이)</option>
-                <option value="기후">기후 시라카와고 (동화 합장촌)</option>
-                <option value="나라">나라 (사슴공원/도다이지)</option>
-                <option value="고베">고베 (항구 야경/아리마 온천)</option>
-                <option value="요코하마">요코하마 (차이나타운/항구)</option>
+                <!-- Populated via JS (including custom cities) -->
               </select>
             </div>
           </div>
@@ -377,53 +347,34 @@
                 <input type="text" id="input-schedule-route" placeholder="예: 1일차(간사이공항→도톤보리) → 2일차(교토 청수사) → 3일차(USJ)" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
               </div>
             </div>
-            <textarea id="input-schedule-detail" rows="2" placeholder="일차별 상세 시간표나 세부 계획을 적어보세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()"></textarea>
+            <textarea id="input-schedule-detail" rows="2" placeholder="일차별 상세 시간표나 세부 계획을 자유롭게 적어보세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()"></textarea>
           </div>
 
-          <!-- Google Maps 1-2-3 Stops Interactive Timeline -->
+          <!-- Google Maps Multi-Stops Interactive Timeline -->
           <div class="bg-gradient-to-br from-slate-900 to-indigo-950 p-5 rounded-xl text-white shadow-md space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-3">
               <div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/50 text-indigo-200">구글맵스 스마트 연동</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/50 text-indigo-200">구글맵스 실시간 경로 연동</span>
                 <h4 class="text-sm sm:text-base font-bold text-white mt-1 flex items-center gap-1.5">
-                  🗺️ 당일 여행 번호별 이동 동선 (1➔2➔3➔4➔5)
+                  🗺️ 번호별 당일 이동 동선 (1➔2➔3➔...)
                 </h4>
               </div>
-              <button onclick="openGoogleMapsRoute()" class="flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow">
-                <span>Google 지도에서 전체 경로 보기 ➔</span>
-              </button>
+              <div class="flex items-center gap-2">
+                <button onclick="addRouteStop()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition">
+                  + 경유지 추가
+                </button>
+                <button onclick="openGoogleMapsRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow">
+                  <span>Google 지도에서 길찾기 열기 ➔</span>
+                </button>
+              </div>
             </div>
 
             <p class="text-xs text-slate-300">
-              출발지(공항/역)부터 주요 명소, 맛집, 숙소를 1, 2, 3번 순서로 입력하면 구글맵 길찾기 링크가 자동 생성됩니다.
+              출발지(공항/역)부터 주요 관광지, 맛집, 숙소를 순서대로 입력하세요. 구글맵에서 대중교통 경로가 바로 시각화됩니다.
             </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
-              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
-                <span class="inline-block w-5 h-5 rounded-full bg-rose-500 text-white font-bold text-center leading-5 text-[11px]">1</span>
-                <span class="text-[10px] text-slate-400 block font-semibold">출발지 (공항/역)</span>
-                <input type="text" id="route-stop-1" value="간사이 국제공항" placeholder="예: 간사이공항" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
-              </div>
-              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
-                <span class="inline-block w-5 h-5 rounded-full bg-amber-500 text-slate-900 font-bold text-center leading-5 text-[11px]">2</span>
-                <span class="text-[10px] text-slate-400 block font-semibold">오전 명소</span>
-                <input type="text" id="route-stop-2" value="오사카성" placeholder="예: 오사카성" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
-              </div>
-              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
-                <span class="inline-block w-5 h-5 rounded-full bg-emerald-500 text-white font-bold text-center leading-5 text-[11px]">3</span>
-                <span class="text-[10px] text-slate-400 block font-semibold">점심 맛집</span>
-                <input type="text" id="route-stop-3" value="도톤보리" placeholder="예: 도톤보리" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
-              </div>
-              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
-                <span class="inline-block w-5 h-5 rounded-full bg-sky-500 text-white font-bold text-center leading-5 text-[11px]">4</span>
-                <span class="text-[10px] text-slate-400 block font-semibold">오후 명소</span>
-                <input type="text" id="route-stop-4" value="우메다 스카이빌딩" placeholder="예: 우메다 스카이빌딩" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
-              </div>
-              <div class="bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg space-y-1">
-                <span class="inline-block w-5 h-5 rounded-full bg-purple-500 text-white font-bold text-center leading-5 text-[11px]">5</span>
-                <span class="text-[10px] text-slate-400 block font-semibold">숙소 도착</span>
-                <input type="text" id="route-stop-5" value="난바역" placeholder="예: 난바역" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs" oninput="onInputChanged()">
-              </div>
+            <div id="route-stops-container" class="space-y-2">
+              <!-- Dynamically populated route stops -->
             </div>
           </div>
 
@@ -431,7 +382,7 @@
           <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">필수 요소 2</span>
-              <span class="text-xs text-slate-400">교통 수단 (공항↔도심, 시내 이동 구체적 명시)</span>
+              <span class="text-xs text-slate-400">교통 수단 (공항↔도심, 시내 이동)</span>
             </div>
             <h4 class="text-sm font-bold text-slate-900">구간별 이용 교통수단 및 패스</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -467,41 +418,43 @@
                   <span class="text-xs font-bold text-slate-600 self-center">장소 2</span>
                   <input type="text" id="input-spot-2" placeholder="예: 유니버설 스튜디오 재팬 (USJ)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
                 </div>
-                <input type="text" id="input-spot-reason-2" placeholder="선택 이유: 슈퍼 닌텐도 월드 어트랙션과 해리포터 테마파크를 직접 체험하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+                <input type="text" id="input-spot-reason-2" placeholder="선택 이유: 슈퍼 닌텐도 월드 어트랙션과 테마파크를 직접 체험하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
               </div>
             </div>
           </div>
 
-          <!-- Element 4: Local Foods (Min 2) -->
+          <!-- Element 4: Creative Food & Snacks (Expanded Multi-Item) -->
           <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700">필수 요소 4</span>
-              <span class="text-xs text-slate-400">현지 대표 음식 (반드시 2개 이상)</span>
+              <span class="text-xs text-slate-400">현지 대표 음식 & 창의적 간식 (최소 2개 이상)</span>
             </div>
-            <h4 class="text-sm font-bold text-slate-900">맛볼 현지 음식 2가지</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">음식 1</label>
-                <input type="text" id="input-food-1" placeholder="예: 오사카 타코야키 & 오코노미야키" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-bold text-slate-900">현지 미식 & 디저트·간식 컬렉션</h4>
+                <p class="text-[11px] text-slate-500">아침/점심/저녁 외에도 편의점 털기, 길거리 간식, 카페 디저트 등을 자유롭게 추가해 보세요!</p>
               </div>
-              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">음식 2</label>
-                <input type="text" id="input-food-2" placeholder="예: 교토 말차 파르페 & 두부 요리" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
-              </div>
+              <button onclick="addFoodItem()" class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-xs font-bold transition">
+                + 음식/간식 추가
+              </button>
+            </div>
+
+            <div id="foods-container" class="space-y-2">
+              <!-- Dynamically populated food items -->
             </div>
           </div>
 
-          <!-- Element 5: Accommodation -->
+          <!-- Element 5: Accommodation & Direct Booking Search -->
           <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700">필수 요소 5</span>
-              <span class="text-xs text-slate-400">숙소 형태 및 대략적 위치 명시</span>
+              <span class="text-xs text-slate-400">숙소 형태 & 위치 (실시간 예약 탐색 연동)</span>
             </div>
-            <h4 class="text-sm font-bold text-slate-900">숙소 형태 & 위치</h4>
+            <h4 class="text-sm font-bold text-slate-900">숙소 형태 & 추천 선택지</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block text-[11px] text-slate-500 mb-1">숙소 유형</label>
-                <select id="input-hotel-type" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" onchange="onInputChanged()">
+                <label class="block text-[11px] text-slate-500 mb-1">숙소 유형 선택</label>
+                <select id="input-hotel-type" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" onchange="onHotelTypeChange()">
                   <option value="">유형을 선택하세요</option>
                   <option value="비즈니스 호텔">비즈니스 호텔 (가성비, 역 접근성)</option>
                   <option value="전통 료칸(旅館)">전통 료칸 (온천, 가이세키 코스)</option>
@@ -510,16 +463,26 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[11px] text-slate-500 mb-1">숙소 위치 (역세권)</label>
+                <label class="block text-[11px] text-slate-500 mb-1">숙소 위치 (역세권 등)</label>
                 <input type="text" id="input-hotel-location" placeholder="예: 난바역 또는 우메다역 도보 5분 거리" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+              </div>
+            </div>
+
+            <!-- Accommodation Direct Search Links (Min 3-4 options) -->
+            <div id="hotel-search-links-box" class="mt-3 p-3 bg-purple-50/60 border border-purple-200 rounded-xl space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-purple-900">🔍 아고다 & 구글 실시간 숙소 검색 링크</span>
+                <span class="text-[10px] text-purple-600">도시 및 유형에 맞는 맞춤 검색 결과</span>
+              </div>
+              <div id="hotel-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <!-- Dynamically populated options -->
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right: Element 6 & Budget Calculator Sidebar (1 col) -->
+        <!-- Right: Element 6 & Budget Calculator Sidebar -->
         <div class="space-y-5">
-          <!-- Budget Calculator Card -->
           <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 sticky top-24">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">필수 요소 6</span>
@@ -527,7 +490,10 @@
             </div>
 
             <div class="flex items-center justify-between">
-              <h4 class="text-sm font-bold text-slate-900">1인 예상 경비 계산기</h4>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900">1인 예상 경비 계산기</h4>
+                <p id="budget-preset-city-name" class="text-[10px] text-rose-600 font-semibold">도시 자동 예산 적용 중</p>
+              </div>
               <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">100엔 ≒ 920원</span>
             </div>
 
@@ -582,7 +548,7 @@
               </div>
             </div>
 
-            <!-- Online Submission to Teacher Button -->
+            <!-- Online Submission Button -->
             <button onclick="submitPlanToTeacher()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black py-3 rounded-lg transition shadow-md">
               <span>선생님께 기획서 온라인 제출하기 🚀</span>
             </button>
@@ -622,8 +588,7 @@
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">발표 브리핑 & 상호 질문 시뮬레이터</h2>
         <p class="mt-2 text-sm text-emerald-100 leading-relaxed max-w-3xl">
-          내가 기획한 내용을 바탕으로 자동 구성된 1분 스피치 대본을 연습하고, 
-          동료 학생의 발표 때 던질 수 있는 <strong>예리하고 적절한 질문(5점 만점 요건)</strong>을 준비해 보세요.
+          내가 기획한 내용을 바탕으로 자동 구성된 1분 스피치 대본을 연습하고, 동료 학생의 발표 때 던질 수 있는 <strong>예리하고 적절한 질문(5점 만점 요건)</strong>을 준비해 보세요.
         </p>
       </div>
 
@@ -656,7 +621,7 @@
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">참여/경청 5점 만점 대비</span>
               <h3 class="text-base font-bold text-slate-900 mt-1">동료 발표 질문 추천 뱅크</h3>
             </div>
-            <span class="text-xs text-slate-400">질문 1회 이상 주도적 질문</span>
+            <span class="text-xs text-slate-400">질문 1회 이상 주도적 참여</span>
           </div>
 
           <p class="text-xs text-slate-600">
@@ -669,7 +634,7 @@
                 <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">교통 및 동선 질문</span>
                 <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
               </div>
-              <p class="text-xs text-slate-800 font-medium">"구글맵으로 확인하신 1번부터 5번 동선 중 환승 시간이 가장 촉박한 구간은 어디이고 어떻게 대처할 계획인가요?"</p>
+              <p class="text-xs text-slate-800 font-medium">"구글맵으로 확인하신 이동 동선 중 환승 시간이 가장 촉박하거나 주의해야 할 구간은 어디인가요?"</p>
             </div>
 
             <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
@@ -693,7 +658,7 @@
                 <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">음식 & 에티켓 질문</span>
                 <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
               </div>
-              <p class="text-xs text-slate-800 font-medium">"소개해주신 대표 음식을 주문하거나 먹을 때 주의해야 할 일본 특유의 식사 에티켓이 있는지 궁금합니다."</p>
+              <p class="text-xs text-slate-800 font-medium">"소개해주신 대표 음식이나 길거리 디저트를 먹을 때 주의해야 할 일본 특유의 식사 매너가 있는지 궁금합니다."</p>
             </div>
           </div>
 
@@ -706,7 +671,63 @@
     </section>
   </main>
 
-  <!-- A4 PRINT WORKSHEET (Print Fallback) -->
+  <!-- MODAL: Custom City Registration (1번 요구사항) -->
+  <div id="custom-city-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🗾</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">나만의 도시 / 소도시 추가하기</h3>
+            <p class="text-xs text-slate-500">가고 싶은 일본의 숨은 명소나 소도시를 등록하세요.</p>
+          </div>
+        </div>
+        <button onclick="toggleCustomCityModal(false)" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">도시 이름 (한글/일본어) <span class="text-rose-500">*</span></label>
+          <input type="text" id="custom-city-name" placeholder="예: 가나자와 (かなざわ) 또는 시즈오카" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">테마 키워드 <span class="text-rose-500">*</span></label>
+          <input type="text" id="custom-city-badge" placeholder="예: 금박 공예 / 에도 정원" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">도시 소개 요약</label>
+          <textarea id="custom-city-desc" rows="2" placeholder="이 도시만의 매력을 간단히 적어보세요." class="w-full px-3 py-2 border border-slate-300 rounded-lg"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">대표 명소 2곳</label>
+            <input type="text" id="custom-city-spots" placeholder="예: 겐로쿠엔 & 21세기미술관" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">대표 음식</label>
+            <input type="text" id="custom-city-food" placeholder="예: 가나자와 카레 & 해산물 덮밥" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">공항/접근 교통</label>
+            <input type="text" id="custom-city-airport" placeholder="예: 고마쓰 공항 리무진 버스" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">시내 교통 수단</label>
+            <input type="text" id="custom-city-transit" placeholder="예: 가나자와 성하마을 순환버스" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-100">
+        <button onclick="toggleCustomCityModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">취소</button>
+        <button onclick="saveCustomCity()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm">+ 도시 등록 및 선택</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4 PRINT WORKSHEET -->
   <div id="print-sheet-area" class="hidden">
     <div style="border: 2px solid #333; padding: 25px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
       <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 15px;">
@@ -722,7 +743,7 @@
 
       <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
         <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0; width: 22%;">① 전체 일정표</th>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0; width: 24%;">① 전체 일정표</th>
           <td style="border: 1px solid #999; padding: 8px;" id="print-schedule">-</td>
         </tr>
         <tr>
@@ -734,7 +755,7 @@
           <td style="border: 1px solid #999; padding: 8px;" id="print-spots">-</td>
         </tr>
         <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">④ 대표 음식 2가지</th>
+          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">④ 대표 미식 & 간식</th>
           <td style="border: 1px solid #999; padding: 8px;" id="print-foods">-</td>
         </tr>
         <tr>
@@ -754,7 +775,7 @@
     </div>
   </div>
 
-  <!-- DEDICATED PDF EXPORT TEMPLATE (Rendered off-screen for html2pdf) -->
+  <!-- DEDICATED PDF EXPORT TEMPLATE -->
   <div id="pdf-render-wrapper" class="fixed -left-[9999px] top-0 w-[794px] bg-white text-slate-900 font-sans p-8 box-border" style="min-height: 1120px;">
     <div class="border-b-2 border-slate-900 pb-4 mb-5 flex items-center justify-between">
       <div>
@@ -808,7 +829,7 @@
           <td class="p-3 text-slate-800" id="pdf-spots-content">-</td>
         </tr>
         <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">④ 대표 음식 2가지</td>
+          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">④ 대표 미식 & 간식</td>
           <td class="p-3 text-slate-800" id="pdf-foods-content">-</td>
         </tr>
         <tr class="border-b border-slate-200">
@@ -824,7 +845,7 @@
 
     <!-- Google Maps Route Timeline in PDF -->
     <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs">
-      <span class="font-bold text-slate-900 block mb-1">🗺️ 구글 지도 1~5번 경유지 경로</span>
+      <span class="font-bold text-slate-900 block mb-1">🗺️ 구글 지도 번호별 경유지 이동 동선</span>
       <p id="pdf-route-timeline" class="text-slate-700">-</p>
     </div>
 
@@ -832,7 +853,7 @@
     <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs space-y-2">
       <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
         <span class="font-bold text-slate-900">🎤 5분 발표 및 동료 평가 준비</span>
-        <span class="text-[10px] text-slate-500">캔바/미리캔버스 슬라이드 기초 자료</span>
+        <span class="text-[10px] text-slate-500">슬라이드 기초 자료</span>
       </div>
       <div>
         <span class="font-semibold text-indigo-700">· 동료 발표 경청 후 질문 예정 내용:</span>
@@ -841,27 +862,23 @@
     </div>
 
     <div class="border-t-2 border-dashed border-slate-300 pt-4 flex items-center justify-between text-[11px] text-slate-600">
-      <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 음식 [ ] 숙소 [ ] 경비</div>
+      <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
       <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
     </div>
   </div>
 
-  <!-- MODAL: Canva / MiriCanvas 5-Minute Presentation Slide Guide -->
+  <!-- MODAL: Canva Presentation Slide Guide -->
   <div id="canva-guide-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
       <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">
-            🎨
-          </div>
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">🎨</div>
           <div>
             <h3 class="text-lg font-bold text-slate-900">캔바 · 미리캔버스 5분 발표 슬라이드 가이드</h3>
             <p class="text-xs text-slate-500">내 계획서 내용이 반영된 6장 슬라이드 구성안 & 원클릭 복사</p>
           </div>
         </div>
-        <button onclick="toggleCanvaModal(false)" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-          ✕
-        </button>
+        <button onclick="toggleCanvaModal(false)" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
       </div>
 
       <div class="p-6 space-y-4 text-xs sm:text-sm">
@@ -878,14 +895,12 @@
         <button onclick="copyAllSlidesScript()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
           <span>📋 전체 6장 슬라이드 한 번에 복사</span>
         </button>
-        <button onclick="toggleCanvaModal(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition">
-          닫기
-        </button>
+        <button onclick="toggleCanvaModal(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition">닫기</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: My Saved Plans Archive (Local Storage & JSON Backup) -->
+  <!-- MODAL: My Saved Plans Archive -->
   <div id="archive-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -912,12 +927,9 @@
 
         <div class="space-y-2">
           <h4 class="text-xs font-bold text-slate-700">저장된 기획서 목록</h4>
-          <div id="saved-plans-list" class="space-y-2">
-            <!-- Populated via JS -->
-          </div>
+          <div id="saved-plans-list" class="space-y-2"></div>
         </div>
 
-        <!-- File Backup / Restore (School <-> Home transport) -->
         <div class="pt-3 border-t border-slate-200">
           <h4 class="text-xs font-bold text-slate-700 mb-1">학교 ↔ 집 이동용 파일 백업</h4>
           <p class="text-[11px] text-slate-500 mb-2">학교 컴퓨터에서 작성한 내용을 파일로 저장해 집에서 그대로 열어보세요.</p>
@@ -939,13 +951,11 @@
     </div>
   </div>
 
-  <!-- MODAL: Teacher Auth Modal (Safe Custom Dialog replacing prompt) -->
+  <!-- MODAL: Teacher Auth Modal -->
   <div id="teacher-auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xl">
-          👑
-        </div>
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xl">👑</div>
         <div>
           <h3 class="text-base font-bold text-slate-900">교사 인증</h3>
           <p class="text-xs text-slate-500">관리자 비밀번호를 입력해 주세요.</p>
@@ -956,12 +966,8 @@
         <p id="teacher-pw-error" class="text-xs text-rose-600 font-semibold mt-1.5 hidden text-center">비밀번호가 올바르지 않습니다.</p>
       </div>
       <div class="flex gap-2">
-        <button onclick="toggleTeacherAuthModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
-          취소
-        </button>
-        <button onclick="verifyTeacherPassword()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shadow-sm">
-          확인
-        </button>
+        <button onclick="toggleTeacherAuthModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">취소</button>
+        <button onclick="verifyTeacherPassword()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shadow-sm">확인</button>
       </div>
     </div>
   </div>
@@ -981,7 +987,6 @@
       </div>
 
       <div class="p-5 space-y-4">
-        <!-- Dashboard Stats -->
         <div class="grid grid-cols-3 gap-3">
           <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
             <span class="text-[11px] text-slate-500 block">총 제출 인원</span>
@@ -1002,7 +1007,6 @@
           </div>
         </div>
 
-        <!-- Submissions Table -->
         <div class="border border-slate-200 rounded-xl overflow-hidden">
           <table class="w-full text-left border-collapse text-xs">
             <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
@@ -1015,9 +1019,7 @@
                 <th class="p-3 text-right">상세/관리</th>
               </tr>
             </thead>
-            <tbody id="admin-submissions-tbody" class="divide-y divide-slate-100">
-              <!-- Populated via JS -->
-            </tbody>
+            <tbody id="admin-submissions-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
 
@@ -1043,7 +1045,7 @@
           <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">📋</span>
           <div>
             <h3 class="text-lg font-bold text-slate-900">일본어 회화 여행 계획 수행평가 채점 기준표</h3>
-            <p class="text-xs text-slate-500">성취기준 [12일회01-05] 연계 | 총 배점 20점 만점</p>
+            <p class="text-xs text-slate-500">성취기준 연계 | 총 배점 20점 만점</p>
           </div>
         </div>
         <button onclick="toggleRubricModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
@@ -1141,7 +1143,8 @@
       } catch (e) {}
     }
 
-    const CITIES_DATA = [
+    // Default Cities Data with Realistic Budget Presets (4번 요구사항)
+    const BASE_CITIES = [
       {
         id: 'tokyo',
         name: '도쿄 (とうきょう)',
@@ -1151,10 +1154,15 @@
         desc: '트렌드의 중심지 시부야와 애니메이션·굿즈 성지 아키하바라, 일본 전통과 미래가 공존하는 메트로폴리스.',
         spot: '도쿄 스카이트리 & 아키하바라 전자상가',
         spotReason: '도쿄 전경을 한눈에 내려다보고 글로벌 서브컬처 문화 및 굿즈 샵을 탐방하기 위해',
-        food: '에도마에 스시 & 츠키지 장어덮밥',
+        foods: [
+          { type: '점심', name: '에도마에 스시', note: '츠키지 장외시장에서 신선한 초밥' },
+          { type: '디저트', name: '아사쿠사 말차 젤라또', note: '단계별 쌉싸름한 녹차 아이스크림' },
+          { type: '저녁', name: '도쿄 츠케멘 라멘', note: '신주쿠 골목 진한 어패류 육수' }
+        ],
         transitAirport: '나리타 익스프레스(NEX) 특급',
         transitCity: '도쿄 서브웨이 72시간 패스',
-        stops: ['나리타 국제공항', '도쿄 스카이트리', '츠키지 장외시장', '아키하바라', '신주쿠역 호텔']
+        stops: ['나리타 국제공항', '도쿄 스카이트리', '츠키지 장외시장', '아키하바라', '신주쿠역 호텔'],
+        budget: { flight: 420000, hotel: 270000, transit: 65000, food: 180000, extra: 120000 }
       },
       {
         id: 'osaka',
@@ -1165,10 +1173,15 @@
         desc: '"쿠이다오레(먹다가 망한다)"의 본고장! 활기찬 상인 문화와 유니버설 스튜디오 재팬(USJ)의 도시.',
         spot: '유니버설 스튜디오 재팬(USJ) & 도톤보리',
         spotReason: '슈퍼 닌텐도 월드 어트랙션 체험과 글리코상 네온사인 야경 감상',
-        food: '타코야키 & 오코노미야키 & 쿠시카츠',
+        foods: [
+          { type: '길거리 간식', name: '원조 타코야키', note: '도톤보리 강변 갓 구운 바삭촉촉 식감' },
+          { type: '저녁', name: '오코노미야키 & 쿠시카츠', note: '신세카이 골목 바삭한 꼬치튀김' },
+          { type: '간식', name: '리쿠로 오지상 치즈케이크', note: '난바역 갓 구워 흔들리는 수플레 치즈케이크' }
+        ],
         transitAirport: '간사이공항 난카이 라피트 특급',
         transitCity: '오사카 메트로 주유패스 (1일권)',
-        stops: ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 호텔']
+        stops: ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 호텔'],
+        budget: { flight: 350000, hotel: 220000, transit: 55000, food: 160000, extra: 130000 }
       },
       {
         id: 'kyoto',
@@ -1179,10 +1192,15 @@
         desc: '1,000년 동안 일본의 수도였으며 17개 유네스코 세계유산과 사찰, 정취 가득한 골목길이 숨 쉬는 역사 도시.',
         spot: '기요미즈데라(청수사) & 후시미이나리 신사',
         spotReason: '절벽 위 웅장한 목조 사찰의 사계절 풍경과 붉은 도리이가 끝없이 이어지는 숲길 산책',
-        food: '교토 가이세키 정식 & 우지 말차 파르페',
+        foods: [
+          { type: '점심', name: '유도부(온두부) 정식', note: '난젠지 사찰 주변 부드러운 교토 전통 수제 두부' },
+          { type: '카페/디저트', name: '우지 말차 파르페', note: '기온 거리 진한 녹차와 당고 조합' },
+          { type: '간식', name: '야츠하시 전통 떡', note: '시나몬 향 쫄깃한 교토 명물 삼각 떡' }
+        ],
         transitAirport: '간사이공항 하루카 특급열차 (교토 직통)',
         transitCity: '교토 시내버스 1일권 및 한큐/게이한 전철',
-        stops: ['교토역', '후시미이나리 신사', '기온거리 말차 디저트', '기요미즈데라', '가와라마치 료칸']
+        stops: ['교토역', '후시미이나리 신사', '기온거리 말차 디저트', '기요미즈데라', '가와라마치 료칸'],
+        budget: { flight: 350000, hotel: 260000, transit: 60000, food: 170000, extra: 100000 }
       },
       {
         id: 'fukuoka',
@@ -1193,24 +1211,15 @@
         desc: '한국에서 가장 가까운 규슈의 관문. 나카스 강변 포장마차(야타이)와 유후인의 고즈넉한 온천 료칸 투어.',
         spot: '유후인 킨린호수 & 나카스 야타이 거리',
         spotReason: '물안개 피어오르는 온천 마을 힐링과 강변 포장마차의 정겨운 심야 미식 체험',
-        food: '하카타 돈코츠 라멘 & 모츠나베(곱창전골)',
+        foods: [
+          { type: '점심', name: '하카타 돈코츠 라멘', note: '진한 돼지뼈 육수와 얇은 면' },
+          { type: '길거리 간식', name: '유후인 금상고로케 & 미르히 푸딩', note: '킨린호수 길목 따끈한 간식' },
+          { type: '야식/이자카야', name: '나카스 야타이 모츠나베', note: '포장마차 정겨운 곱창전골과 꼬치' }
+        ],
         transitAirport: '후쿠오카 공항 지하철 (하카타역 5분 직통)',
         transitCity: '특급 유후인노모리 관광열차 & 산큐패스',
-        stops: ['후쿠오카 공항', '오호리 공원', '하카타 잇푸도 라멘 본점', '유후인 킨린호수', '유후인 료칸']
-      },
-      {
-        id: 'nagoya',
-        name: '나고야 (なごや)',
-        categories: ['popculture', 'gourmet'],
-        badge: '지브리 파크 / 나고야메시',
-        badgeColor: 'bg-indigo-100 text-indigo-800',
-        desc: '애니메이션 팬들의 성지 지브리 파크와 장어덮밥(히츠마부시), 테바사키 등 독창적인 미식의 도시.',
-        spot: '지브리 파크 & 나고야 성',
-        spotReason: '토토로와 센과 치히로 명작 세계관 체험 및 역사적 금샤치 관람',
-        food: '히츠마부시(장어덮밥) & 미소카츠',
-        transitAirport: '주부국제공항 메이테쓰 뮤스카이 특급',
-        transitCity: '나고야 지하철 24시간권 & 리니모(자기부상열차)',
-        stops: ['주부국제공항', '나고야 성', '호라이켄 히츠마부시', '지브리 파크', '사카에역 호텔']
+        stops: ['후쿠오카 공항', '오호리 공원', '하카타 라멘 본점', '유후인 킨린호수', '유후인 료칸'],
+        budget: { flight: 260000, hotel: 240000, transit: 50000, food: 150000, extra: 90000 }
       },
       {
         id: 'sapporo',
@@ -1221,10 +1230,15 @@
         desc: '겨울에는 유키마쓰리(눈축제), 여름에는 시원한 라벤더 언덕과 신선한 털게·스프카레가 반기는 북해도.',
         spot: '오도리 공원 & 오타루 운하',
         spotReason: '세계적인 눈조각상 축제 관람과 가스등이 낭만적인 오타루 운하 야경 감상',
-        food: '삿포로 미소라멘 & 징기스칸(양고기) & 스프카레',
+        foods: [
+          { type: '점심', name: '삿포로 스프카레', note: '구운 채소와 부드러운 닭다리가 들어간 따뜻한 국물 카레' },
+          { type: '저녁', name: '징기스칸 숯불 양고기', note: '스스키노 명물 생양고기 구이' },
+          { type: '디저트', name: '홋카이도 밀크 소프트크림', note: '신선하고 진한 유제품 아이스크림' }
+        ],
         transitAirport: '신치토세 공항 쾌속 에어포트 열차',
         transitCity: 'JR 홋카이도 레일 패스 & 삿포로 지하철 1일권',
-        stops: ['신치토세 공항', '오도리 공원', '스스키노 라멘골목', '오타루 운하', '삿포로역 호텔']
+        stops: ['신치토세 공항', '오도리 공원', '스스키노 라멘골목', '오타루 운하', '삿포로역 호텔'],
+        budget: { flight: 480000, hotel: 250000, transit: 70000, food: 200000, extra: 110000 }
       },
       {
         id: 'okinawa',
@@ -1235,99 +1249,119 @@
         desc: '환상적인 산호초 바다와 독특한 류큐 왕국 문화를 품은 일본 최고의 해양 리조트 휴양지.',
         spot: '츄라우미 수족관 & 만좌모 절벽',
         spotReason: '거대한 고래상어가 헤엄치는 초대형 수조 관람과 에메랄드빛 바다 절경 감상',
-        food: '오키나와 소바 & 타코라이스 & 블루씰 아이스크림',
+        foods: [
+          { type: '점심', name: '오키나와 소바', note: '돼지 갈비가 올라간 전통 메밀국수' },
+          { type: '간식', name: '블루씰 자색고구마 아이스크림', note: '오키나와 특산 베니이모 디저트' },
+          { type: '저녁', name: '타코라이스 & 오리온 맥주', note: '이색 퓨전 멕시칸 스타일 라이스' }
+        ],
         transitAirport: '나하 공항 유이레일(모노레일)',
         transitCity: '오키나와 렌터카 해안 드라이브',
-        stops: ['나하 공항', '국제거리', '만좌모', '츄라우미 수족관', '온나손 해변 리조트']
-      },
-      {
-        id: 'hiroshima',
-        name: '히로시마 & 미야지마 (ひろしま)',
-        categories: ['heritage', 'gourmet'],
-        badge: '해상 신사 / 평화의 도시',
-        badgeColor: 'bg-purple-100 text-purple-800',
-        desc: '밀물 때 바다 위에 붉은 도리이가 떠오르는 미야지마 이쓰쿠시마 신사와 평화기념공원의 유서 깊은 지역.',
-        spot: '이쓰쿠시마 신사(미야지마) & 평화기념공원',
-        spotReason: '바다 위에 세워진 신비로운 신사와 평화의 소중함을 되새기는 세계유산 답사',
-        food: '히로시마풍 오코노미야키 & 미야지마 굴 구이',
-        transitAirport: '히로시마 공항 리무진 버스',
-        transitCity: '산요 신칸센 및 미야지마구치 페리',
-        stops: ['히로시마역', '평화기념공원', '오코노미무라', '미야지마 이쓰쿠시마 신사', '히로시마역 호텔']
-      },
-      {
-        id: 'shirakawago',
-        name: '기후 시라카와고 (ぎふ)',
-        categories: ['heritage', 'hotspring'],
-        badge: '동화 속 합장촌 / 온천',
-        badgeColor: 'bg-amber-100 text-amber-900',
-        desc: '폭설을 견디기 위해 지어진 독특한 갓쇼즈쿠리 지붕 전통 가옥이 모여 있는 유네스코 세계유산 산골 마을.',
-        spot: '시라카와고 전통마을 전망대 & 게로 온천',
-        spotReason: '애니메이션 동화 속 풍경 같은 전통 가옥 보존 지구와 일본 3대 명천 온천욕 체험',
-        food: '히다규(소고기 구이) & 호바미소 정식',
-        transitAirport: '나고야 주부공항 입국 후 JR 특급 히다',
-        transitCity: '다카야마~시라카와고 직행 고속버스 (노히버스)',
-        stops: ['다카야마역', '다카야마 진야', '히다규 정식 전문점', '시라카와고 전망대', '게로 온천 료칸']
-      },
-      {
-        id: 'nara',
-        name: '나라 (なら)',
-        categories: ['heritage', 'nature'],
-        badge: '사슴 공원 / 고대 사찰',
-        badgeColor: 'bg-orange-100 text-orange-800',
-        desc: '도시 전체가 지붕 없는 박물관! 1,200여 마리의 사슴과 세계 최대 목조건축 다이부츠덴이 공존하는 고도.',
-        spot: '나라 사슴공원 & 도다이지(동대사)',
-        spotReason: '사슴 센베 주기 교감 체험과 거대한 청동 대불의 웅장함을 직접 마주하기 위해',
-        food: '감잎 스시(가키노하 스시) & 모찌 떡',
-        transitAirport: '간사이공항 리무진 버스 (나라 직통 85분)',
-        transitCity: '킨테츠 특급 전철 (난바/교토역 35분 연계)',
-        stops: ['긴테쓰 나라역', '도다이지 대불전', '나카타니도 모찌', '나라 사슴공원', '나라 전통 료칸']
-      },
-      {
-        id: 'kobe',
-        name: '고베 (こうべ)',
-        categories: ['gourmet', 'hotspring'],
-        badge: '100만불 야경 / 아리마 온천',
-        badgeColor: 'bg-blue-100 text-blue-800',
-        desc: '서양식 이국적인 항구 풍경과 세계 최고급 고베규, 일본에서 가장 오래된 온천인 아리마 온천을 품은 낭만 도시.',
-        spot: '고베 하버랜드 & 아리마 온천마을',
-        spotReason: '낭만적인 항구 야경과 철분 가득한 붉은 금탕(킨노유) 온천 힐링',
-        food: '고베 비프 철판 스테이크 & 고베 디저트 케이크',
-        transitAirport: '간사이공항 고속 페리 (베이셔틀 30분 직통)',
-        transitCity: 'JR 신쾌속 열차 및 시티루프 순환버스',
-        stops: ['산노미야역', '기타노 이진칸', '고베규 스테이크하우스', '아리마 온천 킨노유', '하버랜드 야경 호텔']
-      },
-      {
-        id: 'yokohama',
-        name: '요코하마 (よこはま)',
-        categories: ['gourmet', 'popculture'],
-        badge: '차이나타운 / 미래형 항구',
-        badgeColor: 'bg-emerald-100 text-emerald-900',
-        desc: '동양 최대 규모의 차이나타운과 현대적인 미래 수변 도시 미나토미라이21이 어우러진 도쿄 근교 핫플레이스.',
-        spot: '요코하마 차이나타운 & 붉은 벽돌 창고(아카렌가)',
-        spotReason: '길거리 만두와 중화 미식 투어 및 로맨틱한 해변 쇼핑가 산책',
-        food: '샤오롱바오 & 요코하마 이에케이 라멘',
-        transitAirport: '하네다 공항 게이큐선 전철 (직통 약 25분)',
-        transitCity: '도큐 도요코선 특급 (시부야 직통 30분)',
-        stops: ['요코하마역', '미나토미라이21', '차이나타운 딤섬거리', '아카렌가 창고', '코스모월드 관람차 호텔']
+        stops: ['나하 공항', '국제거리', '만좌모', '츄라우미 수족관', '온나손 해변 리조트'],
+        budget: { flight: 390000, hotel: 310000, transit: 90000, food: 160000, extra: 100000 }
       }
     ];
+
+    const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
+    function getCustomCities() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_CITIES) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function getAllCities() {
+      return [...BASE_CITIES, ...getCustomCities()];
+    }
+
+    // 1번 요구사항: 나만의 도시 직접 추가 모달 & 저장
+    function openCustomCityModal() {
+      toggleCustomCityModal(true);
+    }
+
+    function toggleCustomCityModal(show) {
+      const modal = document.getElementById('custom-city-modal');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function saveCustomCity() {
+      const name = document.getElementById('custom-city-name').value.trim();
+      const badge = document.getElementById('custom-city-badge').value.trim() || '자유 테마';
+      const desc = document.getElementById('custom-city-desc').value.trim() || '학생이 직접 등록한 매력적인 추천 여행지입니다.';
+      const spots = document.getElementById('custom-city-spots').value.trim() || `${name} 대표 명소 1 & ${name} 대표 명소 2`;
+      const food = document.getElementById('custom-city-food').value.trim() || `${name} 현지 특산 요리`;
+      const airport = document.getElementById('custom-city-airport').value.trim() || '공항 직통 철도 / 버스';
+      const transit = document.getElementById('custom-city-transit').value.trim() || '지역 대중교통 패스';
+
+      if (!name) {
+        showToast('도시 이름을 입력해 주세요!', '⚠️');
+        return;
+      }
+
+      const newCity = {
+        id: 'custom_' + Date.now(),
+        name: name,
+        categories: ['custom'],
+        badge: badge,
+        badgeColor: 'bg-indigo-100 text-indigo-800',
+        desc: desc,
+        spot: spots,
+        spotReason: `${name}만의 고유한 문화와 감성을 직접 체험하기 위해`,
+        foods: [
+          { type: '대표 음식', name: food, note: '현지에서 꼭 맛봐야 할 전통 별미' },
+          { type: '길거리 간식', name: `${name} 특산 디저트`, note: '골목 상점가 달콤한 간식거리' }
+        ],
+        transitAirport: airport,
+        transitCity: transit,
+        stops: [`${name} 기차역/공항`, `${spots.split('&')[0].trim()}`, `${name} 중앙 맛집거리`, `${spots.split('&')[1]?.trim() || name + ' 전망대'}`, `${name} 역세권 숙소`],
+        budget: { flight: 380000, hotel: 230000, transit: 60000, food: 160000, extra: 100000 }
+      };
+
+      const customList = getCustomCities();
+      customList.push(newCity);
+      localStorage.setItem(STORAGE_KEY_CUSTOM_CITIES, JSON.stringify(customList));
+
+      updateCitySelectDropdown();
+      renderCities('custom');
+      toggleCustomCityModal(false);
+      applyCityToPlan(newCity.id);
+      showToast(`'${name}' 도시가 성공적으로 추가되었습니다!`, '🎉');
+      playBeep(784, 'sine', 0.15);
+    }
+
+    function updateCitySelectDropdown() {
+      const select = document.getElementById('input-target-city');
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">도시/지역 선택</option>';
+      const all = getAllCities();
+      all.forEach(c => {
+        const opt = document.createElement('option');
+        const shortName = c.name.split(' ')[0];
+        opt.value = shortName;
+        opt.textContent = `${shortName} (${c.badge})`;
+        select.appendChild(opt);
+      });
+      if (currentVal) select.value = currentVal;
+    }
 
     function renderCities(filter = 'all') {
       const container = document.getElementById('cities-grid');
       container.innerHTML = '';
-
+      const all = getAllCities();
       const filtered = filter === 'all' 
-        ? CITIES_DATA 
-        : CITIES_DATA.filter(c => c.categories.includes(filter));
+        ? all 
+        : all.filter(c => c.categories.includes(filter));
 
       filtered.forEach(city => {
         const card = document.createElement('div');
         card.className = "bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
+        const shortCity = city.name.split(' ')[0];
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${city.badgeColor}">${city.badge}</span>
-              <span class="text-xs text-slate-400 font-mono">JNTO Pick</span>
+              <span class="text-xs text-slate-400 font-mono">${city.categories.includes('custom') ? '학생 등록' : 'JNTO Pick'}</span>
             </div>
             <h4 class="text-base font-bold text-slate-900">${city.name}</h4>
             <p class="text-xs text-slate-600 mt-1 leading-relaxed">${city.desc}</p>
@@ -1338,8 +1372,8 @@
                 <span class="text-slate-800 font-medium">${city.spot}</span>
               </div>
               <div class="flex items-start gap-1.5">
-                <span class="text-rose-500 font-semibold shrink-0">🍜 음식:</span>
-                <span class="text-slate-800 font-medium">${city.food}</span>
+                <span class="text-rose-500 font-semibold shrink-0">🍜 미식:</span>
+                <span class="text-slate-800 font-medium">${city.foods ? city.foods.map(f => f.name).join(', ') : '현지 별미'}</span>
               </div>
               <div class="flex items-start gap-1.5">
                 <span class="text-indigo-500 font-semibold shrink-0">🚆 교통:</span>
@@ -1369,36 +1403,52 @@
       playBeep(440, 'triangle', 0.08);
     }
 
+    // 4번 요구사항: 도시를 바꿀 때 예상 예산이 자동으로 갱신 & 프리셋 반영
     function applyCityToPlan(cityId) {
-      const city = CITIES_DATA.find(c => c.id === cityId);
+      const all = getAllCities();
+      const city = all.find(c => c.id === cityId);
       if (!city) return;
 
-      document.getElementById('input-target-city').value = city.name.split(' ')[0];
-      document.getElementById('input-trip-theme').value = `${city.name.split(' ')[0]} ${city.badge.split('/')[0].trim()} 여행`;
+      const cityNameOnly = city.name.split(' ')[0];
+      document.getElementById('input-target-city').value = cityNameOnly;
+      document.getElementById('input-trip-theme').value = `${cityNameOnly} ${city.badge.split('/')[0].trim()} 여행`;
       document.getElementById('input-transport-airport').value = city.transitAirport;
       document.getElementById('input-transport-city').value = city.transitCity;
-      document.getElementById('input-spot-1').value = city.spot.split('&')[0].trim();
+
+      const spots = city.spot.split('&');
+      document.getElementById('input-spot-1').value = spots[0]?.trim() || `${cityNameOnly} 명소 1`;
       document.getElementById('input-spot-reason-1').value = city.spotReason;
-      
-      const secondSpot = city.spot.split('&')[1];
-      if (secondSpot) {
-        document.getElementById('input-spot-2').value = secondSpot.trim();
-        document.getElementById('input-spot-reason-2').value = '현지 고유의 정취와 트렌드를 직접 체험하기 위해';
+      if (spots[1]) {
+        document.getElementById('input-spot-2').value = spots[1].trim();
+        document.getElementById('input-spot-reason-2').value = '현지 고유의 정취와 풍경을 직접 체험하기 위해';
       }
 
-      document.getElementById('input-food-1').value = city.food.split('&')[0].trim();
-      if (city.food.split('&')[1]) {
-        document.getElementById('input-food-2').value = city.food.split('&')[1].trim();
+      // Populate food items (3번)
+      clearAndSetFoodItems(city.foods || [
+        { type: '점심', name: `${cityNameOnly} 특산 요리`, note: '현지 대표 미식' },
+        { type: '디저트', name: `${cityNameOnly} 전통 간식`, note: '골목 수제 디저트' }
+      ]);
+
+      // Populate route stops (2번)
+      if (city.stops && city.stops.length > 0) {
+        currentRouteStops = [...city.stops];
+        renderRouteStops();
       }
 
-      if (city.stops && city.stops.length >= 5) {
-        for (let i = 1; i <= 5; i++) {
-          const stopInput = document.getElementById(`route-stop-${i}`);
-          if (stopInput) stopInput.value = city.stops[i - 1];
-        }
+      // Budget auto-preset (4번)
+      if (city.budget) {
+        document.getElementById('budget-flight').value = city.budget.flight;
+        document.getElementById('budget-hotel').value = city.budget.hotel;
+        document.getElementById('budget-transit').value = city.budget.transit;
+        document.getElementById('budget-food').value = city.budget.food;
+        document.getElementById('budget-extra').value = city.budget.extra;
+        document.getElementById('budget-preset-city-name').textContent = `'${cityNameOnly}' 맞춤 예산 자동 반영됨`;
       }
 
-      showToast(`'${city.name.split(' ')[0]}' 정보를 플래너에 자동 입력했습니다!`, '🎒');
+      // Refresh hotel links based on city
+      renderHotelOptions();
+
+      showToast(`'${cityNameOnly}' 정보와 도시 맞춤 예산이 플래너에 자동 반영되었습니다!`, '🎒');
       playBeep(660, 'sine', 0.15);
       onInputChanged();
       switchTab('planner');
@@ -1406,14 +1456,177 @@
 
     function onCitySelectChange(val) {
       if (!val) return;
-      const matched = CITIES_DATA.find(c => c.name.startsWith(val));
+      const all = getAllCities();
+      const matched = all.find(c => c.name.startsWith(val));
       if (matched) {
         applyCityToPlan(matched.id);
       } else {
+        renderHotelOptions();
         onInputChanged();
       }
     }
 
+    // 2번 요구사항: 구글맵스 1, 2, 3... 번호별 동선 동적 제어 및 네이티브 연동
+    let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 숙소'];
+
+    function renderRouteStops() {
+      const container = document.getElementById('route-stops-container');
+      container.innerHTML = '';
+      currentRouteStops.forEach((stop, index) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg";
+        row.innerHTML = `
+          <span class="inline-block w-6 h-6 rounded-full bg-rose-500 text-white font-bold text-center leading-6 text-xs shrink-0">${index + 1}</span>
+          <input type="text" value="${stop}" placeholder="경유지/명소/식당 이름" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2.5 py-1.5 text-white text-xs" oninput="currentRouteStops[${index}] = this.value; onInputChanged();">
+          ${currentRouteStops.length > 2 ? `
+            <button onclick="removeRouteStop(${index})" class="text-slate-400 hover:text-rose-400 text-xs px-2 py-1">✕</button>
+          ` : ''}
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addRouteStop() {
+      currentRouteStops.push(`경유지 ${currentRouteStops.length + 1}`);
+      renderRouteStops();
+      onInputChanged();
+      playBeep(520, 'sine', 0.08);
+    }
+
+    function removeRouteStop(idx) {
+      if (currentRouteStops.length <= 2) return;
+      currentRouteStops.splice(idx, 1);
+      renderRouteStops();
+      onInputChanged();
+    }
+
+    function openGoogleMapsRoute() {
+      const validStops = currentRouteStops.map(s => s.trim()).filter(Boolean);
+      if (validStops.length < 2) {
+        showToast('출발지와 목적지를 포함해 2곳 이상 입력하세요!', '⚠️');
+        return;
+      }
+      const city = document.getElementById('input-target-city').value.trim() || 'Japan';
+      const encodedStops = validStops.map(s => encodeURIComponent(`${s}, ${city}`));
+      const origin = encodedStops[0];
+      const destination = encodedStops[encodedStops.length - 1];
+      const waypoints = encodedStops.slice(1, -1).join('|');
+
+      let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
+      if (waypoints) url += `&waypoints=${waypoints}`;
+
+      window.open(url, '_blank');
+      showToast('Google 지도에서 1번부터 전체 번호별 이동 경로를 열었습니다!', '🗺️');
+      playBeep(600, 'sine', 0.1);
+    }
+
+    // 3번 요구사항: 음식/간식 창의적 무제한 추가 (아침, 점심, 저녁, 간식, 편의점, 디저트 등)
+    let currentFoodList = [
+      { type: '점심', name: '오사카 타코야키 & 오코노미야키', note: '도톤보리 명물 거리' },
+      { type: '디저트', name: '교토 말차 파르페 & 당고', note: '사찰 산책 후 달콤한 휴식' }
+    ];
+
+    function renderFoodList() {
+      const container = document.getElementById('foods-container');
+      container.innerHTML = '';
+      currentFoodList.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = "p-3 bg-slate-50 rounded-lg border border-slate-200 flex flex-col sm:flex-row gap-2 items-start sm:items-center";
+        card.innerHTML = `
+          <select class="text-xs px-2 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-700 shrink-0" onchange="currentFoodList[${idx}].type = this.value; onInputChanged();">
+            <option value="아침" ${item.type === '아침' ? 'selected' : ''}>🌅 아침식사</option>
+            <option value="점심" ${item.type === '점심' ? 'selected' : ''}>🍱 점심식사</option>
+            <option value="저녁" ${item.type === '저녁' ? 'selected' : ''}>🍲 저녁식사</option>
+            <option value="길거리 간식" ${item.type === '길거리 간식' ? 'selected' : ''}>🍢 길거리 간식</option>
+            <option value="카페/디저트" ${item.type === '카페/디저트' ? 'selected' : ''}>☕ 카페/디저트</option>
+            <option value="편의점 털기" ${item.type === '편의점 털기' ? 'selected' : ''}>🏪 편의점 털기</option>
+            <option value="야식/이자카야" ${item.type === '야식/이자카야' ? 'selected' : ''}>🏮 야식/이자카야</option>
+          </select>
+          <input type="text" value="${item.name || ''}" placeholder="음식/디저트 명칭 (예: 편의점 에그샌드위치 & 푸딩)" class="w-full sm:flex-1 text-xs px-2.5 py-1.5 border border-slate-300 rounded bg-white" oninput="currentFoodList[${idx}].name = this.value; onInputChanged();">
+          <input type="text" value="${item.note || ''}" placeholder="먹는 장소 또는 선정 이유" class="w-full sm:w-48 text-[11px] px-2.5 py-1.5 border border-slate-300 rounded bg-white text-slate-600" oninput="currentFoodList[${idx}].note = this.value; onInputChanged();">
+          ${currentFoodList.length > 2 ? `
+            <button onclick="removeFoodItem(${idx})" class="text-slate-400 hover:text-rose-600 text-xs px-2 py-1">✕</button>
+          ` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function addFoodItem() {
+      currentFoodList.push({ type: '길거리 간식', name: '', note: '' });
+      renderFoodList();
+      onInputChanged();
+      playBeep(520, 'sine', 0.08);
+    }
+
+    function removeFoodItem(idx) {
+      if (currentFoodList.length <= 2) return;
+      currentFoodList.splice(idx, 1);
+      renderFoodList();
+      onInputChanged();
+    }
+
+    function clearAndSetFoodItems(foods) {
+      currentFoodList = foods && foods.length > 0 ? [...foods] : [
+        { type: '점심', name: '', note: '' },
+        { type: '간식', name: '', note: '' }
+      ];
+      renderFoodList();
+    }
+
+    // 5번 요구사항: 숙소 타입별 아고다/구글 실시간 검색 3~4개 선택지 생성
+    function onHotelTypeChange() {
+      renderHotelOptions();
+      onInputChanged();
+    }
+
+    function renderHotelOptions() {
+      const city = document.getElementById('input-target-city').value.trim() || '도쿄';
+      const hotelType = document.getElementById('input-hotel-type').value || '호텔';
+      const container = document.getElementById('hotel-options-grid');
+      container.innerHTML = '';
+
+      const queryBase = `${city} ${hotelType}`;
+      const searchOptions = [
+        {
+          title: `🏨 [아고다] ${city} ${hotelType} 실시간 특가`,
+          desc: '평점 8.5 이상 역세권 인기 숙소 모아보기',
+          url: `https://www.agoda.com/ko-kr/search?text=${encodeURIComponent(queryBase)}`
+        },
+        {
+          title: `🗺️ [구글 호텔] ${city} 지도 기반 ${hotelType} 비교`,
+          desc: '지하철역 도보 5분 이내 숙소 1박 요금 비교',
+          url: `https://www.google.com/travel/hotels?q=${encodeURIComponent(queryBase)}`
+        },
+        {
+          title: `🔍 [구글] ${city} 학생 추천 가성비 ${hotelType} 후기`,
+          desc: '블로그 및 실제 투숙객 청결도·가성비 리뷰',
+          url: `https://www.google.com/search?q=${encodeURIComponent(queryBase + ' 추천 후기 가성비')}`
+        },
+        {
+          title: `♨️ [료칸/온천넷] ${city} 감성 숙소 모아보기`,
+          desc: '현지 대욕장 또는 조식 포함 추천 선택지',
+          url: `https://www.google.com/search?q=${encodeURIComponent(city + ' 역세권 대욕장 조식 호텔 추천')}`
+        }
+      ];
+
+      searchOptions.forEach(opt => {
+        const a = document.createElement('a');
+        a.href = opt.url;
+        a.target = "_blank";
+        a.className = "p-2.5 bg-white border border-purple-200 rounded-lg hover:border-purple-400 hover:shadow-sm transition block group";
+        a.innerHTML = `
+          <div class="font-bold text-slate-800 group-hover:text-purple-700 flex items-center justify-between text-xs">
+            <span>${opt.title}</span>
+            <span class="text-purple-500 font-mono text-[11px]">➔</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">${opt.desc}</p>
+        `;
+        container.appendChild(a);
+      });
+    }
+
+    // Quiz functions
     const QUIZ_ANSWERS = {
       1: { correct: 'X', exp: '정답입니다! 일본 차량은 왼쪽(좌측통행)으로 주행합니다.' },
       2: { correct: '신칸센', exp: '정답입니다! 1964년 개통된 일본의 대표 초고속열차는 신칸센(しんかんせん)입니다.' },
@@ -1443,35 +1656,7 @@
       }
     }
 
-    function openGoogleMapsRoute() {
-      const stops = [];
-      for (let i = 1; i <= 5; i++) {
-        const val = document.getElementById(`route-stop-${i}`).value.trim();
-        if (val) stops.push(val);
-      }
-
-      if (stops.length < 2) {
-        showToast('출발지와 목적지를 최소 2곳 이상 입력해 주세요!', '⚠️');
-        return;
-      }
-
-      const city = document.getElementById('input-target-city').value.trim() || 'Japan';
-      const encodedStops = stops.map(s => encodeURIComponent(`${s}, ${city}`));
-      
-      const origin = encodedStops[0];
-      const destination = encodedStops[encodedStops.length - 1];
-      const waypoints = encodedStops.slice(1, -1).join('|');
-
-      let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
-      if (waypoints) {
-        url += `&waypoints=${waypoints}`;
-      }
-
-      window.open(url, '_blank');
-      showToast('Google 지도에서 1~5번 대중교통 이동 경로를 열었습니다!', '🗺️');
-      playBeep(600, 'sine', 0.1);
-    }
-
+    // Storage Keys
     const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
     const STORAGE_KEY_ARCHIVE = 'tabinote_saved_plans';
     const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
@@ -1490,8 +1675,7 @@
         spotReason1: document.getElementById('input-spot-reason-1').value.trim(),
         spot2: document.getElementById('input-spot-2').value.trim(),
         spotReason2: document.getElementById('input-spot-reason-2').value.trim(),
-        food1: document.getElementById('input-food-1').value.trim(),
-        food2: document.getElementById('input-food-2').value.trim(),
+        foods: [...currentFoodList],
         hotelType: document.getElementById('input-hotel-type').value,
         hotelLocation: document.getElementById('input-hotel-location').value.trim(),
         budgetFlight: Number(document.getElementById('budget-flight').value) || 0,
@@ -1499,13 +1683,7 @@
         budgetTransit: Number(document.getElementById('budget-transit').value) || 0,
         budgetFood: Number(document.getElementById('budget-food').value) || 0,
         budgetExtra: Number(document.getElementById('budget-extra').value) || 0,
-        routeStops: [
-          document.getElementById('route-stop-1').value.trim(),
-          document.getElementById('route-stop-2').value.trim(),
-          document.getElementById('route-stop-3').value.trim(),
-          document.getElementById('route-stop-4').value.trim(),
-          document.getElementById('route-stop-5').value.trim()
-        ],
+        routeStops: [...currentRouteStops],
         peerQuestion: document.getElementById('my-peer-question').value.trim(),
         savedAt: new Date().toISOString()
       };
@@ -1525,8 +1703,6 @@
       if (data.spotReason1 !== undefined) document.getElementById('input-spot-reason-1').value = data.spotReason1;
       if (data.spot2 !== undefined) document.getElementById('input-spot-2').value = data.spot2;
       if (data.spotReason2 !== undefined) document.getElementById('input-spot-reason-2').value = data.spotReason2;
-      if (data.food1 !== undefined) document.getElementById('input-food-1').value = data.food1;
-      if (data.food2 !== undefined) document.getElementById('input-food-2').value = data.food2;
       if (data.hotelType !== undefined) document.getElementById('input-hotel-type').value = data.hotelType;
       if (data.hotelLocation !== undefined) document.getElementById('input-hotel-location').value = data.hotelLocation;
       if (data.budgetFlight !== undefined) document.getElementById('budget-flight').value = data.budgetFlight || '';
@@ -1535,22 +1711,24 @@
       if (data.budgetFood !== undefined) document.getElementById('budget-food').value = data.budgetFood || '';
       if (data.budgetExtra !== undefined) document.getElementById('budget-extra').value = data.budgetExtra || '';
       if (data.peerQuestion !== undefined) document.getElementById('my-peer-question').value = data.peerQuestion;
-      
-      if (data.routeStops && Array.isArray(data.routeStops)) {
-        for (let i = 1; i <= 5; i++) {
-          if (data.routeStops[i - 1] !== undefined) {
-            document.getElementById(`route-stop-${i}`).value = data.routeStops[i - 1];
-          }
-        }
+
+      if (data.foods && Array.isArray(data.foods)) {
+        currentFoodList = data.foods;
+        renderFoodList();
       }
 
+      if (data.routeStops && Array.isArray(data.routeStops)) {
+        currentRouteStops = data.routeStops;
+        renderRouteStops();
+      }
+
+      renderHotelOptions();
       calculateTotalBudget();
     }
 
     let autoSaveTimeout = null;
     function onInputChanged() {
       calculateTotalBudget();
-      
       clearTimeout(autoSaveTimeout);
       autoSaveTimeout = setTimeout(() => {
         try {
@@ -1596,15 +1774,16 @@
     function updatePlanState() {
       const hasSched = (document.getElementById('input-schedule-duration').value.trim() !== '') &&
                        (document.getElementById('input-schedule-route').value.trim() !== '');
-      
+
       const hasTransit = (document.getElementById('input-transport-airport').value.trim() !== '') ||
                          (document.getElementById('input-transport-city').value.trim() !== '');
 
       const hasSpots = (document.getElementById('input-spot-1').value.trim() !== '') &&
                        (document.getElementById('input-spot-2').value.trim() !== '');
 
-      const hasFoods = (document.getElementById('input-food-1').value.trim() !== '') &&
-                       (document.getElementById('input-food-2').value.trim() !== '');
+      // 4번 요소: 미식 및 간식 2개 이상 입력 확인
+      const filledFoods = currentFoodList.filter(item => item.name && item.name.trim() !== '');
+      const hasFoods = filledFoods.length >= 2;
 
       const hasHotel = (document.getElementById('input-hotel-type').value !== '') &&
                        (document.getElementById('input-hotel-location').value.trim() !== '');
@@ -1654,23 +1833,24 @@
       const spot1 = document.getElementById('input-spot-1').value.trim() || '첫 번째 명소';
       const spot2 = document.getElementById('input-spot-2').value.trim() || '두 번째 명소';
       const reason1 = document.getElementById('input-spot-reason-1').value.trim() || '역사와 문화를 직접 체험하기 위해';
-      const food1 = document.getElementById('input-food-1').value.trim() || '현지 대표 미식';
+      
+      const foodNames = currentFoodList.filter(f => f.name.trim() !== '').map(f => f.name).join(', ') || '현지 대표 미식과 디저트';
       const hotel = document.getElementById('input-hotel-type').value || '숙소';
       const total = calculateTotalBudgetRaw();
 
       const box = document.getElementById('speech-script-box');
       box.innerHTML = `
         <p><strong>[도입: 10초]</strong><br>
-        "안녕하십니까! 이번 일본어 회화 여행 계획 발표를 맡은 <strong>${name}</strong>입니다. 제가 선정한 여행 테마는 <strong>'${theme}'</strong>이며, 목적지는 <strong>${city}</strong>입니다."</p>
+        "안녕하십니까! 이번 일본어 회화 여행 계획 발표를 맡은 <strong>${name}</strong>입니다. 제가 기획한 여행 테마는 <strong>'${theme}'</strong>이며, 목적지는 <strong>${city}</strong>입니다."</p>
 
-        <p><strong>[일정 & 교통 동선: 20초]</strong><br>
-        "저희의 일정은 총 <strong>${dur}</strong> 동안 진행되며, 핵심 루트는 <strong>${route}</strong>입니다. 현지 도착 후에는 <strong>${transit}</strong>을(를) 활용하여 도심으로 빠르고 경제적으로 이동할 계획입니다."</p>
+        <p><strong>[일정 & 번호별 동선: 20초]</strong><br>
+        "저희 일정은 <strong>${dur}</strong> 동안 진행되며, 구글 지도 기반 <strong>${currentRouteStops.join(' ➔ ')}</strong> 순서로 동선을 최적화했습니다. 현지 이동에는 <strong>${transit}</strong>을(를) 활용합니다."</p>
 
-        <p><strong>[관광 명소 2곳 & 미식: 20초]</strong><br>
-        "주요 방문 명소는 2곳 이상으로, 먼저 <strong>${spot1}</strong>을(를) 찾아가 ${reason1} 시간을 갖습니다. 이어서 <strong>${spot2}</strong>을(를) 둘러보며 현지의 별미인 <strong>${food1}</strong>을(를) 맛볼 예정입니다."</p>
+        <p><strong>[명소 2곳 & 미식/간식: 20초]</strong><br>
+        "방문 명소로는 <strong>${spot1}</strong>에서 ${reason1} 시간을 보내고, <strong>${spot2}</strong>을(를) 탐방합니다. 또한 식도락으로 <strong>${foodNames}</strong>을(를) 맛볼 계획입니다."</p>
 
         <p><strong>[숙소 & 예산 마무리: 10초]</strong><br>
-        "숙소는 효율적인 이동을 위해 <strong>${hotel}</strong>을(를) 예약하였으며, 1인 총 예상 경비는 약 <strong>${total ? total.toLocaleString() + '원' : '예산 산출 중'}</strong>입니다. 발표를 경청해 주셔서 감사드리며, 질문 있으시면 편하게 말씀해 주세요!"</p>
+        "숙소는 아고다와 구글을 통해 비교한 <strong>${hotel}</strong>을(를) 선택했으며, 1인 총 예상 경비는 약 <strong>${total ? total.toLocaleString() + '원' : '예산 산출 중'}</strong>입니다. 경청해 주셔서 감사드리며, 질문 있으시면 말씀해 주세요!"</p>
       `;
     }
 
@@ -1688,45 +1868,45 @@
         title: "슬라이드 1: 표지 (Title Slide)",
         time: "0:00 ~ 0:40",
         getSlideText: d => `[일본어 회화 발표] 나만의 일본 테마 여행\n\n· 여행 테마: ${d.tripTheme || '나만의 테마 여행'}\n· 방문 도시: 일본 ${d.targetCity || '추천 도시'}\n· 발표자: ${d.studentName || '이름 미입력'}`,
-        tip: "캔바/미리캔버스 검색창에 '일본 여행' 또는 '여행 발표'를 검색해 감성적인 표지 템플릿을 고르세요."
+        tip: "캔바/미리캔버스 검색창에 '일본 여행'을 검색해 감성적인 표지 템플릿을 고르세요."
       },
       {
         num: 2,
-        title: "슬라이드 2: 왜 이 도시인가? & 전체 일정표",
+        title: "슬라이드 2: 전체 일정표 & 선정 이유",
         time: "0:40 ~ 1:30",
         getSlideText: d => `· 여행 기간: ${d.duration || '2박 3일'}\n· 핵심 이동 루트: ${d.route || '1일차 → 2일차 → 3일차'}\n· 테마 선정 이유: ${d.targetCity || '일본'}만의 고유한 매력과 테마를 직접 체험하기 위해 선정`,
-        tip: "지도 일러스트나 화살표 타임라인 그래픽을 활용하면 일정이 한눈에 들어옵니다."
+        tip: "화살표 타임라인 그래픽을 활용하면 일정이 한눈에 들어옵니다."
       },
       {
         num: 3,
-        title: "슬라이드 3: 스마트 교통 노하우 & 구글맵스 1~5번 동선",
+        title: "슬라이드 3: 구글 지도 번호별 이동 경로 (1➔2➔3...)",
         time: "1:30 ~ 2:20",
-        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글맵 1~5번 이동 동선:\n  1번 ${d.routeStops[0]} ➔ 2번 ${d.routeStops[1]} ➔ 3번 ${d.routeStops[2]} ➔ 4번 ${d.routeStops[3]} ➔ 5번 ${d.routeStops[4]}`,
-        tip: "기차, 지하철, 시내버스 아이콘 스티커를 번호 옆에 나란히 배치해 보세요."
+        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글맵스 상세 동선:\n  ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}`,
+        tip: "구글맵 캡처 사진이나 역 번호 스티커를 나란히 배치해 보세요."
       },
       {
         num: 4,
         title: "슬라이드 4: 대표 명소 2곳 (하이라이트)",
         time: "2:20 ~ 3:30",
         getSlideText: d => `1. ${d.spot1 || '대표 명소 1'}\n   - 선정 이유: ${d.spotReason1 || '풍경과 역사를 감상하기 위해'}\n2. ${d.spot2 || '대표 명소 2'}\n   - 선정 이유: ${d.spotReason2 || '문화와 체험을 즐기기 위해'}`,
-        tip: "고화질 사진 2장을 좌우로 배치하고 핵심 키워드 2~3줄로 설명하세요."
+        tip: "고화질 사진 2장을 좌우로 배치하고 핵심 키워드로 설명하세요."
       },
       {
         num: 5,
-        title: "슬라이드 5: 오감만족 미식 로드 & 힐링 숙소",
+        title: "슬라이드 5: 오감만족 미식 & 디저트 & 숙소",
         time: "3:30 ~ 4:20",
-        getSlideText: d => `· 현지 대표 음식 2선:\n  1) ${d.food1 || '대표 음식 1'}\n  2) ${d.food2 || '대표 음식 2'}\n· 숙소 형태 & 위치: ${d.hotelType || '호텔'} (${d.hotelLocation || '역세권'})`,
-        tip: "음식 사진과 료칸/호텔 사진을 배치하여 청중의 시선을 사로잡으세요."
+        getSlideText: d => `· 현지 미식 & 디저트 컬렉션:\n${d.foods.map(f => `  - [${f.type}] ${f.name} (${f.note})`).join('\n')}\n· 숙소: ${d.hotelType || '호텔'} (${d.hotelLocation || '역세권'})`,
+        tip: "음식 사진과 편의점 간식 사진을 콜라주 형태로 배치하세요."
       },
       {
         num: 6,
-        title: "슬라이드 6: 1인 예상 경비 분석 & Q&A",
+        title: "슬라이드 6: 1인 예상 경비 분석 & 질의응답",
         time: "4:20 ~ 5:00",
         getSlideText: d => {
           const tot = (d.budgetFlight||0) + (d.budgetHotel||0) + (d.budgetTransit||0) + (d.budgetFood||0) + (d.budgetExtra||0);
-          return `· 1인 총 예상 경비: 약 ${tot.toLocaleString()}원 (약 ${(Math.round(tot/9.2)).toLocaleString()}円)\n· 경비 절약 팁: 대중교통 패스 및 사전 예약 할인 혜택 활용\n· "경청해 주셔서 감사합니다. 질문 있으신가요?"`;
+          return `· 1인 총 예상 경비: 약 ${tot.toLocaleString()}원 (약 ${(Math.round(tot/9.2)).toLocaleString()}円)\n· 경비 절약 팁: 대중교통 패스 및 사전 예약 혜택 활용\n· "경청해 주셔서 감사합니다. 질문 있으신가요?"`;
         },
-        tip: "파이차트(원형 그래프)로 항공/숙소/식비 비율을 시각화하면 가산점 효과!"
+        tip: "원형 차트로 항공/숙소/식비 비율을 시각화하면 높은 평가를 받습니다."
       }
     ];
 
@@ -1759,7 +1939,7 @@
     function copySlideByIndex(idx) {
       const data = getFormData();
       const text = CANVA_SLIDE_TEMPLATES[idx].getSlideText(data);
-      copyTextToClipboard(text, '슬라이드 내용이 복사되었습니다! 캔바에 붙여넣으세요.');
+      copyTextToClipboard(text, '슬라이드 내용이 복사되었습니다!');
     }
 
     function copyAllSlidesScript() {
@@ -1799,16 +1979,17 @@
       document.getElementById('pdf-schedule-content').innerHTML = `<strong>기간:</strong> ${data.duration || '미작성'}<br><strong>동선:</strong> ${data.route || '미작성'}${data.scheduleDetail ? '<br><strong>상세:</strong> ' + data.scheduleDetail : ''}`;
       document.getElementById('pdf-transport-content').innerHTML = `<strong>공항↔도심:</strong> ${data.transportAirport || '미작성'}<br><strong>시내 이동/패스:</strong> ${data.transportCity || '미작성'}`;
       document.getElementById('pdf-spots-content').innerHTML = `1. <strong>${data.spot1 || '명소 1'}</strong> (이유: ${data.spotReason1 || '미작성'})<br>2. <strong>${data.spot2 || '명소 2'}</strong> (이유: ${data.spotReason2 || '미작성'})`;
-      document.getElementById('pdf-foods-content').innerHTML = `1. ${data.food1 || '음식 1'}<br>2. ${data.food2 || '음식 2'}`;
+
+      const foodSummary = data.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(' / ');
+      document.getElementById('pdf-foods-content').innerHTML = foodSummary || '미작성';
       document.getElementById('pdf-hotel-content').innerHTML = `<strong>유형:</strong> ${data.hotelType || '미선택'} / <strong>위치:</strong> ${data.hotelLocation || '미작성'}`;
 
       const total = calculateTotalBudgetRaw();
       const approxJpy = Math.round(total / 9.2);
       document.getElementById('pdf-budget-content').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span class="text-[10px] text-slate-500">※ 항공·숙박·교통·식비 포함</span>`;
 
-      document.getElementById('pdf-route-timeline').textContent = `1번 ${data.routeStops[0]} ➔ 2번 ${data.routeStops[1]} ➔ 3번 ${data.routeStops[2]} ➔ 4번 ${data.routeStops[3]} ➔ 5번 ${data.routeStops[4]}`;
-      document.getElementById('pdf-question-content').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 교통 또는 추천 맛집에 대해 질문 예정';
-
+      document.getElementById('pdf-route-timeline').textContent = data.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ');
+      document.getElementById('pdf-question-content').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
       document.getElementById('pdf-checklist-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
 
       const element = document.getElementById('pdf-render-wrapper');
@@ -1857,7 +2038,9 @@
       document.getElementById('print-schedule').innerHTML = `기간: ${data.duration || '-'}<br>동선: ${data.route || '-'}`;
       document.getElementById('print-transport').innerHTML = `공항: ${data.transportAirport || '-'}<br>시내: ${data.transportCity || '-'}`;
       document.getElementById('print-spots').innerHTML = `1. ${data.spot1 || '-'} (${data.spotReason1 || '-' })<br>2. ${data.spot2 || '-'} (${data.spotReason2 || '-' })`;
-      document.getElementById('print-foods').innerHTML = `1. ${data.food1 || '-'}<br>2. ${data.food2 || '-'}`;
+      
+      const foodSummary = data.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(' / ');
+      document.getElementById('print-foods').innerHTML = foodSummary || '-';
       document.getElementById('print-hotel').innerHTML = `${data.hotelType || '-'} (${data.hotelLocation || '-'})`;
       
       const tot = calculateTotalBudgetRaw();
@@ -1870,7 +2053,8 @@
     function copyPlanToClipboard() {
       const d = getFormData();
       const tot = calculateTotalBudgetRaw();
-      const txt = `[일본어 회화 여행 계획서]\n- 작성자: ${d.studentName || '미작성'}\n- 테마: ${d.tripTheme || '미작성'} (${d.targetCity || '미작성'})\n\n1. 일정: ${d.duration || '-'} / ${d.route || '-'}\n2. 교통: 공항(${d.transportAirport || '-'}), 시내(${d.transportCity || '-'})\n3. 관광지: 1) ${d.spot1 || '-'}, 2) ${d.spot2 || '-'}\n4. 음식: 1) ${d.food1 || '-'}, 2) ${d.food2 || '-'}\n5. 숙소: ${d.hotelType || '-'} (${d.hotelLocation || '-'})\n6. 총 예산: 약 ${tot.toLocaleString()}원`;
+      const foodSummary = d.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(', ');
+      const txt = `[일본어 회화 여행 계획서]\n- 작성자: ${d.studentName || '미작성'}\n- 테마: ${d.tripTheme || '미작성'} (${d.targetCity || '미작성'})\n\n1. 일정: ${d.duration || '-'} / ${d.route || '-'}\n2. 교통: 공항(${d.transportAirport || '-'}), 시내(${d.transportCity || '-'})\n3. 관광지: 1) ${d.spot1 || '-'}, 2) ${d.spot2 || '-'}\n4. 미식/간식: ${foodSummary || '-'}\n5. 숙소: ${d.hotelType || '-'} (${d.hotelLocation || '-'})\n6. 총 예산: 약 ${tot.toLocaleString()}원`;
       copyTextToClipboard(txt, '계획서 텍스트가 복사되었습니다!');
     }
 
@@ -2007,11 +2191,11 @@
         submissions = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
       } catch (e) {}
 
-      // Calculate score
       const hasSched = (data.duration !== '') && (data.route !== '');
       const hasTransit = (data.transportAirport !== '') || (data.transportCity !== '');
       const hasSpots = (data.spot1 !== '') && (data.spot2 !== '');
-      const hasFoods = (data.food1 !== '') && (data.food2 !== '');
+      const filledFoods = data.foods.filter(f => f.name && f.name.trim() !== '');
+      const hasFoods = filledFoods.length >= 2;
       const hasHotel = (data.hotelType !== '') && (data.hotelLocation !== '');
       const totalBudget = (data.budgetFlight||0) + (data.budgetHotel||0) + (data.budgetTransit||0) + (data.budgetFood||0) + (data.budgetExtra||0);
       const hasBudget = totalBudget > 0;
@@ -2033,7 +2217,6 @@
         totalBudget: totalBudget
       };
 
-      // Replace previous submission from same student name or add
       const existingIdx = submissions.findIndex(s => s.studentName === data.studentName);
       if (existingIdx >= 0) {
         submissions[existingIdx] = record;
@@ -2162,9 +2345,10 @@
         return;
       }
 
-      let csv = "\uFEFF학번및이름,제출일시,목적지,여행테마,기간,루트,교통수단,명소1,명소2,음식1,음식2,숙소,총예산(원),6대요소충족수,예상점수\n";
+      let csv = "\uFEFF학번및이름,제출일시,목적지,여행테마,기간,루트,교통수단,명소1,명소2,미식및간식목록,숙소,총예산(원),6대요소충족수,예상점수\n";
       subs.forEach(s => {
-        csv += `"${s.studentName}","${s.submittedAt}","${s.targetCity}","${s.tripTheme}","${s.duration}","${s.route}","${s.transportAirport} / ${s.transportCity}","${s.spot1}","${s.spot2}","${s.food1}","${s.food2}","${s.hotelType} ${s.hotelLocation}","${s.totalBudget}","${s.fulfilledCount}","${s.score}"\n`;
+        const foodsStr = s.foods ? s.foods.map(f => `${f.type}:${f.name}`).join('|') : '';
+        csv += `"${s.studentName}","${s.submittedAt}","${s.targetCity}","${s.tripTheme}","${s.duration}","${s.route}","${s.transportAirport} / ${s.transportCity}","${s.spot1}","${s.spot2}","${foodsStr}","${s.hotelType} ${s.hotelLocation}","${s.totalBudget}","${s.fulfilledCount}","${s.score}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -2236,9 +2420,12 @@
     }
 
     window.onload = function () {
+      updateCitySelectDropdown();
       renderCities('all');
-      
-      // Restore cached draft from LocalStorage
+      renderRouteStops();
+      renderFoodList();
+      renderHotelOptions();
+
       try {
         const saved = localStorage.getItem(STORAGE_KEY_CURRENT);
         if (saved) {
