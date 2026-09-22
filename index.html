@@ -360,30 +360,45 @@
             <textarea id="input-schedule-detail" rows="2" placeholder="일차별 상세 시간표나 세부 계획을 자유롭게 적어보세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()"></textarea>
           </div>
 
-          <!-- Google Maps Multi-Stops Interactive Timeline -->
-          <div class="bg-gradient-to-br from-slate-900 to-indigo-950 p-5 rounded-xl text-white shadow-md space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-3">
+          <!-- =================================================== -->
+          <!-- 🗺️ Google Maps 1, 2, 3... 번호 경로 시각화 영역       -->
+          <!-- =================================================== -->
+          <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-2xl text-white shadow-lg space-y-4 border border-indigo-900/50">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
               <div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/50 text-indigo-200">구글맵스 실시간 경로 연동</span>
-                <h4 class="text-sm sm:text-base font-bold text-white mt-1 flex items-center gap-1.5">
-                  🗺️ 번호별 당일 이동 동선 (1➔2➔3➔...)
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded bg-rose-500 text-white">Google Maps 실시간 연동</span>
+                  <span class="text-xs text-indigo-300 font-semibold">1 ➔ 2 ➔ 3 순차 이동</span>
+                </div>
+                <h4 class="text-sm sm:text-base font-extrabold text-white mt-1 flex items-center gap-1.5">
+                  🗺️ 구글 지도 1, 2, 3 번호별 경로 시뮬레이터
                 </h4>
               </div>
               <div class="flex items-center gap-2">
                 <button onclick="addRouteStop()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition">
                   + 경유지 추가
                 </button>
-                <button onclick="openGoogleMapsRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow">
-                  <span>Google 지도에서 길찾기 열기 ➔</span>
+                <button onclick="openGoogleMapsNumberedRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black px-3.5 py-2 rounded-xl transition shadow-lg shadow-rose-900/50 ring-2 ring-rose-400/30">
+                  <span>Google 지도에서 번호별 경로 열기 ➔</span>
                 </button>
               </div>
             </div>
 
-            <p class="text-xs text-slate-300">
-              출발지(공항/역)부터 주요 관광지, 맛집, 숙소를 순서대로 입력하세요. 구글맵에서 대중교통 경로가 바로 시각화됩니다.
+            <p class="text-xs text-slate-300 leading-relaxed">
+              공항, 주요 명소, 맛집, 숙소를 방문 순서대로 입력하세요. <strong>[Google 지도에서 번호별 경로 열기]</strong>를 누르면 구글 지도 위에 <strong>1(A), 2(B), 3(C)... 순서로 핀이 찍히며 환승/대중교통 이동선이 연결</strong>됩니다.
             </p>
 
+            <!-- 경유지 입력 리스트 -->
             <div id="route-stops-container" class="space-y-2"></div>
+
+            <!-- 번호별 동선 실시간 미리보기 바 (Timeline Preview) -->
+            <div class="bg-slate-950/60 border border-indigo-500/30 p-3 rounded-xl space-y-1.5">
+              <div class="flex items-center justify-between text-[11px] text-indigo-300 font-semibold">
+                <span>📍 실시간 동선 미리보기 (Preview):</span>
+                <span class="text-[10px] text-slate-400">우측 📍 버튼으로 단독 위치 확인 가능</span>
+              </div>
+              <div id="route-numbered-chips" class="flex flex-wrap items-center gap-1.5 pt-1"></div>
+            </div>
           </div>
 
           <!-- Element 2: Transportation -->
@@ -559,7 +574,6 @@
 
             <!-- Export / PDF / Canva Buttons -->
             <div class="pt-2 space-y-2">
-              <!-- 원클릭 인쇄/PDF 저장 버튼 -->
               <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -796,10 +810,10 @@
         </table>
       </div>
 
-      <!-- Google Maps Route Timeline -->
+      <!-- Google Maps Route Timeline (번호형 1, 2, 3...) -->
       <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 14px; font-size: 11px;">
-        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 경유지 이동 동선</strong>
-        <p id="print-route-timeline" style="margin: 0; color: #334155;">-</p>
+        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 경유지 이동 동선 (순차 경로)</strong>
+        <p id="print-route-timeline" style="margin: 0; color: #334155; line-height: 1.6;">-</p>
       </div>
 
       <!-- Presentation & Mutual Questions -->
@@ -820,90 +834,6 @@
         <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
       </div>
 
-    </div>
-  </div>
-
-  <!-- MODAL: Canva Presentation Slide Guide -->
-  <div id="canva-guide-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">🎨</div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">캔바 · 미리캔버스 5분 발표 슬라이드 가이드</h3>
-            <p class="text-xs text-slate-500">내 계획서 내용이 반영된 6장 슬라이드 구성안 & 원클릭 복사</p>
-          </div>
-        </div>
-        <button onclick="toggleCanvaModal(false)" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
-      </div>
-
-      <div class="p-6 space-y-4 text-xs sm:text-sm">
-        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900 flex items-start gap-2">
-          <span class="text-base">💡</span>
-          <div>
-            <strong>선생님의 발표 꿀팁:</strong> 캔바나 미리캔버스에서 <strong>[프레젠테이션]</strong> 템플릿을 선택하고, 아래 슬라이드별 내용을 복사하여 넣으면 5분 발표 슬라이드가 순식간에 완성됩니다!
-          </div>
-        </div>
-        <div class="space-y-3" id="canva-slides-container"></div>
-      </div>
-
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <button onclick="copyAllSlidesScript()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-          <span>📋 전체 6장 슬라이드 한 번에 복사</span>
-        </button>
-        <button onclick="toggleCanvaModal(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: My Saved Plans Archive -->
-  <div id="archive-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">📁</span>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">내 기획서 보관함 (개인별 기록 관리)</h3>
-            <p class="text-xs text-slate-500">작성 중인 기획서를 저장하고 언제든 다시 불러올 수 있습니다.</p>
-          </div>
-        </div>
-        <button onclick="toggleArchiveModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
-      </div>
-
-      <div class="p-5 space-y-4">
-        <div class="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <div>
-            <span class="text-xs font-bold text-slate-800 block">현재 작성 내용 보관함에 새 저장</span>
-            <span class="text-[11px] text-slate-500">다른 테마로 새로운 계획을 작성할 때 유용합니다.</span>
-          </div>
-          <button onclick="saveCurrentPlanAsNewSlot()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition">
-            + 새 기획서로 저장
-          </button>
-        </div>
-
-        <div class="space-y-2">
-          <h4 class="text-xs font-bold text-slate-700">저장된 기획서 목록</h4>
-          <div id="saved-plans-list" class="space-y-2"></div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-200">
-          <h4 class="text-xs font-bold text-slate-700 mb-1">학교 ↔ 집 이동용 파일 백업</h4>
-          <p class="text-[11px] text-slate-500 mb-2">학교 컴퓨터에서 작성한 내용을 파일로 저장해 집에서 그대로 열어보세요.</p>
-          <div class="flex gap-2">
-            <button onclick="exportBackupFile()" class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">
-              💾 백업 파일 다운로드 (.json)
-            </button>
-            <label class="flex-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg text-center cursor-pointer transition border border-slate-300">
-              📂 백업 파일 불러오기
-              <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="importBackupFile(event)">
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-        <button onclick="toggleArchiveModal(false)" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold">닫기</button>
-      </div>
     </div>
   </div>
 
@@ -928,7 +858,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Teacher Admin Dashboard (실시간 클라우드 수합 대시보드) -->
+  <!-- MODAL: Teacher Admin Dashboard -->
   <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -943,7 +873,6 @@
       </div>
 
       <div class="p-5 space-y-4">
-        <!-- Cloud Status Bar -->
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-2">
             <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
@@ -962,7 +891,6 @@
           </div>
         </div>
 
-        <!-- Hidden Cloud URL Config Bar -->
         <div id="gas-url-config-box" class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
           <label class="block font-bold text-amber-900">구글 웹 앱 배포 URL (Google Apps Script Web App URL)</label>
           <div class="flex gap-2">
@@ -972,7 +900,6 @@
           <p class="text-[11px] text-amber-700">※ 다른 구글 시트로 변경할 경우에만 새 주소를 입력하여 저장하세요.</p>
         </div>
 
-        <!-- Dashboard Stats -->
         <div class="grid grid-cols-3 gap-3">
           <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
             <span class="text-[11px] text-slate-500 block">총 제출 인원</span>
@@ -993,7 +920,6 @@
           </div>
         </div>
 
-        <!-- Submissions Table -->
         <div class="border border-slate-200 rounded-xl overflow-hidden">
           <table class="w-full text-left border-collapse text-xs">
             <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
@@ -1113,7 +1039,7 @@
 
   <script>
     // ==========================================
-    // 🌐 [연동 완료] 선생님의 최신 구글 앱스 스크립트 웹 앱 URL
+    // 🌐 [스프레드시트 연동 완료] Apps Script Web App URL
     // ==========================================
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxyOhnVnCdHHiFdv9Wbt6ZjSMsW9KGsPfPjnPvH3xWRQS0Kf0UhLCqD5VAhenRUm3lc9A/exec"; 
 
@@ -1460,7 +1386,9 @@
       }
     }
 
-    // Route Stops Management
+    // ==========================================
+    // 🗺️ Route Stops Management (1, 2, 3 번호 경로)
+    // ==========================================
     let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 숙소'];
 
     function renderRouteStops() {
@@ -1468,16 +1396,50 @@
       container.innerHTML = '';
       currentRouteStops.forEach((stop, index) => {
         const row = document.createElement('div');
-        row.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg";
+        row.className = "flex items-center gap-2 bg-slate-800/90 border border-slate-700/80 p-2 rounded-xl transition hover:border-slate-500";
         row.innerHTML = `
-          <span class="inline-block w-6 h-6 rounded-full bg-rose-500 text-white font-bold text-center leading-6 text-xs shrink-0">${index + 1}</span>
-          <input type="text" value="${stop}" placeholder="경유지/명소/식당 이름" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2.5 py-1.5 text-white text-xs" oninput="currentRouteStops[${index}] = this.value; onInputChanged();">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 text-white font-black text-xs shrink-0 shadow">
+            ${index + 1}
+          </span>
+          <input type="text" value="${stop}" placeholder="${index + 1}번 방문지 (명소/식당/역)" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-white text-xs focus:ring-1 focus:ring-rose-400 focus:outline-none" oninput="currentRouteStops[${index}] = this.value; onInputChanged();">
+          <button onclick="openSingleSpotMap('${stop}')" title="이 장소만 구글 지도에서 확인" class="text-slate-400 hover:text-amber-300 text-xs px-2 py-1 shrink-0 transition">
+            📍
+          </button>
           ${currentRouteStops.length > 2 ? `
-            <button onclick="removeRouteStop(${index})" class="text-slate-400 hover:text-rose-400 text-xs px-2 py-1">✕</button>
+            <button onclick="removeRouteStop(${index})" title="삭제" class="text-slate-400 hover:text-rose-400 text-xs px-2 py-1 shrink-0">✕</button>
           ` : ''}
         `;
         container.appendChild(row);
       });
+
+      renderNumberedChipsPreview();
+    }
+
+    function renderNumberedChipsPreview() {
+      const chipsBox = document.getElementById('route-numbered-chips');
+      if (!chipsBox) return;
+      chipsBox.innerHTML = '';
+      currentRouteStops.forEach((stop, idx) => {
+        const chip = document.createElement('div');
+        chip.className = "inline-flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-full px-2.5 py-1 text-[11px] text-slate-200 font-medium";
+        chip.innerHTML = `
+          <span class="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-black inline-flex items-center justify-center">${idx + 1}</span>
+          <span>${stop || `장소 ${idx + 1}`}</span>
+          ${idx < currentRouteStops.length - 1 ? '<span class="text-indigo-400 text-[10px] ml-1">➔</span>' : ''}
+        `;
+        chipsBox.appendChild(chip);
+      });
+    }
+
+    function openSingleSpotMap(placeName) {
+      if (!placeName || placeName.trim() === '') {
+        showToast('장소명을 먼저 입력해 주세요!', '⚠️');
+        return;
+      }
+      const city = document.getElementById('input-target-city').value.trim() || '일본';
+      const q = encodeURIComponent(`${placeName}, ${city}`);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
+      playBeep(600, 'sine', 0.08);
     }
 
     function addRouteStop() {
@@ -1494,24 +1456,32 @@
       onInputChanged();
     }
 
-    function openGoogleMapsRoute() {
+    // ==========================================
+    // 🗺️ 구글 지도 1, 2, 3 번호별 다중 경유지 경로 열기
+    // ==========================================
+    function openGoogleMapsNumberedRoute() {
       const validStops = currentRouteStops.map(s => s.trim()).filter(Boolean);
       if (validStops.length < 2) {
         showToast('출발지와 목적지를 포함해 2곳 이상 입력하세요!', '⚠️');
         return;
       }
       const city = document.getElementById('input-target-city').value.trim() || 'Japan';
-      const encodedStops = validStops.map(s => encodeURIComponent(`${s}, ${city}`));
-      const origin = encodedStops[0];
-      const destination = encodedStops[encodedStops.length - 1];
-      const waypoints = encodedStops.slice(1, -1).join('|');
-
+      
+      // 구글맵 길찾기 정식 Waypoint 파라미터 조합
+      const origin = encodeURIComponent(`${validStops[0]}, ${city}`);
+      const destination = encodeURIComponent(`${validStops[validStops.length - 1]}, ${city}`);
+      
       let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
-      if (waypoints) url += `&waypoints=${waypoints}`;
+      
+      // 중간 경유지들 (1번 다음부터 마지막 전까지를 pipe | 로 연결)
+      if (validStops.length > 2) {
+        const intermediate = validStops.slice(1, -1).map(s => encodeURIComponent(`${s}, ${city}`)).join('|');
+        url += `&waypoints=${intermediate}`;
+      }
 
       window.open(url, '_blank');
-      showToast('Google 지도에서 1번부터 전체 번호별 이동 경로를 열었습니다!', '🗺️');
-      playBeep(600, 'sine', 0.1);
+      showToast('구글 지도에서 1, 2, 3... 번호별 경유지 경로를 열었습니다!', '🗺️');
+      playBeep(660, 'sine', 0.12);
     }
 
     // Food Items Management
@@ -1717,6 +1687,7 @@
     let autoSaveTimeout = null;
     function onInputChanged() {
       calculateTotalBudget();
+      renderNumberedChipsPreview();
       clearTimeout(autoSaveTimeout);
       autoSaveTimeout = setTimeout(() => {
         try {
@@ -1825,13 +1796,15 @@
       const hotel = document.getElementById('input-hotel-type').value || '숙소';
       const total = calculateTotalBudgetRaw();
 
+      const numberedPathText = currentRouteStops.map((s, i) => `${i + 1}번 ${s}`).join(' ➔ ');
+
       const box = document.getElementById('speech-script-box');
       box.innerHTML = `
         <p><strong>[도입: 10초]</strong><br>
         "안녕하십니까! 이번 일본어 회화 여행 계획 발표를 맡은 <strong>${name}</strong>입니다. 제가 기획한 여행 테마는 <strong>'${theme}'</strong>이며, 목적지는 <strong>${city}</strong>입니다."</p>
 
         <p><strong>[일정 & 번호별 동선: 20초]</strong><br>
-        "저희 일정은 <strong>${dur}</strong> 동안 진행되며, 구글 지도 기반 <strong>${currentRouteStops.join(' ➔ ')}</strong> 순서로 동선을 최적화했습니다. 현지 이동에는 <strong>${transit}</strong>을(를) 활용합니다."</p>
+        "저희 일정은 <strong>${dur}</strong> 동안 진행되며, 구글 지도 기반 <strong>${numberedPathText}</strong> 순서로 동선을 최적화했습니다. 현지 이동에는 <strong>${transit}</strong>을(를) 활용합니다."</p>
 
         <p><strong>[명소 2곳 & 미식/간식: 20초]</strong><br>
         "방문 명소로는 <strong>${spot1}</strong>에서 ${reason1} 시간을 보내고, <strong>${spot2}</strong>을(를) 탐방합니다. 또한 식도락으로 <strong>${foodNames}</strong>을(를) 맛볼 계획입니다."</p>
@@ -1868,8 +1841,8 @@
         num: 3,
         title: "슬라이드 3: 구글 지도 번호별 이동 경로 (1➔2➔3...)",
         time: "1:30 ~ 2:20",
-        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글맵스 상세 동선:\n  ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}`,
-        tip: "구글맵 캡처 사진이나 역 번호 스티커를 나란히 배치해 보세요."
+        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글 지도 순차 동선:\n  ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}`,
+        tip: "구글 지도 번호 경로를 캡처해 슬라이드에 넣으면 전달력이 크게 올라갑니다."
       },
       {
         num: 4,
@@ -1954,12 +1927,11 @@
     }
 
     // ==========================================
-    // 📄 [백지 0%] 브라우저 원본 엔진 인쇄 및 PDF 저장
+    // 📄 브라우저 네이티브 인쇄 및 PDF 저장
     // ==========================================
     function downloadPlanPDF() {
       const data = getFormData();
       
-      // 1. 인쇄 영역에 실시간 작성 데이터 100% 매핑
       document.getElementById('print-student-name').textContent = data.studentName || '미작성';
       document.getElementById('print-trip-theme').textContent = data.tripTheme || '미작성';
       document.getElementById('print-target-city').textContent = data.targetCity || '미작성';
@@ -1976,13 +1948,12 @@
       const approxJpy = Math.round(total / 9.2);
       document.getElementById('print-budget').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span style="font-size:10px; color:#64748b;">※ 항공·숙박·교통·식비 포함</span>`;
       
-      document.getElementById('print-route-timeline').textContent = data.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ');
+      // 번호형 1, 2, 3... 이동 동선 매핑
+      document.getElementById('print-route-timeline').textContent = data.routeStops.map((s, i) => `[${i+1}] ${s}`).join(' ➔ ');
       document.getElementById('print-question').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
       document.getElementById('print-score-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
 
       playBeep(784, 'sine', 0.12);
-      
-      // 2. 브라우저 내장 인쇄 대화상자 호출 (대상: 'PDF로 저장' 선택 시 즉시 저장됨)
       window.print();
     }
 
@@ -1990,7 +1961,7 @@
       const d = getFormData();
       const tot = calculateTotalBudgetRaw();
       const foodSummary = d.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(', ');
-      const txt = `[일본어 회화 여행 계획서]\n- 작성자: ${d.studentName || '미작성'}\n- 테마: ${d.tripTheme || '미작성'} (${d.targetCity || '미작성'})\n\n1. 일정: ${d.duration || '-'} / ${d.route || '-'}\n2. 교통: 공항(${d.transportAirport || '-'}), 시내(${d.transportCity || '-'})\n3. 관광지: 1) ${d.spot1 || '-'}, 2) ${d.spot2 || '-'}\n4. 미식/간식: ${foodSummary || '-'}\n5. 숙소: ${d.hotelType || '-'} (${d.hotelLocation || '-'})\n6. 총 예산: 약 ${tot.toLocaleString()}원`;
+      const txt = `[일본어 회화 여행 계획서]\n- 작성자: ${d.studentName || '미작성'}\n- 테마: ${d.tripTheme || '미작성'} (${d.targetCity || '미작성'})\n\n1. 일정: ${d.duration || '-'} / ${d.route || '-'}\n2. 번호별 이동 동선: ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}\n3. 교통: 공항(${d.transportAirport || '-'}), 시내(${d.transportCity || '-'})\n4. 관광지: 1) ${d.spot1 || '-'}, 2) ${d.spot2 || '-'}\n5. 미식/간식: ${foodSummary || '-'}\n6. 숙소: ${d.hotelType || '-'} (${d.hotelLocation || '-'})\n7. 총 예산: 약 ${tot.toLocaleString()}원`;
       copyTextToClipboard(txt, '계획서 텍스트가 복사되었습니다!');
     }
 
@@ -2151,7 +2122,6 @@
         totalBudget: totalBudget
       };
 
-      // 1. 해당 기기(태블릿) 로컬 백업 저장
       let submissions = [];
       try {
         submissions = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
@@ -2164,7 +2134,6 @@
       }
       localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(submissions));
 
-      // 2. 구글 스프레드시트 클라우드 서버로 실시간 POST 전송
       const gasUrl = getActiveGasUrl();
       const submitBtn = document.getElementById('btn-submit-plan');
       const submitBtnText = document.getElementById('submit-btn-text');
@@ -2273,9 +2242,6 @@
       }
     }
 
-    // ==========================================
-    // 📥 구글 스프레드시트에서 실시간 학생 제출본 조회
-    // ==========================================
     let cachedSubmissionsList = [];
 
     async function fetchCloudSubmissions() {
