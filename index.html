@@ -764,93 +764,93 @@
     </div>
   </div>
 
-  <!-- DEDICATED PDF EXPORT TEMPLATE -->
-  <div id="pdf-render-wrapper" class="fixed -left-[9999px] top-0 w-[794px] bg-white text-slate-900 font-sans p-8 box-border" style="min-height: 1120px;">
-    <div class="border-b-2 border-slate-900 pb-4 mb-5 flex items-center justify-between">
+  <!-- DEDICATED PDF EXPORT TEMPLATE (백지 방지 및 고해상도 출력 스타일 적용) -->
+  <div id="pdf-render-wrapper" style="position: fixed; left: -9999px; top: 0; width: 794px; min-height: 1120px; background-color: #ffffff; color: #0f172a; padding: 32px; box-sizing: border-box; font-family: Pretendard, sans-serif;">
+    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
       <div>
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-rose-100 text-rose-800 text-xs font-bold mb-1">
+        <div style="display: inline-block; padding: 2px 10px; border-radius: 4px; background-color: #ffe4e6; color: #9f1239; font-size: 11px; font-weight: bold; margin-bottom: 6px;">
           일본어 회화 수행평가 과제물
         </div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">나만의 일본 테마 여행 기획서</h1>
-        <p class="text-xs text-slate-500 mt-0.5">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
+        <h1 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.5px;">나만의 일본 테마 여행 기획서</h1>
+        <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
       </div>
-      <div class="text-right">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-black text-2xl shadow">
+      <div style="text-align: right;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f43f5e, #f59e0b); display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-left: auto;">
           旅
         </div>
-        <div class="text-[10px] text-slate-400 font-mono mt-1">TABI NOTE</div>
+        <div style="font-size: 10px; color: #94a3b8; font-family: monospace; margin-top: 4px;">TABI NOTE</div>
       </div>
     </div>
 
     <!-- Student Meta Box -->
-    <div class="grid grid-cols-3 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 text-xs">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 12px;">
       <div>
-        <span class="text-slate-400 block font-semibold text-[10px]">작성자 (학번/성명)</span>
-        <span id="pdf-student-name" class="font-bold text-slate-900 text-sm">-</span>
+        <span style="color: #64748b; display: block; font-size: 10px; font-weight: 600; margin-bottom: 2px;">작성자 (학번/성명)</span>
+        <span id="pdf-student-name" style="font-weight: 700; color: #0f172a; font-size: 13px;">-</span>
       </div>
       <div>
-        <span class="text-slate-400 block font-semibold text-[10px]">여행 테마</span>
-        <span id="pdf-trip-theme" class="font-bold text-rose-700 text-sm">-</span>
+        <span style="color: #64748b; display: block; font-size: 10px; font-weight: 600; margin-bottom: 2px;">여행 테마</span>
+        <span id="pdf-trip-theme" style="font-weight: 700; color: #be123c; font-size: 13px;">-</span>
       </div>
       <div>
-        <span class="text-slate-400 block font-semibold text-[10px]">목적지</span>
-        <span id="pdf-target-city" class="font-bold text-slate-900 text-sm">-</span>
+        <span style="color: #64748b; display: block; font-size: 10px; font-weight: 600; margin-bottom: 2px;">목적지</span>
+        <span id="pdf-target-city" style="font-weight: 700; color: #0f172a; font-size: 13px;">-</span>
       </div>
     </div>
 
     <!-- 6 Elements Table -->
-    <div class="border border-slate-300 rounded-xl overflow-hidden mb-5 text-xs">
-      <div class="bg-slate-900 text-white px-3 py-2 font-bold flex justify-between items-center text-xs">
+    <div style="border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; margin-bottom: 18px; font-size: 11px;">
+      <div style="background-color: #0f172a; color: #ffffff; padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
         <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
-        <span id="pdf-checklist-badge" class="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px]">0/6 충족</span>
+        <span id="pdf-checklist-badge" style="background-color: #10b981; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 10px;">0/6 충족</span>
       </div>
-      <table class="w-full border-collapse">
-        <tr class="border-b border-slate-200">
-          <td class="w-28 bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">① 전체 일정표</td>
-          <td class="p-3 text-slate-800" id="pdf-schedule-content">-</td>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 120px; background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">① 전체 일정표</td>
+          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-schedule-content">-</td>
         </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">② 교통 수단</td>
-          <td class="p-3 text-slate-800" id="pdf-transport-content">-</td>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">② 교통 수단</td>
+          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-transport-content">-</td>
         </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">③ 관광지 2곳 이상</td>
-          <td class="p-3 text-slate-800" id="pdf-spots-content">-</td>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">③ 관광지 2곳 이상</td>
+          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-spots-content">-</td>
         </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">④ 대표 미식 & 간식</td>
-          <td class="p-3 text-slate-800" id="pdf-foods-content">-</td>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">④ 대표 미식 & 간식</td>
+          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-foods-content">-</td>
         </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑤ 숙소 형태 & 위치</td>
-          <td class="p-3 text-slate-800" id="pdf-hotel-content">-</td>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">⑤ 숙소 형태 & 위치</td>
+          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-hotel-content">-</td>
         </tr>
         <tr>
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑥ 예상 여행 경비</td>
-          <td class="p-3 text-slate-800" id="pdf-budget-content">-</td>
+          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">⑥ 예상 여행 경비</td>
+          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-budget-content">-</td>
         </tr>
       </table>
     </div>
 
     <!-- Google Maps Route Timeline in PDF -->
-    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs">
-      <span class="font-bold text-slate-900 block mb-1">🗺️ 구글 지도 번호별 경유지 이동 동선</span>
-      <p id="pdf-route-timeline" class="text-slate-700">-</p>
+    <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background-color: #f8fafc; margin-bottom: 18px; font-size: 11px;">
+      <span style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 경유지 이동 동선</span>
+      <p id="pdf-route-timeline" style="color: #334155; margin: 0; line-height: 1.5;">-</p>
     </div>
 
     <!-- Presentation & Q&A Box -->
-    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs space-y-2">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
-        <span class="font-bold text-slate-900">🎤 5분 발표 및 동료 평가 준비</span>
-        <span class="text-[10px] text-slate-500">슬라이드 기초 자료</span>
+    <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background-color: #f8fafc; margin-bottom: 20px; font-size: 11px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 6px;">
+        <span style="font-weight: 700; color: #0f172a;">🎤 5분 발표 및 동료 평가 준비</span>
+        <span style="font-size: 10px; color: #64748b;">슬라이드 기초 자료</span>
       </div>
       <div>
-        <span class="font-semibold text-indigo-700">· 동료 발표 경청 후 질문 예정 내용:</span>
-        <p id="pdf-question-content" class="mt-0.5 text-slate-700 pl-2">미작성</p>
+        <span style="font-weight: 600; color: #4338ca;">· 동료 발표 경청 후 질문 예정 내용:</span>
+        <p id="pdf-question-content" style="margin: 4px 0 0 0; color: #334155; padding-left: 8px;">미작성</p>
       </div>
     </div>
 
-    <div class="border-t-2 border-dashed border-slate-300 pt-4 flex items-center justify-between text-[11px] text-slate-600">
+    <div style="border-top: 2px dashed #cbd5e1; padding-top: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #475569;">
       <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
       <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
     </div>
@@ -1002,7 +1002,7 @@
             <input type="text" id="input-cloud-api-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-1.5 border border-amber-300 rounded bg-white">
             <button onclick="saveCloudApiUrl()" class="px-3 py-1.5 bg-amber-600 text-white font-bold rounded">저장</button>
           </div>
-          <p class="text-[11px] text-amber-700">※ 변경이 필요할 경우에만 새 주소를 입력하여 저장하세요.</p>
+          <p class="text-[11px] text-amber-700">※ 다른 구글 시트로 변경할 경우에만 새 주소를 입력하여 저장하세요.</p>
         </div>
 
         <!-- Dashboard Stats -->
@@ -1146,7 +1146,7 @@
 
   <script>
     // ==========================================
-    // 🌐 [스프레드시트 연동 완료] 새로 배포된 Apps Script Web App URL
+    // 🌐 [연동 완료] 선생님의 최신 구글 앱스 스크립트 웹 앱 URL
     // ==========================================
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxyOhnVnCdHHiFdv9Wbt6ZjSMsW9KGsPfPjnPvH3xWRQS0Kf0UhLCqD5VAhenRUm3lc9A/exec"; 
 
@@ -1156,9 +1156,10 @@
     const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
     const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
 
-    // 로컬 값보다 새 배포 주소(DEFAULT_GAS_URL)를 최우선으로 안정적 반환
+    // 최신 배포 주소(DEFAULT_GAS_URL)를 기본으로 안정적 반환
     function getActiveGasUrl() {
-      return DEFAULT_GAS_URL;
+      const stored = localStorage.getItem(STORAGE_KEY_GAS_URL);
+      return (stored && stored.trim() !== '') ? stored : DEFAULT_GAS_URL;
     }
 
     let audioCtx = null;
@@ -1987,6 +1988,9 @@
       }
     }
 
+    // ==========================================
+    // 📄 PDF 다운로드 (백지 출력 방지 완벽 패치)
+    // ==========================================
     function downloadPlanPDF() {
       const data = getFormData();
       const name = data.studentName || '학생';
@@ -2007,7 +2011,7 @@
 
       const total = calculateTotalBudgetRaw();
       const approxJpy = Math.round(total / 9.2);
-      document.getElementById('pdf-budget-content').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span class="text-[10px] text-slate-500">※ 항공·숙박·교통·식비 포함</span>`;
+      document.getElementById('pdf-budget-content').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span style="font-size:10px; color:#64748b;">※ 항공·숙박·교통·식비 포함</span>`;
 
       document.getElementById('pdf-route-timeline').textContent = data.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ');
       document.getElementById('pdf-question-content').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
@@ -2025,26 +2029,46 @@
       label.textContent = "PDF 생성 중... ⏳";
       playBeep(440, 'sine', 0.1);
 
+      // 백지 캡처 버그 방지: 뷰포트 뒤쪽으로 잠시 가져옴
+      element.style.position = 'fixed';
+      element.style.left = '0px';
+      element.style.top = '0px';
+      element.style.zIndex = '-50';
+      element.style.visibility = 'visible';
+
       if (window.html2pdf) {
         const opt = {
           margin: [8, 8, 8, 8],
           filename: filename,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
+          html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false,
+            scrollY: 0,
+            scrollX: 0
+          },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
+          // 캡처 후 다시 화면 밖으로 숨김
+          element.style.left = '-9999px';
+          element.style.zIndex = '';
           btn.disabled = false;
           label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
           showToast(`'${filename}' 다운로드가 완료되었습니다!`, '📄');
           playBeep(880, 'sine', 0.2);
-        }).catch(() => {
+        }).catch(err => {
+          element.style.left = '-9999px';
+          element.style.zIndex = '';
           btn.disabled = false;
           label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
           triggerPrintPlan();
         });
       } else {
+        element.style.left = '-9999px';
+        element.style.zIndex = '';
         btn.disabled = false;
         label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
         triggerPrintPlan();
@@ -2531,7 +2555,7 @@
     }
 
     window.onload = function () {
-      // 페이지 로드 시 새 주소로 강제 동기화
+      // 접속 시 항상 최신 웹 앱 URL로 브라우저 동기화
       localStorage.setItem(STORAGE_KEY_GAS_URL, DEFAULT_GAS_URL);
 
       updateCitySelectDropdown();
