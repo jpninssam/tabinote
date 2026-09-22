@@ -1,2631 +1,950 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>타비노트 (Tabi Note) - 일본어 회화 일본 테마 여행 플래너</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2pdf.js CDN for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#fff1f2',
-              100: '#ffe4e6',
-              500: '#f43f5e',
-              600: '#e11d48',
-              700: '#be123c',
-            }
-          }
-        }
-      }
-    };
-  </script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
-    body {
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @media print {
-      body * { visibility: hidden; }
-      #print-sheet-area, #print-sheet-area * { visibility: visible; }
-      #print-sheet-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 20px;
-        background: white !important;
-        color: black !important;
-      }
-      .no-print { display: none !important; }
-    }
-  </style>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+    <!-- Top Right Controls -->
+    <div class="flex items-center space-x-2">
+      <div id="save-status-badge" class="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="save-status-text">자동 저장 활성</span>
+      </div>
 
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white font-black text-xl shadow-md">
-            旅
-          </div>
-          <div>
-            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
-              타비노트 <span class="text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold">일본어 회화</span>
-            </h1>
-            <p class="text-xs text-slate-500 hidden sm:block">나만의 일본 테마 여행 기획 & 5분 발표 프로젝트</p>
-          </div>
+      <button onclick="openArchiveModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-300">
+        📁 내 보관함
+      </button>
+
+      <button onclick="toggleRubricModal(true)" class="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow-sm">
+        <span class="text-amber-400">📋</span> 기준표(20점)
+      </button>
+
+      <button onclick="openTeacherAdminModal()" class="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
+        👑 교사 관리
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <nav class="flex space-x-2 sm:space-x-4 overflow-x-auto no-scrollbar border-t border-slate-100 py-2">
+    <button onclick="switchTab('traffic')" id="tab-btn-traffic" class="tab-btn active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
+      🚦 1. 교통 문화 & 퀴즈
+    </button>
+    <button onclick="switchTab('cities')" id="tab-btn-cities" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
+      🗾 2. JNTO 테마 & 명소
+    </button>
+    <button onclick="switchTab('planner')" id="tab-btn-planner" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
+      📝 3. 6대 요소 여행 플래너
+      <span id="nav-score-badge" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">0/6</span>
+    </button>
+    <button onclick="switchTab('presentation')" id="tab-btn-presentation" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
+      🎤 4. 5분 발표 & 상호 질문
+    </button>
+  </nav>
+</div>
+
+
+<!-- TAB 1: TRAFFIC CULTURE & QUIZZES -->
+<section id="tab-content-traffic" class="tab-panel block space-y-6">
+  <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md">
+    <div class="inline-flex items-center gap-1.5 bg-indigo-800/80 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+      <span>🚦 일본 자유여행 필수 교통 에티켓</span>
+    </div>
+    <h2 class="text-2xl sm:text-3xl font-black tracking-tight">일본의 독특한 교통 문화 & 상식 마스터</h2>
+    <p class="mt-2 text-sm text-indigo-200 leading-relaxed max-w-3xl">
+      여행 계획서 작성 시 <strong>'이용 교통수단(공항↔도심, 시내 패스)'</strong>을 현실감 있게 작성하기 위해 꼭 알아야 할 실전 상식입니다.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">1. 도로 & 주행 방향</span>
+        <span class="text-xs text-slate-400 font-mono">기초 상식</span>
+      </div>
+      <h4 class="text-base font-bold text-slate-900">운전석은 오른쪽, 자동차는 좌측통행!</h4>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        한국과 정반대입니다. 차량 운전석이 오른쪽에 있고 도로는 <strong>좌측통행</strong>을 합니다. 횡단보도를 건널 때는 먼저 <strong>오른쪽</strong>을 살핀 후 건너는 습관이 필요합니다.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">2. 시내버스 탑승법</span>
+        <span class="text-xs text-slate-400 font-mono">대중교통</span>
+      </div>
+      <h4 class="text-base font-bold text-slate-900">뒷문 승차 시 ‘정리권(整理券)’ 뽑기</h4>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        일반적인 시내버스는 <strong>뒷문으로 타고 앞문으로 내립니다.</strong> 탈 때 번호표(정리권)를 뽑고, 내릴 때 전광판 번호에 적힌 운임을 기사님 옆 요금통에 지불합니다.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">3. 택시 이용 에티켓</span>
+        <span class="text-xs text-slate-400 font-mono">주의 매너</span>
+      </div>
+      <h4 class="text-base font-bold text-slate-900">문 손대지 마세요! 뒷문은 자동문</h4>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        일본 택시의 승객용 뒷문은 기사님이 운전석에서 여닫는 <strong>자동문</strong>입니다. 손으로 무리하게 힘을 주어 닫지 않도록 주의합니다.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold">4. 철도 & 고속열차</span>
+        <span class="text-xs text-slate-400 font-mono">철도 왕국</span>
+      </div>
+      <h4 class="text-base font-bold text-slate-900">신칸센(新幹線)과 IC 교통카드</h4>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        1964년 도쿄 올림픽에 맞춰 개통된 고속철도 <strong>신칸센</strong>은 전국 주요 대도시를 초고속으로 연결합니다. 스이카, 이코카 등 IC 카드와 외국인 전용 교통 패스를 적극 활용해 보세요.
+      </p>
+    </div>
+  </div>
+
+  <!-- Quiz Box -->
+  <div class="bg-white rounded-xl border border-slate-300 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+        <span>⚡</span> 일본 교통 상식 퀴즈 3문항 (원클릭 풀이)
+      </h3>
+      <span id="quiz-score-indicator" class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+        정답: 0 / 3
+      </span>
+    </div>
+
+    <div class="space-y-4">
+      <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-bold text-slate-800">Q1. 일본에서 자동차는 도로의 오른쪽으로 달린다.</p>
+          <p id="quiz-ans-1" class="text-xs font-medium mt-1 text-slate-500">결과를 선택하세요.</p>
         </div>
-
-        <!-- Top Right Controls -->
-        <div class="flex items-center space-x-2">
-          <div id="save-status-badge" class="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="save-status-text">자동 저장 활성</span>
-          </div>
-
-          <button onclick="openArchiveModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition border border-slate-300">
-            📁 내 보관함
-          </button>
-
-          <button onclick="toggleRubricModal(true)" class="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow-sm">
-            <span class="text-amber-400">📋</span> 기준표(20점)
-          </button>
-
-          <button onclick="openTeacherAdminModal()" class="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
-            👑 교사 관리
-          </button>
+        <div class="flex gap-2">
+          <button onclick="checkQuiz(1, 'O')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">O</button>
+          <button onclick="checkQuiz(1, 'X')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">X</button>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="flex space-x-2 sm:space-x-4 overflow-x-auto no-scrollbar border-t border-slate-100 py-2">
-        <button onclick="switchTab('traffic')" id="tab-btn-traffic" class="tab-btn active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
-          🚦 1. 교통 문화 & 퀴즈
-        </button>
-        <button onclick="switchTab('cities')" id="tab-btn-cities" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
-          🗾 2. JNTO 테마 & 명소
-        </button>
-        <button onclick="switchTab('planner')" id="tab-btn-planner" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
-          📝 3. 6대 요소 여행 플래너
-          <span id="nav-score-badge" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">0/6</span>
-        </button>
-        <button onclick="switchTab('presentation')" id="tab-btn-presentation" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent flex items-center gap-1.5">
-          🎤 4. 5분 발표 & 상호 질문
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
-
-    <!-- TAB 1: TRAFFIC CULTURE & QUIZZES -->
-    <section id="tab-content-traffic" class="tab-panel block space-y-6">
-      <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md">
-        <div class="inline-flex items-center gap-1.5 bg-indigo-800/80 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-          <span>🚦 일본 자유여행 필수 교통 에티켓</span>
+      <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-bold text-slate-800">Q2. 1964년 개통된 일본의 대표적인 초고속 열차의 명칭은?</p>
+          <p id="quiz-ans-2" class="text-xs font-medium mt-1 text-slate-500">선택지를 클릭하세요.</p>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-black tracking-tight">일본의 독특한 교통 문화 & 상식 마스터</h2>
-        <p class="mt-2 text-sm text-indigo-200 leading-relaxed max-w-3xl">
-          여행 계획서 작성 시 <strong>'이용 교통수단(공항↔도심, 시내 패스)'</strong>을 현실감 있게 작성하기 위해 꼭 알아야 할 실전 상식입니다.
+        <div class="flex flex-wrap gap-2">
+          <button onclick="checkQuiz(2, 'KTX')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">KTX</button>
+          <button onclick="checkQuiz(2, '신칸센')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">신칸센 (しんかんせん)</button>
+          <button onclick="checkQuiz(2, 'TGV')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">TGV</button>
+        </div>
+      </div>
+
+      <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-bold text-slate-800">Q3. 일본 택시를 이용할 때 탑승객이 직접 힘으로 문을 여닫는 것이 올바른 매너이다.</p>
+          <p id="quiz-ans-3" class="text-xs font-medium mt-1 text-slate-500">결과를 선택하세요.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="checkQuiz(3, 'O')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">O</button>
+          <button onclick="checkQuiz(3, 'X')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">X</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 pt-3 border-t border-slate-200 flex justify-end">
+      <button onclick="switchTab('cities')" class="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow">
+        다음 단계: 2. 테마 & 여행지 탐색하기 ➔
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 2: CITIES & ATTRACTIONS -->
+<section id="tab-content-cities" class="tab-panel hidden space-y-6">
+  <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-3">
+        <span>✨ JNTO 일본정부관광국 공식 추천 테마 & 자유 등록</span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">당신만의 일본 테마 여행지를 골라보세요</h2>
+      <p class="mt-2 text-sm text-rose-100 leading-relaxed max-w-2xl">
+        추천 도시 외에도 가고 싶은 일본의 소도시나 명소가 있다면 <strong>[+ 나만의 도시 직접 추가]</strong>로 등록할 수 있습니다!
+      </p>
+    </div>
+    <button onclick="openCustomCityModal()" class="shrink-0 bg-white text-rose-600 hover:bg-rose-50 font-bold px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm flex items-center gap-2 transition">
+      <span class="text-base">📍</span> + 나만의 도시/소도시 직접 추가
+    </button>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+    <button onclick="filterCities('all')" class="city-filter active text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white whitespace-nowrap">전체 보기</button>
+    <button onclick="filterCities('hotspring')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">♨️ 온천 & 료칸</button>
+    <button onclick="filterCities('popculture')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🎬 애니 & 테마파크</button>
+    <button onclick="filterCities('gourmet')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🍜 전국 미식 로드</button>
+    <button onclick="filterCities('heritage')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🏯 전통 & 세계유산</button>
+    <button onclick="filterCities('nature')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">❄️ 자연 & 휴양</button>
+    <button onclick="filterCities('custom')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-indigo-600 hover:bg-indigo-50 whitespace-nowrap">⭐ 내가 추가한 도시</button>
+  </div>
+
+  <!-- Grid Cards -->
+  <div id="cities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+</section>
+
+<!-- TAB 3: 6-ELEMENT TRAVEL PLANNER -->
+<section id="tab-content-planner" class="tab-panel hidden space-y-6">
+  <!-- Live Score Badge Bar -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-800 text-xs font-bold">수행평가 1영역 (10점 만점)</span>
+          <h2 class="text-xl font-bold text-slate-900">여행 계획 필수 6요소 작성기</h2>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">
+          도시를 변경하면 항공료와 숙박비 등 <strong>예상 예산 프리셋이 자동 재계산</strong>됩니다.
         </p>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">1. 도로 & 주행 방향</span>
-            <span class="text-xs text-slate-400 font-mono">기초 상식</span>
-          </div>
-          <h4 class="text-base font-bold text-slate-900">운전석은 오른쪽, 자동차는 좌측통행!</h4>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            한국과 정반대입니다. 차량 운전석이 오른쪽에 있고 도로는 <strong>좌측통행</strong>을 합니다. 횡단보도를 건널 때는 먼저 <strong>오른쪽</strong>을 살핀 후 건너는 습관이 필요합니다.
-          </p>
+      <!-- Gauge -->
+      <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 gap-3">
+        <div class="text-right">
+          <div class="text-[11px] text-slate-500 font-medium">충족 요소</div>
+          <div id="elements-count-text" class="text-lg font-black text-rose-600">0 / 6 완료</div>
         </div>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">2. 시내버스 탑승법</span>
-            <span class="text-xs text-slate-400 font-mono">대중교통</span>
-          </div>
-          <h4 class="text-base font-bold text-slate-900">뒷문 승차 시 ‘정리권(整理券)’ 뽑기</h4>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            일반적인 시내버스는 <strong>뒷문으로 타고 앞문으로 내립니다.</strong> 탈 때 번호표(정리권)를 뽑고, 내릴 때 전광판 번호에 적힌 운임을 기사님 옆 요금통에 지불합니다.
-          </p>
-        </div>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">3. 택시 이용 에티켓</span>
-            <span class="text-xs text-slate-400 font-mono">주의 매너</span>
-          </div>
-          <h4 class="text-base font-bold text-slate-900">문 손대지 마세요! 뒷문은 자동문</h4>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            일본 택시의 승객용 뒷문은 기사님이 운전석에서 여닫는 <strong>자동문</strong>입니다. 손으로 무리하게 힘을 주어 닫지 않도록 주의합니다.
-          </p>
-        </div>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold">4. 철도 & 고속열차</span>
-            <span class="text-xs text-slate-400 font-mono">철도 왕국</span>
-          </div>
-          <h4 class="text-base font-bold text-slate-900">신칸센(新幹線)과 IC 교통카드</h4>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            1964년 도쿄 올림픽에 맞춰 개통된 고속철도 <strong>신칸센</strong>은 전국 주요 대도시를 초고속으로 연결합니다. 스이카, 이코카 등 IC 카드와 외국인 전용 교통 패스를 적극 활용해 보세요.
-          </p>
-        </div>
-      </div>
-
-      <!-- Quiz Box -->
-      <div class="bg-white rounded-xl border border-slate-300 p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-            <span>⚡</span> 일본 교통 상식 퀴즈 3문항 (원클릭 풀이)
-          </h3>
-          <span id="quiz-score-indicator" class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
-            정답: 0 / 3
-          </span>
-        </div>
-
-        <div class="space-y-4">
-          <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <p class="text-sm font-bold text-slate-800">Q1. 일본에서 자동차는 도로의 오른쪽으로 달린다.</p>
-              <p id="quiz-ans-1" class="text-xs font-medium mt-1 text-slate-500">결과를 선택하세요.</p>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="checkQuiz(1, 'O')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">O</button>
-              <button onclick="checkQuiz(1, 'X')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">X</button>
-            </div>
-          </div>
-
-          <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <p class="text-sm font-bold text-slate-800">Q2. 1964년 개통된 일본의 대표적인 초고속 열차의 명칭은?</p>
-              <p id="quiz-ans-2" class="text-xs font-medium mt-1 text-slate-500">선택지를 클릭하세요.</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button onclick="checkQuiz(2, 'KTX')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">KTX</button>
-              <button onclick="checkQuiz(2, '신칸센')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">신칸센 (しんかんせん)</button>
-              <button onclick="checkQuiz(2, 'TGV')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">TGV</button>
-            </div>
-          </div>
-
-          <div class="border border-slate-200 bg-slate-50 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <p class="text-sm font-bold text-slate-800">Q3. 일본 택시를 이용할 때 탑승객이 직접 힘으로 문을 여닫는 것이 올바른 매너이다.</p>
-              <p id="quiz-ans-3" class="text-xs font-medium mt-1 text-slate-500">결과를 선택하세요.</p>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="checkQuiz(3, 'O')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">O</button>
-              <button onclick="checkQuiz(3, 'X')" class="px-4 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold text-sm text-slate-700">X</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-200 flex justify-end">
-          <button onclick="switchTab('cities')" class="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow">
-            다음 단계: 2. 테마 & 여행지 탐색하기 ➔
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 2: CITIES & ATTRACTIONS -->
-    <section id="tab-content-cities" class="tab-panel hidden space-y-6">
-      <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="h-8 w-px bg-slate-200"></div>
         <div>
-          <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-3">
-            <span>✨ JNTO 일본정부관광국 공식 추천 테마 & 자유 등록</span>
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">당신만의 일본 테마 여행지를 골라보세요</h2>
-          <p class="mt-2 text-sm text-rose-100 leading-relaxed max-w-2xl">
-            추천 도시 외에도 가고 싶은 일본의 소도시나 명소가 있다면 <strong>[+ 나만의 도시 직접 추가]</strong>로 등록할 수 있습니다!
-          </p>
-        </div>
-        <button onclick="openCustomCityModal()" class="shrink-0 bg-white text-rose-600 hover:bg-rose-50 font-bold px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm flex items-center gap-2 transition">
-          <span class="text-base">📍</span> + 나만의 도시/소도시 직접 추가
-        </button>
-      </div>
-
-      <!-- Filter Buttons -->
-      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        <button onclick="filterCities('all')" class="city-filter active text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white whitespace-nowrap">전체 보기</button>
-        <button onclick="filterCities('hotspring')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">♨️ 온천 & 료칸</button>
-        <button onclick="filterCities('popculture')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🎬 애니 & 테마파크</button>
-        <button onclick="filterCities('gourmet')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🍜 전국 미식 로드</button>
-        <button onclick="filterCities('heritage')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">🏯 전통 & 세계유산</button>
-        <button onclick="filterCities('nature')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap">❄️ 자연 & 휴양</button>
-        <button onclick="filterCities('custom')" class="city-filter text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-indigo-600 hover:bg-indigo-50 whitespace-nowrap">⭐ 내가 추가한 도시</button>
-      </div>
-
-      <!-- Grid Cards -->
-      <div id="cities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
-    </section>
-
-    <!-- TAB 3: 6-ELEMENT TRAVEL PLANNER -->
-    <section id="tab-content-planner" class="tab-panel hidden space-y-6">
-      <!-- Live Score Badge Bar -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-800 text-xs font-bold">수행평가 1영역 (10점 만점)</span>
-              <h2 class="text-xl font-bold text-slate-900">여행 계획 필수 6요소 작성기</h2>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">
-              도시를 변경하면 항공료와 숙박비 등 <strong>예상 예산 프리셋이 자동 재계산</strong>됩니다.
-            </p>
-          </div>
-          <!-- Gauge -->
-          <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 gap-3">
-            <div class="text-right">
-              <div class="text-[11px] text-slate-500 font-medium">충족 요소</div>
-              <div id="elements-count-text" class="text-lg font-black text-rose-600">0 / 6 완료</div>
-            </div>
-            <div class="h-8 w-px bg-slate-200"></div>
-            <div>
-              <div class="text-[11px] text-slate-500 font-medium">예상 점수</div>
-              <div id="expected-score-text" class="text-lg font-black text-slate-900">3점 <span class="text-xs font-normal text-slate-400">/ 10점</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6 Checklist Indicators -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-4 pt-4 border-t border-slate-100">
-          <div id="check-elem-1" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
-            <span class="check-icon">⬜</span> ① 전체 일정표
-          </div>
-          <div id="check-elem-2" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
-            <span class="check-icon">⬜</span> ② 교통 수단
-          </div>
-          <div id="check-elem-3" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
-            <span class="check-icon">⬜</span> ③ 관광지 2곳 이상
-          </div>
-          <div id="check-elem-4" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
-            <span class="check-icon">⬜</span> ④ 음식 2개 이상
-          </div>
-          <div id="check-elem-5" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
-            <span class="check-icon">⬜</span> ⑤ 숙소 형태
-          </div>
-          <div id="check-elem-6" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
-            <span class="check-icon">⬜</span> ⑥ 예상 경비
-          </div>
+          <div class="text-[11px] text-slate-500 font-medium">예상 점수</div>
+          <div id="expected-score-text" class="text-lg font-black text-slate-900">3점 <span class="text-xs font-normal text-slate-400">/ 10점</span></div>
         </div>
       </div>
+    </div>
 
-      <!-- Main Planner Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Left: Form inputs (2 cols) -->
-        <div class="lg:col-span-2 space-y-5">
-          <!-- Student Info Header -->
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">학번 및 이름 <span class="text-rose-500">*</span></label>
-              <input type="text" id="input-student-name" placeholder="예: 2학년 3반 15번 김철수" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="onInputChanged()">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">여행 테마/제목 <span class="text-rose-500">*</span></label>
-              <input type="text" id="input-trip-theme" placeholder="예: 오사카·교토 미식 & 세계유산 힐링" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="onInputChanged()">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">주요 방문 도시 <span class="text-rose-500">*</span></label>
-              <select id="input-target-city" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" onchange="onCitySelectChange(this.value)">
-                <option value="">도시/지역 선택</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Element 1: Total Schedule -->
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-700">필수 요소 1</span>
-              <span class="text-xs text-slate-400">전체 일정표 (기간 및 일차별 동선)</span>
-            </div>
-            <h4 class="text-sm font-bold text-slate-900">전체 일정 및 이동 루트</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-[11px] text-slate-500 mb-1">일정 기간</label>
-                <input type="text" id="input-schedule-duration" placeholder="예: 2박 3일" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="block text-[11px] text-slate-500 mb-1">일차별 루트 요약</label>
-                <input type="text" id="input-schedule-route" placeholder="예: 1일차(간사이공항→도톤보리) → 2일차(교토 청수사) → 3일차(USJ)" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
-              </div>
-            </div>
-            <textarea id="input-schedule-detail" rows="2" placeholder="일차별 상세 시간표나 세부 계획을 자유롭게 적어보세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()"></textarea>
-          </div>
-
-          <!-- Google Maps Multi-Stops Interactive Timeline -->
-          <div class="bg-gradient-to-br from-slate-900 to-indigo-950 p-5 rounded-xl text-white shadow-md space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-3">
-              <div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/50 text-indigo-200">구글맵스 실시간 경로 연동</span>
-                <h4 class="text-sm sm:text-base font-bold text-white mt-1 flex items-center gap-1.5">
-                  🗺️ 번호별 당일 이동 동선 (1➔2➔3➔...)
-                </h4>
-              </div>
-              <div class="flex items-center gap-2">
-                <button onclick="addRouteStop()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition">
-                  + 경유지 추가
-                </button>
-                <button onclick="openGoogleMapsRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow">
-                  <span>Google 지도에서 길찾기 열기 ➔</span>
-                </button>
-              </div>
-            </div>
-
-            <p class="text-xs text-slate-300">
-              출발지(공항/역)부터 주요 관광지, 맛집, 숙소를 순서대로 입력하세요. 구글맵에서 대중교통 경로가 바로 시각화됩니다.
-            </p>
-
-            <div id="route-stops-container" class="space-y-2"></div>
-          </div>
-
-          <!-- Element 2: Transportation -->
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">필수 요소 2</span>
-              <span class="text-xs text-slate-400">교통 수단 (공항↔도심, 시내 이동)</span>
-            </div>
-            <h4 class="text-sm font-bold text-slate-900">구간별 이용 교통수단 및 패스</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] text-slate-500 mb-1">공항 ↔ 숙소/도심 이동</label>
-                <input type="text" id="input-transport-airport" placeholder="예: 간사이공항 난카이 라피트 특급 / 나리타 익스프레스" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
-              </div>
-              <div>
-                <label class="block text-[11px] text-slate-500 mb-1">도심 내 이동 수단 / 패스</label>
-                <input type="text" id="input-transport-city" placeholder="예: 오사카 메트로 주유패스, 교토 시내버스 1일권" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
-              </div>
-            </div>
-          </div>
-
-          <!-- Element 3: Attractions (Min 2) -->
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">필수 요소 3</span>
-              <span class="text-xs text-slate-400">관광지 (반드시 2곳 이상 선택 및 이유 작성)</span>
-            </div>
-            <h4 class="text-sm font-bold text-slate-900">방문 관광지 2곳 이상 & 선정 이유</h4>
-            <div class="space-y-3">
-              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                <div class="flex gap-2">
-                  <span class="text-xs font-bold text-slate-600 self-center">장소 1</span>
-                  <input type="text" id="input-spot-1" placeholder="예: 기요미즈데라(청수사)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
-                </div>
-                <input type="text" id="input-spot-reason-1" placeholder="선택 이유: 8세기 말 절벽 위에 세워진 사찰에서 교토 전경을 감상하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
-              </div>
-
-              <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                <div class="flex gap-2">
-                  <span class="text-xs font-bold text-slate-600 self-center">장소 2</span>
-                  <input type="text" id="input-spot-2" placeholder="예: 유니버설 스튜디오 재팬 (USJ)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
-                </div>
-                <input type="text" id="input-spot-reason-2" placeholder="선택 이유: 슈퍼 닌텐도 월드 어트랙션과 테마파크를 직접 체험하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
-              </div>
-            </div>
-          </div>
-
-          <!-- Element 4: Creative Food & Snacks -->
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700">필수 요소 4</span>
-              <span class="text-xs text-slate-400">현지 대표 음식 & 창의적 간식 (최소 2개 이상)</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <div>
-                <h4 class="text-sm font-bold text-slate-900">현지 미식 & 디저트·간식 컬렉션</h4>
-                <p class="text-[11px] text-slate-500">아침/점심/저녁 외에도 편의점 털기, 길거리 간식, 카페 디저트 등을 자유롭게 추가해 보세요!</p>
-              </div>
-              <button onclick="addFoodItem()" class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-xs font-bold transition">
-                + 음식/간식 추가
-              </button>
-            </div>
-
-            <div id="foods-container" class="space-y-2"></div>
-          </div>
-
-          <!-- Element 5: Accommodation & Direct Booking Search -->
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700">필수 요소 5</span>
-              <span class="text-xs text-slate-400">숙소 형태 & 위치 (실시간 예약 탐색 연동)</span>
-            </div>
-            <h4 class="text-sm font-bold text-slate-900">숙소 형태 & 추천 선택지</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] text-slate-500 mb-1">숙소 유형 선택</label>
-                <select id="input-hotel-type" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" onchange="onHotelTypeChange()">
-                  <option value="">유형을 선택하세요</option>
-                  <option value="비즈니스 호텔">비즈니스 호텔 (가성비, 역 접근성)</option>
-                  <option value="전통 료칸(旅館)">전통 료칸 (온천, 가이세키 코스)</option>
-                  <option value="게스트하우스/호스텔">게스트하우스/호스텔 (저예산 배낭여행)</option>
-                  <option value="캡슐 호텔">캡슐 호텔 (이색 체험, 1인 여행)</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] text-slate-500 mb-1">숙소 위치 (역세권 등)</label>
-                <input type="text" id="input-hotel-location" placeholder="예: 난바역 또는 우메다역 도보 5분 거리" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
-              </div>
-            </div>
-
-            <!-- Accommodation Direct Search Links -->
-            <div id="hotel-search-links-box" class="mt-3 p-3 bg-purple-50/60 border border-purple-200 rounded-xl space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-purple-900">🔍 아고다 & 구글 실시간 숙소 검색 링크</span>
-                <span class="text-[10px] text-purple-600">도시 및 유형에 맞는 맞춤 검색 결과</span>
-              </div>
-              <div id="hotel-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Element 6 & Budget Calculator Sidebar -->
-        <div class="space-y-5">
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 sticky top-24">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">필수 요소 6</span>
-              <span class="text-xs text-slate-400">대략적인 여행 경비</span>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <div>
-                <h4 class="text-sm font-bold text-slate-900">1인 예상 경비 계산기</h4>
-                <p id="budget-preset-city-name" class="text-[10px] text-rose-600 font-semibold">도시 자동 예산 적용 중</p>
-              </div>
-              <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">100엔 ≒ 920원</span>
-            </div>
-
-            <div class="space-y-3">
-              <div>
-                <label class="flex justify-between text-xs text-slate-600 mb-1">
-                  <span>항공권 (원)</span>
-                  <span id="badge-flight-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
-                </label>
-                <input type="number" id="budget-flight" placeholder="예: 350000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
-              </div>
-
-              <div>
-                <label class="flex justify-between text-xs text-slate-600 mb-1">
-                  <span>숙박비 (원)</span>
-                  <span id="badge-hotel-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
-                </label>
-                <input type="number" id="budget-hotel" placeholder="예: 200000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
-              </div>
-
-              <div>
-                <label class="flex justify-between text-xs text-slate-600 mb-1">
-                  <span>현지 교통비 (패스/지하철)</span>
-                  <span id="badge-transit-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
-                </label>
-                <input type="number" id="budget-transit" placeholder="예: 60000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
-              </div>
-
-              <div>
-                <label class="flex justify-between text-xs text-slate-600 mb-1">
-                  <span>식비 및 간식비 (원)</span>
-                  <span id="badge-food-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
-                </label>
-                <input type="number" id="budget-food" placeholder="예: 150000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
-              </div>
-
-              <div>
-                <label class="flex justify-between text-xs text-slate-600 mb-1">
-                  <span>입장료 & 쇼핑/기타 (원)</span>
-                  <span id="badge-extra-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
-                </label>
-                <input type="number" id="budget-extra" placeholder="예: 100000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
-              </div>
-            </div>
-
-            <!-- Total Budget Summary -->
-            <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-1">
-              <div class="text-[11px] font-semibold text-rose-800">1인 총 예상 경비</div>
-              <div class="flex items-baseline justify-between">
-                <span id="total-budget-krw" class="text-xl font-black text-rose-600">0 원</span>
-                <span id="total-budget-jpy" class="text-xs font-mono text-rose-700">약 0 円</span>
-              </div>
-            </div>
-
-            <!-- Online Submission Button (실시간 클라우드 제출) -->
-            <button onclick="submitPlanToTeacher()" id="btn-submit-plan" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black py-3 rounded-lg transition shadow-md">
-              <span id="submit-btn-text">선생님께 기획서 온라인 제출하기 🚀</span>
-            </button>
-
-            <!-- Export / PDF / Canva Buttons -->
-            <div class="pt-2 space-y-2">
-              <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <span id="btn-pdf-label">기획서 PDF 파일 다운로드 (.pdf)</span>
-              </button>
-
-              <button onclick="openCanvaGuideModal()" class="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-lg transition shadow-sm">
-                <span>🎨 캔바·미리캔버스 5분 발표 자료 가이드</span>
-              </button>
-
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="triggerPrintPlan()" class="flex items-center justify-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold py-2 rounded-lg transition">
-                  🖨️ 인쇄 / 미리보기
-                </button>
-                <button onclick="copyPlanToClipboard()" class="flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold py-2 rounded-lg transition">
-                  📋 텍스트 복사
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- 6 Checklist Indicators -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-4 pt-4 border-t border-slate-100">
+      <div id="check-elem-1" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+        <span class="check-icon">⬜</span> ① 전체 일정표
       </div>
-    </section>
-
-    <!-- TAB 4: PRESENTATION & QUESTIONS -->
-    <section id="tab-content-presentation" class="tab-panel hidden space-y-6">
-      <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-6 text-white shadow-md">
-        <div class="inline-flex items-center gap-1.5 bg-emerald-500/50 px-3 py-1 rounded-full text-xs font-medium mb-3">
-          <span>🎤 수행평가 발표(5점) & 질문(5점) 대비</span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">발표 브리핑 & 상호 질문 시뮬레이터</h2>
-        <p class="mt-2 text-sm text-emerald-100 leading-relaxed max-w-3xl">
-          내가 기획한 내용을 바탕으로 자동 구성된 1분 스피치 대본을 연습하고, 동료 학생의 발표 때 던질 수 있는 <strong>예리하고 적절한 질문(5점 만점 요건)</strong>을 준비해 보세요.
-        </p>
+      <div id="check-elem-2" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+        <span class="check-icon">⬜</span> ② 교통 수단
       </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Left: Speech Script -->
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">발표 5점 만점 대비</span>
-              <h3 class="text-base font-bold text-slate-900 mt-1">나의 1분 발표 스크립트</h3>
-            </div>
-            <button onclick="refreshSpeechScript()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1">
-              🔄 대본 새로고침
-            </button>
-          </div>
-
-          <div id="speech-script-box" class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 font-normal"></div>
-
-          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
-            📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글맵스로 확인한 대중교통 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
-          </div>
-        </div>
-
-        <!-- Right: Mutual Questions Bank -->
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">참여/경청 5점 만점 대비</span>
-              <h3 class="text-base font-bold text-slate-900 mt-1">동료 발표 질문 추천 뱅크</h3>
-            </div>
-            <span class="text-xs text-slate-400">질문 1회 이상 주도적 참여</span>
-          </div>
-
-          <p class="text-xs text-slate-600">
-            친구의 발표를 들은 후 아래 카드를 클릭하면 내 메모장에 질문이 자동 복사됩니다.
-          </p>
-
-          <div class="space-y-3">
-            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">교통 및 동선 질문</span>
-                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
-              </div>
-              <p class="text-xs text-slate-800 font-medium">"구글맵으로 확인하신 이동 동선 중 환승 시간이 가장 촉박하거나 주의해야 할 구간은 어디인가요?"</p>
-            </div>
-
-            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">명소 & 문화 질문</span>
-                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
-              </div>
-              <p class="text-xs text-slate-800 font-medium">"선정하신 두 명소 중 계절이나 시간대에 따라 더 특별한 경험을 할 수 있는 현지 꿀팁이 있나요?"</p>
-            </div>
-
-            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">예산 & 가성비 질문</span>
-                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
-              </div>
-              <p class="text-xs text-slate-800 font-medium">"총예산 안에서 교통 패스나 사전 예약 할인을 활용해 경비를 가장 알뜰하게 아낀 항목은 무엇인가요?"</p>
-            </div>
-
-            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">음식 & 에티켓 질문</span>
-                <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
-              </div>
-              <p class="text-xs text-slate-800 font-medium">"소개해주신 대표 음식이나 길거리 디저트를 먹을 때 주의해야 할 일본 특유의 식사 매너가 있는지 궁금합니다."</p>
-            </div>
-          </div>
-
-          <div class="pt-2">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">내가 질문할 내용 메모</label>
-            <textarea id="my-peer-question" rows="2" placeholder="위 질문 카드를 클릭하거나 직접 질문할 내용을 메모하세요..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-400" oninput="onInputChanged()"></textarea>
-          </div>
-        </div>
+      <div id="check-elem-3" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+        <span class="check-icon">⬜</span> ③ 관광지 2곳 이상
       </div>
-    </section>
-  </main>
-
-  <!-- MODAL: Custom City Registration -->
-  <div id="custom-city-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">🗾</span>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">나만의 도시 / 소도시 추가하기</h3>
-            <p class="text-xs text-slate-500">가고 싶은 일본의 숨은 명소나 소도시를 등록하세요.</p>
-          </div>
-        </div>
-        <button onclick="toggleCustomCityModal(false)" class="text-slate-400 hover:text-slate-600">✕</button>
+      <div id="check-elem-4" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+        <span class="check-icon">⬜</span> ④ 음식 2개 이상
       </div>
+      <div id="check-elem-5" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+        <span class="check-icon">⬜</span> ⑤ 숙소 형태
+      </div>
+      <div id="check-elem-6" class="check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs">
+        <span class="check-icon">⬜</span> ⑥ 예상 경비
+      </div>
+    </div>
+  </div>
 
-      <div class="space-y-3 text-xs">
+  <!-- Main Planner Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left: Form inputs (2 cols) -->
+    <div class="lg:col-span-2 space-y-5">
+      <!-- Student Info Header -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">도시 이름 (한글/일본어) <span class="text-rose-500">*</span></label>
-          <input type="text" id="custom-city-name" placeholder="예: 가나자와 (かなざわ) 또는 시즈오카" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">학번 및 이름 <span class="text-rose-500">*</span></label>
+          <input type="text" id="input-student-name" placeholder="예: 2학년 3반 15번 김철수" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="onInputChanged()">
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">테마 키워드 <span class="text-rose-500">*</span></label>
-          <input type="text" id="custom-city-badge" placeholder="예: 금박 공예 / 에도 정원" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">여행 테마/제목 <span class="text-rose-500">*</span></label>
+          <input type="text" id="input-trip-theme" placeholder="예: 오사카·교토 미식 & 세계유산 힐링" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="onInputChanged()">
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">도시 소개 요약</label>
-          <textarea id="custom-city-desc" rows="2" placeholder="이 도시만의 매력을 간단히 적어보세요." class="w-full px-3 py-2 border border-slate-300 rounded-lg"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">대표 명소 2곳</label>
-            <input type="text" id="custom-city-spots" placeholder="예: 겐로쿠엔 & 21세기미술관" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">대표 음식</label>
-            <input type="text" id="custom-city-food" placeholder="예: 가나자와 카레 & 해산물 덮밥" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">공항/접근 교통</label>
-            <input type="text" id="custom-city-airport" placeholder="예: 고마쓰 공항 리무진 버스" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">시내 교통 수단</label>
-            <input type="text" id="custom-city-transit" placeholder="예: 가나자와 성하마을 순환버스" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
-        </div>
-      </div>
-
-      <div class="flex gap-2 pt-2 border-t border-slate-100">
-        <button onclick="toggleCustomCityModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">취소</button>
-        <button onclick="saveCustomCity()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm">+ 도시 등록 및 선택</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- A4 PRINT WORKSHEET -->
-  <div id="print-sheet-area" class="hidden">
-    <div style="border: 2px solid #333; padding: 25px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-      <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 15px;">
-        <h2 style="font-size: 20px; font-weight: bold; margin: 0;">[일본어 회화] 나만의 일본 테마 여행 기획서</h2>
-        <p style="font-size: 12px; color: #555; margin: 5px 0 0 0;">평가 영역: 여행 계획(10점) + 발표(5점) + 경청/질의(5점) = 20점 만점</p>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px;">
-        <div><strong>작성자:</strong> <span id="print-student-name">-</span></div>
-        <div><strong>여행 테마:</strong> <span id="print-trip-theme">-</span></div>
-        <div><strong>목적지:</strong> <span id="print-target-city">-</span></div>
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0; width: 24%;">① 전체 일정표</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-schedule">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">② 교통 수단</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-transport">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">③ 관광지 2곳 이상</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-spots">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">④ 대표 미식 & 간식</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-foods">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑤ 숙소 형태 & 위치</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-hotel">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑥ 대략적인 경비</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-budget">-</td>
-        </tr>
-      </table>
-
-      <div style="border: 1px dashed #666; padding: 10px; margin-top: 15px; font-size: 12px; background: #fafafa;">
-        <strong>[동료 발표 질문 메모]</strong>
-        <p style="margin: 5px 0;" id="print-question">-</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- DEDICATED PDF EXPORT TEMPLATE -->
-  <div id="pdf-render-wrapper" class="fixed -left-[9999px] top-0 w-[794px] bg-white text-slate-900 font-sans p-8 box-border" style="min-height: 1120px;">
-    <div class="border-b-2 border-slate-900 pb-4 mb-5 flex items-center justify-between">
-      <div>
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-rose-100 text-rose-800 text-xs font-bold mb-1">
-          일본어 회화 수행평가 과제물
-        </div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">나만의 일본 테마 여행 기획서</h1>
-        <p class="text-xs text-slate-500 mt-0.5">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
-      </div>
-      <div class="text-right">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-black text-2xl shadow">
-          旅
-        </div>
-        <div class="text-[10px] text-slate-400 font-mono mt-1">TABI NOTE</div>
-      </div>
-    </div>
-
-    <!-- Student Meta Box -->
-    <div class="grid grid-cols-3 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 text-xs">
-      <div>
-        <span class="text-slate-400 block font-semibold text-[10px]">작성자 (학번/성명)</span>
-        <span id="pdf-student-name" class="font-bold text-slate-900 text-sm">-</span>
-      </div>
-      <div>
-        <span class="text-slate-400 block font-semibold text-[10px]">여행 테마</span>
-        <span id="pdf-trip-theme" class="font-bold text-rose-700 text-sm">-</span>
-      </div>
-      <div>
-        <span class="text-slate-400 block font-semibold text-[10px]">목적지</span>
-        <span id="pdf-target-city" class="font-bold text-slate-900 text-sm">-</span>
-      </div>
-    </div>
-
-    <!-- 6 Elements Table -->
-    <div class="border border-slate-300 rounded-xl overflow-hidden mb-5 text-xs">
-      <div class="bg-slate-900 text-white px-3 py-2 font-bold flex justify-between items-center text-xs">
-        <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
-        <span id="pdf-checklist-badge" class="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px]">0/6 충족</span>
-      </div>
-      <table class="w-full border-collapse">
-        <tr class="border-b border-slate-200">
-          <td class="w-28 bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">① 전체 일정표</td>
-          <td class="p-3 text-slate-800" id="pdf-schedule-content">-</td>
-        </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">② 교통 수단</td>
-          <td class="p-3 text-slate-800" id="pdf-transport-content">-</td>
-        </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">③ 관광지 2곳 이상</td>
-          <td class="p-3 text-slate-800" id="pdf-spots-content">-</td>
-        </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">④ 대표 미식 & 간식</td>
-          <td class="p-3 text-slate-800" id="pdf-foods-content">-</td>
-        </tr>
-        <tr class="border-b border-slate-200">
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑤ 숙소 형태 & 위치</td>
-          <td class="p-3 text-slate-800" id="pdf-hotel-content">-</td>
-        </tr>
-        <tr>
-          <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑥ 예상 여행 경비</td>
-          <td class="p-3 text-slate-800" id="pdf-budget-content">-</td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- Google Maps Route Timeline in PDF -->
-    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs">
-      <span class="font-bold text-slate-900 block mb-1">🗺️ 구글 지도 번호별 경유지 이동 동선</span>
-      <p id="pdf-route-timeline" class="text-slate-700">-</p>
-    </div>
-
-    <!-- Presentation & Q&A Box -->
-    <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs space-y-2">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
-        <span class="font-bold text-slate-900">🎤 5분 발표 및 동료 평가 준비</span>
-        <span class="text-[10px] text-slate-500">슬라이드 기초 자료</span>
-      </div>
-      <div>
-        <span class="font-semibold text-indigo-700">· 동료 발표 경청 후 질문 예정 내용:</span>
-        <p id="pdf-question-content" class="mt-0.5 text-slate-700 pl-2">미작성</p>
-      </div>
-    </div>
-
-    <div class="border-t-2 border-dashed border-slate-300 pt-4 flex items-center justify-between text-[11px] text-slate-600">
-      <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
-      <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
-    </div>
-  </div>
-
-  <!-- MODAL: Canva Presentation Slide Guide -->
-  <div id="canva-guide-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">🎨</div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">캔바 · 미리캔버스 5분 발표 슬라이드 가이드</h3>
-            <p class="text-xs text-slate-500">내 계획서 내용이 반영된 6장 슬라이드 구성안 & 원클릭 복사</p>
-          </div>
-        </div>
-        <button onclick="toggleCanvaModal(false)" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">✕</button>
-      </div>
-
-      <div class="p-6 space-y-4 text-xs sm:text-sm">
-        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900 flex items-start gap-2">
-          <span class="text-base">💡</span>
-          <div>
-            <strong>선생님의 발표 꿀팁:</strong> 캔바나 미리캔버스에서 <strong>[프레젠테이션]</strong> 템플릿을 선택하고, 아래 슬라이드별 내용을 복사하여 넣으면 5분 발표 슬라이드가 순식간에 완성됩니다!
-          </div>
-        </div>
-        <div class="space-y-3" id="canva-slides-container"></div>
-      </div>
-
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <button onclick="copyAllSlidesScript()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-          <span>📋 전체 6장 슬라이드 한 번에 복사</span>
-        </button>
-        <button onclick="toggleCanvaModal(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: My Saved Plans Archive -->
-  <div id="archive-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">📁</span>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">내 기획서 보관함 (개인별 기록 관리)</h3>
-            <p class="text-xs text-slate-500">작성 중인 기획서를 저장하고 언제든 다시 불러올 수 있습니다.</p>
-          </div>
-        </div>
-        <button onclick="toggleArchiveModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
-      </div>
-
-      <div class="p-5 space-y-4">
-        <div class="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <div>
-            <span class="text-xs font-bold text-slate-800 block">현재 작성 내용 보관함에 새 저장</span>
-            <span class="text-[11px] text-slate-500">다른 테마로 새로운 계획을 작성할 때 유용합니다.</span>
-          </div>
-          <button onclick="saveCurrentPlanAsNewSlot()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition">
-            + 새 기획서로 저장
-          </button>
-        </div>
-
-        <div class="space-y-2">
-          <h4 class="text-xs font-bold text-slate-700">저장된 기획서 목록</h4>
-          <div id="saved-plans-list" class="space-y-2"></div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-200">
-          <h4 class="text-xs font-bold text-slate-700 mb-1">학교 ↔ 집 이동용 파일 백업</h4>
-          <p class="text-[11px] text-slate-500 mb-2">학교 컴퓨터에서 작성한 내용을 파일로 저장해 집에서 그대로 열어보세요.</p>
-          <div class="flex gap-2">
-            <button onclick="exportBackupFile()" class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">
-              💾 백업 파일 다운로드 (.json)
-            </button>
-            <label class="flex-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg text-center cursor-pointer transition border border-slate-300">
-              📂 백업 파일 불러오기
-              <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="importBackupFile(event)">
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-        <button onclick="toggleArchiveModal(false)" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Teacher Auth Modal -->
-  <div id="teacher-auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xl">👑</div>
-        <div>
-          <h3 class="text-base font-bold text-slate-900">교사 인증</h3>
-          <p class="text-xs text-slate-500">관리자 비밀번호를 입력해 주세요.</p>
-        </div>
-      </div>
-      <div>
-        <input type="password" id="teacher-pw-input" placeholder="비밀번호 4자리" class="w-full text-center tracking-widest text-lg font-bold px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none" onkeydown="if(event.key==='Enter') verifyTeacherPassword()">
-        <p id="teacher-pw-error" class="text-xs text-rose-600 font-semibold mt-1.5 hidden text-center">비밀번호가 올바르지 않습니다.</p>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="toggleTeacherAuthModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">취소</button>
-        <button onclick="verifyTeacherPassword()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shadow-sm">확인</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Teacher Admin Dashboard (실시간 클라우드 수합 대시보드) -->
-  <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2">
-          <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base">👑</span>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">교사용 실시간 제출 관리 대시보드</h3>
-            <p class="text-xs text-slate-500">학생들이 제출한 여행 계획서 수합 및 6대 요소 채점 현황</p>
-          </div>
-        </div>
-        <button onclick="toggleTeacherAdminModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
-      </div>
-
-      <div class="p-5 space-y-4">
-        <!-- Cloud Status Bar -->
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-2">
-            <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
-            <div>
-              <span id="cloud-status-title" class="font-bold text-slate-800">클라우드 서버 상태: 확인 중</span>
-              <p id="cloud-status-desc" class="text-[11px] text-slate-500">구글 스프레드시트 웹 앱과 연동되어 각 기기 제출본을 실시간으로 가져옵니다.</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button onclick="fetchCloudSubmissions()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center gap-1 transition shadow-sm">
-              🔄 실시간 새로고침
-            </button>
-            <button onclick="toggleGasUrlConfig()" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold transition">
-              ⚙️ 연동 URL 설정
-            </button>
-          </div>
-        </div>
-
-        <!-- Hidden Cloud URL Config Bar -->
-        <div id="gas-url-config-box" class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
-          <label class="block font-bold text-amber-900">구글 웹 앱 배포 URL (Google Apps Script Web App URL)</label>
-          <div class="flex gap-2">
-            <input type="text" id="input-cloud-api-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-1.5 border border-amber-300 rounded bg-white">
-            <button onclick="saveCloudApiUrl()" class="px-3 py-1.5 bg-amber-600 text-white font-bold rounded">저장</button>
-          </div>
-          <p class="text-[11px] text-amber-700">※ 한 번만 설정하면 이 브라우저에 저장되어 학생들의 제출본을 계속 실시간으로 가져옵니다.</p>
-        </div>
-
-        <!-- Dashboard Stats -->
-        <div class="grid grid-cols-3 gap-3">
-          <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
-            <span class="text-[11px] text-slate-500 block">총 제출 인원</span>
-            <span id="admin-total-submissions" class="text-xl font-black text-slate-900">0명</span>
-          </div>
-          <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl">
-            <span class="text-[11px] text-emerald-700 block">10점 만점 충족 인원</span>
-            <span id="admin-perfect-submissions" class="text-xl font-black text-emerald-700">0명</span>
-          </div>
-          <div class="bg-indigo-50 border border-indigo-200 p-3.5 rounded-xl flex items-center justify-between">
-            <div>
-              <span class="text-[11px] text-indigo-700 block">데이터 내보내기</span>
-              <span class="text-xs font-bold text-indigo-900">CSV 엑셀</span>
-            </div>
-            <button onclick="exportSubmissionsCSV()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-sm">
-              다운로드 📥
-            </button>
-          </div>
-        </div>
-
-        <!-- Submissions Table -->
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-              <tr>
-                <th class="p-3">제출 시각</th>
-                <th class="p-3">학번 / 이름</th>
-                <th class="p-3">목적지 & 테마</th>
-                <th class="p-3">6대 요소 점수</th>
-                <th class="p-3">총 예산</th>
-                <th class="p-3 text-right">상세/관리</th>
-              </tr>
-            </thead>
-            <tbody id="admin-submissions-tbody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-
-        <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
-          <span>※ 학생 제출 데이터는 클라우드 구글 시트에 실시간 영구 보관됩니다.</span>
-          <button onclick="clearAllSubmissionsPrompt()" class="text-rose-600 hover:text-rose-700 font-semibold">
-            제출 내역 전체 초기화
-          </button>
-        </div>
-      </div>
-
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-        <button onclick="toggleTeacherAdminModal(false)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Evaluation Rubric -->
-  <div id="rubric-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2">
-          <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">📋</span>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">일본어 회화 여행 계획 수행평가 채점 기준표</h3>
-            <p class="text-xs text-slate-500">성취기준 연계 | 총 배점 20점 만점</p>
-          </div>
-        </div>
-        <button onclick="toggleRubricModal(false)" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
-      </div>
-
-      <div class="p-6 space-y-4 text-xs sm:text-sm">
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
-            <span>1. 여행 계획서 작성하기 (필수 6요소 완성도)</span>
-            <span class="text-rose-600">배점 10점</span>
-          </div>
-          <table class="w-full text-left border-collapse text-xs">
-            <tr class="border-t border-slate-200 bg-rose-50/50">
-              <td class="p-2.5 font-semibold text-rose-900 w-24">10점 (만점)</td>
-              <td class="p-2.5 text-slate-700"><strong>필수 요소 6가지</strong>(전체 일정표, 교통 수단, 관광지 2곳 이상, 음식 2개 이상, 숙소, 대략적인 여행 경비)를 <strong>모두 포함</strong>하여 구체적이고 상세하게 작성함.</td>
-            </tr>
-            <tr class="border-t border-slate-200">
-              <td class="p-2.5 font-semibold text-slate-800">9점</td>
-              <td class="p-2.5 text-slate-600">필수 요소 중 5가지를 포함하여 상세히 작성함.</td>
-            </tr>
-            <tr class="border-t border-slate-200">
-              <td class="p-2.5 font-semibold text-slate-800">8점</td>
-              <td class="p-2.5 text-slate-600">필수 요소 중 4가지를 포함하여 비교적 상세히 작성함.</td>
-            </tr>
-            <tr class="border-t border-slate-200">
-              <td class="p-2.5 font-semibold text-slate-800">7점 ~ 5점</td>
-              <td class="p-2.5 text-slate-600">필수 요소 중 3~1가지만 포함하여 단편적으로 작성함.</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
-            <span>2. 여행 계획 발표하기 (유창성 & 전달력)</span>
-            <span class="text-emerald-600">배점 5점</span>
-          </div>
-          <table class="w-full text-left border-collapse text-xs">
-            <tr class="border-t border-slate-200 bg-emerald-50/50">
-              <td class="p-2.5 font-semibold text-emerald-900 w-24">5점 (만점)</td>
-              <td class="p-2.5 text-slate-700">조사한 여행 계획을 바탕으로 자신의 의견이나 생각을 적절하고 <strong>유창하게 발표</strong>할 수 있다.</td>
-            </tr>
-            <tr class="border-t border-slate-200">
-              <td class="p-2.5 font-semibold text-slate-800">4점 ~ 2점</td>
-              <td class="p-2.5 text-slate-600">비교적 적절하게 전달하거나 일부만을 단편적으로 발표함.</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
-            <span>3. 경청 및 상호작용 (동료 피드백 & 질문)</span>
-            <span class="text-blue-600">배점 5점</span>
-          </div>
-          <table class="w-full text-left border-collapse text-xs">
-            <tr class="border-t border-slate-200 bg-blue-50/50">
-              <td class="p-2.5 font-semibold text-blue-900 w-24">5점 (만점)</td>
-              <td class="p-2.5 text-slate-700">다른 학생의 발표를 바른 자세로 경청하고, 발표 내용과 관련된 <strong>적절한 질문을 1회 이상 주도적으로 하여 상호작용에 적극 참여함</strong>.</td>
-            </tr>
-            <tr class="border-t border-slate-200">
-              <td class="p-2.5 font-semibold text-slate-800">3점 ~ 1점</td>
-              <td class="p-2.5 text-slate-600">경청하나 질문을 하지 않고 수동적이거나 집중하지 않음.</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-        <button onclick="toggleRubricModal(false)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">확인 완료</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast-message" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 text-xs sm:text-sm flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <span id="toast-icon">✨</span>
-    <span id="toast-text">알림 내용</span>
-  </div>
-
-  <script>
-    // ==========================================
-    // 🌐 [중요] 구글 스프레드시트 웹 앱 API URL 설정
-    // ==========================================
-    // 선생님의 Google Apps Script 배포 URL을 아래 따옴표 안에 직접 붙여넣거나,
-    // [교사 관리] 화면의 [⚙️ 연동 URL 설정]에서 입력하실 수 있습니다.
-    const DEFAULT_GAS_URL = ""; 
-
-    const STORAGE_KEY_GAS_URL = 'tabinote_gas_api_url';
-    const STORAGE_KEY_CURRENT = 'tabinote_current_draft';
-    const STORAGE_KEY_ARCHIVE = 'tabinote_saved_plans';
-    const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
-    const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
-
-    function getActiveGasUrl() {
-      return localStorage.getItem(STORAGE_KEY_GAS_URL) || DEFAULT_GAS_URL;
-    }
-
-    let audioCtx = null;
-    function playBeep(freq = 520, type = 'sine', duration = 0.12) {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    // Default Cities Data
-    const BASE_CITIES = [
-      {
-        id: 'tokyo',
-        name: '도쿄 (とうきょう)',
-        categories: ['popculture', 'gourmet'],
-        badge: '수도 / 트렌드 & 팝컬처',
-        badgeColor: 'bg-rose-100 text-rose-800',
-        desc: '트렌드의 중심지 시부야와 애니메이션·굿즈 성지 아키하바라, 일본 전통과 미래가 공존하는 메트로폴리스.',
-        spot: '도쿄 스카이트리 & 아키하바라 전자상가',
-        spotReason: '도쿄 전경을 한눈에 내려다보고 글로벌 서브컬처 문화 및 굿즈 샵을 탐방하기 위해',
-        foods: [
-          { type: '점심', name: '에도마에 스시', note: '츠키지 장외시장에서 신선한 초밥' },
-          { type: '디저트', name: '아사쿠사 말차 젤라또', note: '단계별 쌉싸름한 녹차 아이스크림' },
-          { type: '저녁', name: '도쿄 츠케멘 라멘', note: '신주쿠 골목 진한 어패류 육수' }
-        ],
-        transitAirport: '나리타 익스프레스(NEX) 특급',
-        transitCity: '도쿄 서브웨이 72시간 패스',
-        stops: ['나리타 국제공항', '도쿄 스카이트리', '츠키지 장외시장', '아키하바라', '신주쿠역 호텔'],
-        budget: { flight: 420000, hotel: 270000, transit: 65000, food: 180000, extra: 120000 }
-      },
-      {
-        id: 'osaka',
-        name: '오사카 (おおさか)',
-        categories: ['gourmet', 'popculture'],
-        badge: '미식의 천국 / 테마파크',
-        badgeColor: 'bg-amber-100 text-amber-800',
-        desc: '"쿠이다오레(먹다가 망한다)"의 본고장! 활기찬 상인 문화와 유니버설 스튜디오 재팬(USJ)의 도시.',
-        spot: '유니버설 스튜디오 재팬(USJ) & 도톤보리',
-        spotReason: '슈퍼 닌텐도 월드 어트랙션 체험과 글리코상 네온사인 야경 감상',
-        foods: [
-          { type: '길거리 간식', name: '원조 타코야키', note: '도톤보리 강변 갓 구운 바삭촉촉 식감' },
-          { type: '저녁', name: '오코노미야키 & 쿠시카츠', note: '신세카이 골목 바삭한 꼬치튀김' },
-          { type: '간식', name: '리쿠로 오지상 치즈케이크', note: '난바역 갓 구워 흔들리는 수플레 치즈케이크' }
-        ],
-        transitAirport: '간사이공항 난카이 라피트 특급',
-        transitCity: '오사카 메트로 주유패스 (1일권)',
-        stops: ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 호텔'],
-        budget: { flight: 350000, hotel: 220000, transit: 55000, food: 160000, extra: 130000 }
-      },
-      {
-        id: 'kyoto',
-        name: '교토 (きょうと)',
-        categories: ['heritage'],
-        badge: '천년의 고도 / 유네스코 세계유산',
-        badgeColor: 'bg-emerald-100 text-emerald-800',
-        desc: '1,000년 동안 일본의 수도였으며 17개 유네스코 세계유산과 사찰, 정취 가득한 골목길이 숨 쉬는 역사 도시.',
-        spot: '기요미즈데라(청수사) & 후시미이나리 신사',
-        spotReason: '절벽 위 웅장한 목조 사찰의 사계절 풍경과 붉은 도리이가 끝없이 이어지는 숲길 산책',
-        foods: [
-          { type: '점심', name: '유도부(온두부) 정식', note: '난젠지 사찰 주변 부드러운 교토 전통 수제 두부' },
-          { type: '카페/디저트', name: '우지 말차 파르페', note: '기온 거리 진한 녹차와 당고 조합' },
-          { type: '간식', name: '야츠하시 전통 떡', note: '시나몬 향 쫄깃한 교토 명물 삼각 떡' }
-        ],
-        transitAirport: '간사이공항 하루카 특급열차 (교토 직통)',
-        transitCity: '교토 시내버스 1일권 및 한큐/게이한 전철',
-        stops: ['교토역', '후시미이나리 신사', '기온거리 말차 디저트', '기요미즈데라', '가와라마치 료칸'],
-        budget: { flight: 350000, hotel: 260000, transit: 60000, food: 170000, extra: 100000 }
-      },
-      {
-        id: 'fukuoka',
-        name: '후쿠오카 & 유후인 (ふくおか)',
-        categories: ['hotspring', 'gourmet'],
-        badge: '온천 힐링 / 야타이 미식',
-        badgeColor: 'bg-red-100 text-red-800',
-        desc: '한국에서 가장 가까운 규슈의 관문. 나카스 강변 포장마차(야타이)와 유후인의 고즈넉한 온천 료칸 투어.',
-        spot: '유후인 킨린호수 & 나카스 야타이 거리',
-        spotReason: '물안개 피어오르는 온천 마을 힐링과 강변 포장마차의 정겨운 심야 미식 체험',
-        foods: [
-          { type: '점심', name: '하카타 돈코츠 라멘', note: '진한 돼지뼈 육수와 얇은 면' },
-          { type: '길거리 간식', name: '유후인 금상고로케 & 미르히 푸딩', note: '킨린호수 길목 따끈한 간식' },
-          { type: '야식/이자카야', name: '나카스 야타이 모츠나베', note: '포장마차 정겨운 곱창전골과 꼬치' }
-        ],
-        transitAirport: '후쿠오카 공항 지하철 (하카타역 5분 직통)',
-        transitCity: '특급 유후인노모리 관광열차 & 산큐패스',
-        stops: ['후쿠오카 공항', '오호리 공원', '하카타 라멘 본점', '유후인 킨린호수', '유후인 료칸'],
-        budget: { flight: 260000, hotel: 240000, transit: 50000, food: 150000, extra: 90000 }
-      },
-      {
-        id: 'sapporo',
-        name: '삿포로 (さっぽろ)',
-        categories: ['nature', 'gourmet'],
-        badge: '설국 축제 / 청정 미식',
-        badgeColor: 'bg-sky-100 text-sky-800',
-        desc: '겨울에는 유키마쓰리(눈축제), 여름에는 시원한 라벤더 언덕과 신선한 털게·스프카레가 반기는 북해도.',
-        spot: '오도리 공원 & 오타루 운하',
-        spotReason: '세계적인 눈조각상 축제 관람과 가스등이 낭만적인 오타루 운하 야경 감상',
-        foods: [
-          { type: '점심', name: '삿포로 스프카레', note: '구운 채소와 부드러운 닭다리가 들어간 따뜻한 국물 카레' },
-          { type: '저녁', name: '징기스칸 숯불 양고기', note: '스스키노 명물 생양고기 구이' },
-          { type: '디저트', name: '홋카이도 밀크 소프트크림', note: '신선하고 진한 유제품 아이스크림' }
-        ],
-        transitAirport: '신치토세 공항 쾌속 에어포트 열차',
-        transitCity: 'JR 홋카이도 레일 패스 & 삿포로 지하철 1일권',
-        stops: ['신치토세 공항', '오도리 공원', '스스키노 라멘골목', '오타루 운하', '삿포로역 호텔'],
-        budget: { flight: 480000, hotel: 250000, transit: 70000, food: 200000, extra: 110000 }
-      },
-      {
-        id: 'okinawa',
-        name: '오키나와 (おきなわ)',
-        categories: ['nature'],
-        badge: '에메랄드빛 해변 / 아열대 휴양',
-        badgeColor: 'bg-teal-100 text-teal-800',
-        desc: '환상적인 산호초 바다와 독특한 류큐 왕국 문화를 품은 일본 최고의 해양 리조트 휴양지.',
-        spot: '츄라우미 수족관 & 만좌모 절벽',
-        spotReason: '거대한 고래상어가 헤엄치는 초대형 수조 관람과 에메랄드빛 바다 절경 감상',
-        foods: [
-          { type: '점심', name: '오키나와 소바', note: '돼지 갈비가 올라간 전통 메밀국수' },
-          { type: '간식', name: '블루씰 자색고구마 아이스크림', note: '오키나와 특산 베니이모 디저트' },
-          { type: '저녁', name: '타코라이스 & 오리온 맥주', note: '이색 퓨전 멕시칸 스타일 라이스' }
-        ],
-        transitAirport: '나하 공항 유이레일(모노레일)',
-        transitCity: '오키나와 렌터카 해안 드라이브',
-        stops: ['나하 공항', '국제거리', '만좌모', '츄라우미 수족관', '온나손 해변 리조트'],
-        budget: { flight: 390000, hotel: 310000, transit: 90000, food: 160000, extra: 100000 }
-      }
-    ];
-
-    function getCustomCities() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_CITIES) || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function getAllCities() {
-      return [...BASE_CITIES, ...getCustomCities()];
-    }
-
-    function openCustomCityModal() {
-      toggleCustomCityModal(true);
-    }
-
-    function toggleCustomCityModal(show) {
-      const modal = document.getElementById('custom-city-modal');
-      if (show) modal.classList.remove('hidden');
-      else modal.classList.add('hidden');
-    }
-
-    function saveCustomCity() {
-      const name = document.getElementById('custom-city-name').value.trim();
-      const badge = document.getElementById('custom-city-badge').value.trim() || '자유 테마';
-      const desc = document.getElementById('custom-city-desc').value.trim() || '학생이 직접 등록한 매력적인 추천 여행지입니다.';
-      const spots = document.getElementById('custom-city-spots').value.trim() || `${name} 대표 명소 1 & ${name} 대표 명소 2`;
-      const food = document.getElementById('custom-city-food').value.trim() || `${name} 현지 특산 요리`;
-      const airport = document.getElementById('custom-city-airport').value.trim() || '공항 직통 철도 / 버스';
-      const transit = document.getElementById('custom-city-transit').value.trim() || '지역 대중교통 패스';
-
-      if (!name) {
-        showToast('도시 이름을 입력해 주세요!', '⚠️');
-        return;
-      }
-
-      const newCity = {
-        id: 'custom_' + Date.now(),
-        name: name,
-        categories: ['custom'],
-        badge: badge,
-        badgeColor: 'bg-indigo-100 text-indigo-800',
-        desc: desc,
-        spot: spots,
-        spotReason: `${name}만의 고유한 문화와 감성을 직접 체험하기 위해`,
-        foods: [
-          { type: '대표 음식', name: food, note: '현지에서 꼭 맛봐야 할 전통 별미' },
-          { type: '길거리 간식', name: `${name} 특산 디저트`, note: '골목 상점가 달콤한 간식거리' }
-        ],
-        transitAirport: airport,
-        transitCity: transit,
-        stops: [`${name} 기차역/공항`, `${spots.split('&')[0].trim()}`, `${name} 중앙 맛집거리`, `${spots.split('&')[1]?.trim() || name + ' 전망대'}`, `${name} 역세권 숙소`],
-        budget: { flight: 380000, hotel: 230000, transit: 60000, food: 160000, extra: 100000 }
-      };
-
-      const customList = getCustomCities();
-      customList.push(newCity);
-      localStorage.setItem(STORAGE_KEY_CUSTOM_CITIES, JSON.stringify(customList));
-
-      updateCitySelectDropdown();
-      renderCities('custom');
-      toggleCustomCityModal(false);
-      applyCityToPlan(newCity.id);
-      showToast(`'${name}' 도시가 성공적으로 추가되었습니다!`, '🎉');
-      playBeep(784, 'sine', 0.15);
-    }
-
-    function updateCitySelectDropdown() {
-      const select = document.getElementById('input-target-city');
-      const currentVal = select.value;
-      select.innerHTML = '<option value="">도시/지역 선택</option>';
-      const all = getAllCities();
-      all.forEach(c => {
-        const opt = document.createElement('option');
-        const shortName = c.name.split(' ')[0];
-        opt.value = shortName;
-        opt.textContent = `${shortName} (${c.badge})`;
-        select.appendChild(opt);
-      });
-      if (currentVal) select.value = currentVal;
-    }
-
-    function renderCities(filter = 'all') {
-      const container = document.getElementById('cities-grid');
-      container.innerHTML = '';
-      const all = getAllCities();
-      const filtered = filter === 'all' 
-        ? all 
-        : all.filter(c => c.categories.includes(filter));
-
-      filtered.forEach(city => {
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${city.badgeColor}">${city.badge}</span>
-              <span class="text-xs text-slate-400 font-mono">${city.categories.includes('custom') ? '학생 등록' : 'JNTO Pick'}</span>
-            </div>
-            <h4 class="text-base font-bold text-slate-900">${city.name}</h4>
-            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${city.desc}</p>
-            
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-2 text-xs">
-              <div class="flex items-start gap-1.5">
-                <span class="text-amber-500 font-semibold shrink-0">🏛️ 명소:</span>
-                <span class="text-slate-800 font-medium">${city.spot}</span>
-              </div>
-              <div class="flex items-start gap-1.5">
-                <span class="text-rose-500 font-semibold shrink-0">🍜 미식:</span>
-                <span class="text-slate-800 font-medium">${city.foods ? city.foods.map(f => f.name).join(', ') : '현지 별미'}</span>
-              </div>
-              <div class="flex items-start gap-1.5">
-                <span class="text-indigo-500 font-semibold shrink-0">🚆 교통:</span>
-                <span class="text-slate-600 text-[11px]">${city.transitAirport} / ${city.transitCity}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4 pt-3">
-            <button onclick="applyCityToPlan('${city.id}')" class="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 border border-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
-              <span>➕ 이 여행지를 내 계획에 담기</span>
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function filterCities(category) {
-      document.querySelectorAll('.city-filter').forEach(btn => {
-        btn.classList.remove('active', 'bg-slate-900', 'text-white');
-        btn.classList.add('bg-white', 'text-slate-600');
-      });
-      event.target.classList.add('active', 'bg-slate-900', 'text-white');
-      event.target.classList.remove('bg-white', 'text-slate-600');
-      renderCities(category);
-      playBeep(440, 'triangle', 0.08);
-    }
-
-    function applyCityToPlan(cityId) {
-      const all = getAllCities();
-      const city = all.find(c => c.id === cityId);
-      if (!city) return;
-
-      const cityNameOnly = city.name.split(' ')[0];
-      document.getElementById('input-target-city').value = cityNameOnly;
-      document.getElementById('input-trip-theme').value = `${cityNameOnly} ${city.badge.split('/')[0].trim()} 여행`;
-      document.getElementById('input-transport-airport').value = city.transitAirport;
-      document.getElementById('input-transport-city').value = city.transitCity;
-
-      const spots = city.spot.split('&');
-      document.getElementById('input-spot-1').value = spots[0]?.trim() || `${cityNameOnly} 명소 1`;
-      document.getElementById('input-spot-reason-1').value = city.spotReason;
-      if (spots[1]) {
-        document.getElementById('input-spot-2').value = spots[1].trim();
-        document.getElementById('input-spot-reason-2').value = '현지 고유의 정취와 풍경을 직접 체험하기 위해';
-      }
-
-      clearAndSetFoodItems(city.foods || [
-        { type: '점심', name: `${cityNameOnly} 특산 요리`, note: '현지 대표 미식' },
-        { type: '디저트', name: `${cityNameOnly} 전통 간식`, note: '골목 수제 디저트' }
-      ]);
-
-      if (city.stops && city.stops.length > 0) {
-        currentRouteStops = [...city.stops];
-        renderRouteStops();
-      }
-
-      if (city.budget) {
-        document.getElementById('budget-flight').value = city.budget.flight;
-        document.getElementById('budget-hotel').value = city.budget.hotel;
-        document.getElementById('budget-transit').value = city.budget.transit;
-        document.getElementById('budget-food').value = city.budget.food;
-        document.getElementById('budget-extra').value = city.budget.extra;
-        document.getElementById('budget-preset-city-name').textContent = `'${cityNameOnly}' 맞춤 예산 자동 반영됨`;
-      }
-
-      renderHotelOptions();
-
-      showToast(`'${cityNameOnly}' 정보와 도시 맞춤 예산이 플래너에 자동 반영되었습니다!`, '🎒');
-      playBeep(660, 'sine', 0.15);
-      onInputChanged();
-      switchTab('planner');
-    }
-
-    function onCitySelectChange(val) {
-      if (!val) return;
-      const all = getAllCities();
-      const matched = all.find(c => c.name.startsWith(val));
-      if (matched) {
-        applyCityToPlan(matched.id);
-      } else {
-        renderHotelOptions();
-        onInputChanged();
-      }
-    }
-
-    // Route Stops Management
-    let currentRouteStops = ['간사이 국제공항', '오사카성', '도톤보리 맛집거리', '유니버설 스튜디오 재팬', '난바역 숙소'];
-
-    function renderRouteStops() {
-      const container = document.getElementById('route-stops-container');
-      container.innerHTML = '';
-      currentRouteStops.forEach((stop, index) => {
-        const row = document.createElement('div');
-        row.className = "flex items-center gap-2 bg-slate-800/80 border border-slate-700 p-2.5 rounded-lg";
-        row.innerHTML = `
-          <span class="inline-block w-6 h-6 rounded-full bg-rose-500 text-white font-bold text-center leading-6 text-xs shrink-0">${index + 1}</span>
-          <input type="text" value="${stop}" placeholder="경유지/명소/식당 이름" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2.5 py-1.5 text-white text-xs" oninput="currentRouteStops[${index}] = this.value; onInputChanged();">
-          ${currentRouteStops.length > 2 ? `
-            <button onclick="removeRouteStop(${index})" class="text-slate-400 hover:text-rose-400 text-xs px-2 py-1">✕</button>
-          ` : ''}
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function addRouteStop() {
-      currentRouteStops.push(`경유지 ${currentRouteStops.length + 1}`);
-      renderRouteStops();
-      onInputChanged();
-      playBeep(520, 'sine', 0.08);
-    }
-
-    function removeRouteStop(idx) {
-      if (currentRouteStops.length <= 2) return;
-      currentRouteStops.splice(idx, 1);
-      renderRouteStops();
-      onInputChanged();
-    }
-
-    function openGoogleMapsRoute() {
-      const validStops = currentRouteStops.map(s => s.trim()).filter(Boolean);
-      if (validStops.length < 2) {
-        showToast('출발지와 목적지를 포함해 2곳 이상 입력하세요!', '⚠️');
-        return;
-      }
-      const city = document.getElementById('input-target-city').value.trim() || 'Japan';
-      const encodedStops = validStops.map(s => encodeURIComponent(`${s}, ${city}`));
-      const origin = encodedStops[0];
-      const destination = encodedStops[encodedStops.length - 1];
-      const waypoints = encodedStops.slice(1, -1).join('|');
-
-      let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
-      if (waypoints) url += `&waypoints=${waypoints}`;
-
-      window.open(url, '_blank');
-      showToast('Google 지도에서 1번부터 전체 번호별 이동 경로를 열었습니다!', '🗺️');
-      playBeep(600, 'sine', 0.1);
-    }
-
-    // Food Items Management
-    let currentFoodList = [
-      { type: '점심', name: '오사카 타코야키 & 오코노미야키', note: '도톤보리 명물 거리' },
-      { type: '디저트', name: '교토 말차 파르페 & 당고', note: '사찰 산책 후 달콤한 휴식' }
-    ];
-
-    function renderFoodList() {
-      const container = document.getElementById('foods-container');
-      container.innerHTML = '';
-      currentFoodList.forEach((item, idx) => {
-        const card = document.createElement('div');
-        card.className = "p-3 bg-slate-50 rounded-lg border border-slate-200 flex flex-col sm:flex-row gap-2 items-start sm:items-center";
-        card.innerHTML = `
-          <select class="text-xs px-2 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-700 shrink-0" onchange="currentFoodList[${idx}].type = this.value; onInputChanged();">
-            <option value="아침" ${item.type === '아침' ? 'selected' : ''}>🌅 아침식사</option>
-            <option value="점심" ${item.type === '점심' ? 'selected' : ''}>🍱 점심식사</option>
-            <option value="저녁" ${item.type === '저녁' ? 'selected' : ''}>🍲 저녁식사</option>
-            <option value="길거리 간식" ${item.type === '길거리 간식' ? 'selected' : ''}>🍢 길거리 간식</option>
-            <option value="카페/디저트" ${item.type === '카페/디저트' ? 'selected' : ''}>☕ 카페/디저트</option>
-            <option value="편의점 털기" ${item.type === '편의점 털기' ? 'selected' : ''}>🏪 편의점 털기</option>
-            <option value="야식/이자카야" ${item.type === '야식/이자카야' ? 'selected' : ''}>🏮 야식/이자카야</option>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">주요 방문 도시 <span class="text-rose-500">*</span></label>
+          <select id="input-target-city" class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400 focus:outline-none" onchange="onCitySelectChange(this.value)">
+            <option value="">도시/지역 선택</option>
           </select>
-          <input type="text" value="${item.name || ''}" placeholder="음식/디저트 명칭 (예: 편의점 에그샌드위치 & 푸딩)" class="w-full sm:flex-1 text-xs px-2.5 py-1.5 border border-slate-300 rounded bg-white" oninput="currentFoodList[${idx}].name = this.value; onInputChanged();">
-          <input type="text" value="${item.note || ''}" placeholder="먹는 장소 또는 선정 이유" class="w-full sm:w-48 text-[11px] px-2.5 py-1.5 border border-slate-300 rounded bg-white text-slate-600" oninput="currentFoodList[${idx}].note = this.value; onInputChanged();">
-          ${currentFoodList.length > 2 ? `
-            <button onclick="removeFoodItem(${idx})" class="text-slate-400 hover:text-rose-600 text-xs px-2 py-1">✕</button>
-          ` : ''}
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function addFoodItem() {
-      currentFoodList.push({ type: '길거리 간식', name: '', note: '' });
-      renderFoodList();
-      onInputChanged();
-      playBeep(520, 'sine', 0.08);
-    }
-
-    function removeFoodItem(idx) {
-      if (currentFoodList.length <= 2) return;
-      currentFoodList.splice(idx, 1);
-      renderFoodList();
-      onInputChanged();
-    }
-
-    function clearAndSetFoodItems(foods) {
-      currentFoodList = foods && foods.length > 0 ? [...foods] : [
-        { type: '점심', name: '', note: '' },
-        { type: '간식', name: '', note: '' }
-      ];
-      renderFoodList();
-    }
-
-    function onHotelTypeChange() {
-      renderHotelOptions();
-      onInputChanged();
-    }
-
-    function renderHotelOptions() {
-      const city = document.getElementById('input-target-city').value.trim() || '도쿄';
-      const hotelType = document.getElementById('input-hotel-type').value || '호텔';
-      const container = document.getElementById('hotel-options-grid');
-      container.innerHTML = '';
-
-      const queryBase = `${city} ${hotelType}`;
-      const searchOptions = [
-        {
-          title: `🏨 [아고다] ${city} ${hotelType} 실시간 특가`,
-          desc: '평점 8.5 이상 역세권 인기 숙소 모아보기',
-          url: `https://www.agoda.com/ko-kr/search?text=${encodeURIComponent(queryBase)}`
-        },
-        {
-          title: `🗺️ [구글 호텔] ${city} 지도 기반 ${hotelType} 비교`,
-          desc: '지하철역 도보 5분 이내 숙소 1박 요금 비교',
-          url: `https://www.google.com/travel/hotels?q=${encodeURIComponent(queryBase)}`
-        },
-        {
-          title: `🔍 [구글] ${city} 학생 추천 가성비 ${hotelType} 후기`,
-          desc: '블로그 및 실제 투숙객 청결도·가성비 리뷰',
-          url: `https://www.google.com/search?q=${encodeURIComponent(queryBase + ' 추천 후기 가성비')}`
-        },
-        {
-          title: `♨️ [료칸/온천넷] ${city} 감성 숙소 모아보기`,
-          desc: '현지 대욕장 또는 조식 포함 추천 선택지',
-          url: `https://www.google.com/search?q=${encodeURIComponent(city + ' 역세권 대욕장 조식 호텔 추천')}`
-        }
-      ];
-
-      searchOptions.forEach(opt => {
-        const a = document.createElement('a');
-        a.href = opt.url;
-        a.target = "_blank";
-        a.className = "p-2.5 bg-white border border-purple-200 rounded-lg hover:border-purple-400 hover:shadow-sm transition block group";
-        a.innerHTML = `
-          <div class="font-bold text-slate-800 group-hover:text-purple-700 flex items-center justify-between text-xs">
-            <span>${opt.title}</span>
-            <span class="text-purple-500 font-mono text-[11px]">➔</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-0.5">${opt.desc}</p>
-        `;
-        container.appendChild(a);
-      });
-    }
-
-    // Quizzes
-    const QUIZ_ANSWERS = {
-      1: { correct: 'X', exp: '정답입니다! 일본 차량은 왼쪽(좌측통행)으로 주행합니다.' },
-      2: { correct: '신칸센', exp: '정답입니다! 1964년 개통된 일본의 대표 초고속열차는 신칸센(しんかんせん)입니다.' },
-      3: { correct: 'X', exp: '정답입니다! 일본 택시 뒷문은 자동문이므로 손으로 열거나 닫지 않습니다.' }
-    };
-    let quizScore = { 1: false, 2: false, 3: false };
-
-    function checkQuiz(qNum, selected) {
-      const info = QUIZ_ANSWERS[qNum];
-      const targetFeedback = document.getElementById(`quiz-ans-${qNum}`);
-      if (selected === info.correct) {
-        quizScore[qNum] = true;
-        targetFeedback.textContent = `⭕ ${info.exp}`;
-        targetFeedback.className = "text-xs font-semibold mt-1 text-emerald-600";
-        playBeep(784, 'sine', 0.15);
-      } else {
-        quizScore[qNum] = false;
-        targetFeedback.textContent = `❌ 오답입니다. 본문 설명을 다시 읽어보세요!`;
-        targetFeedback.className = "text-xs font-semibold mt-1 text-rose-600";
-        playBeep(220, 'square', 0.2);
-      }
-
-      const totalCorrect = Object.values(quizScore).filter(Boolean).length;
-      document.getElementById('quiz-score-indicator').textContent = `정답: ${totalCorrect} / 3`;
-      if (totalCorrect === 3) {
-        showToast('교통 상식 퀴즈 3문항을 모두 맞혔습니다! 👏', '🎉');
-      }
-    }
-
-    function getFormData() {
-      return {
-        studentName: document.getElementById('input-student-name').value.trim(),
-        tripTheme: document.getElementById('input-trip-theme').value.trim(),
-        targetCity: document.getElementById('input-target-city').value.trim(),
-        duration: document.getElementById('input-schedule-duration').value.trim(),
-        route: document.getElementById('input-schedule-route').value.trim(),
-        scheduleDetail: document.getElementById('input-schedule-detail').value.trim(),
-        transportAirport: document.getElementById('input-transport-airport').value.trim(),
-        transportCity: document.getElementById('input-transport-city').value.trim(),
-        spot1: document.getElementById('input-spot-1').value.trim(),
-        spotReason1: document.getElementById('input-spot-reason-1').value.trim(),
-        spot2: document.getElementById('input-spot-2').value.trim(),
-        spotReason2: document.getElementById('input-spot-reason-2').value.trim(),
-        foods: [...currentFoodList],
-        hotelType: document.getElementById('input-hotel-type').value,
-        hotelLocation: document.getElementById('input-hotel-location').value.trim(),
-        budgetFlight: Number(document.getElementById('budget-flight').value) || 0,
-        budgetHotel: Number(document.getElementById('budget-hotel').value) || 0,
-        budgetTransit: Number(document.getElementById('budget-transit').value) || 0,
-        budgetFood: Number(document.getElementById('budget-food').value) || 0,
-        budgetExtra: Number(document.getElementById('budget-extra').value) || 0,
-        routeStops: [...currentRouteStops],
-        peerQuestion: document.getElementById('my-peer-question').value.trim(),
-        savedAt: new Date().toISOString()
-      };
-    }
-
-    function setFormData(data) {
-      if (!data) return;
-      if (data.studentName !== undefined) document.getElementById('input-student-name').value = data.studentName;
-      if (data.tripTheme !== undefined) document.getElementById('input-trip-theme').value = data.tripTheme;
-      if (data.targetCity !== undefined) document.getElementById('input-target-city').value = data.targetCity;
-      if (data.duration !== undefined) document.getElementById('input-schedule-duration').value = data.duration;
-      if (data.route !== undefined) document.getElementById('input-schedule-route').value = data.route;
-      if (data.scheduleDetail !== undefined) document.getElementById('input-schedule-detail').value = data.scheduleDetail;
-      if (data.transportAirport !== undefined) document.getElementById('input-transport-airport').value = data.transportAirport;
-      if (data.transportCity !== undefined) document.getElementById('input-transport-city').value = data.transportCity;
-      if (data.spot1 !== undefined) document.getElementById('input-spot-1').value = data.spot1;
-      if (data.spotReason1 !== undefined) document.getElementById('input-spot-reason-1').value = data.spotReason1;
-      if (data.spot2 !== undefined) document.getElementById('input-spot-2').value = data.spot2;
-      if (data.spotReason2 !== undefined) document.getElementById('input-spot-reason-2').value = data.spotReason2;
-      if (data.hotelType !== undefined) document.getElementById('input-hotel-type').value = data.hotelType;
-      if (data.hotelLocation !== undefined) document.getElementById('input-hotel-location').value = data.hotelLocation;
-      if (data.budgetFlight !== undefined) document.getElementById('budget-flight').value = data.budgetFlight || '';
-      if (data.budgetHotel !== undefined) document.getElementById('budget-hotel').value = data.budgetHotel || '';
-      if (data.budgetTransit !== undefined) document.getElementById('budget-transit').value = data.budgetTransit || '';
-      if (data.budgetFood !== undefined) document.getElementById('budget-food').value = data.budgetFood || '';
-      if (data.budgetExtra !== undefined) document.getElementById('budget-extra').value = data.budgetExtra || '';
-      if (data.peerQuestion !== undefined) document.getElementById('my-peer-question').value = data.peerQuestion;
-
-      if (data.foods && Array.isArray(data.foods)) {
-        currentFoodList = data.foods;
-        renderFoodList();
-      }
-
-      if (data.routeStops && Array.isArray(data.routeStops)) {
-        currentRouteStops = data.routeStops;
-        renderRouteStops();
-      }
-
-      renderHotelOptions();
-      calculateTotalBudget();
-    }
-
-    let autoSaveTimeout = null;
-    function onInputChanged() {
-      calculateTotalBudget();
-      clearTimeout(autoSaveTimeout);
-      autoSaveTimeout = setTimeout(() => {
-        try {
-          const data = getFormData();
-          localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(data));
-          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          document.getElementById('save-status-text').textContent = `자동 저장됨 (${timeStr})`;
-        } catch (e) {}
-      }, 500);
-    }
-
-    function calculateTotalBudgetRaw() {
-      const f = Number(document.getElementById('budget-flight').value) || 0;
-      const h = Number(document.getElementById('budget-hotel').value) || 0;
-      const t = Number(document.getElementById('budget-transit').value) || 0;
-      const fd = Number(document.getElementById('budget-food').value) || 0;
-      const e = Number(document.getElementById('budget-extra').value) || 0;
-      return f + h + t + fd + e;
-    }
-
-    function calculateTotalBudget() {
-      const f = Number(document.getElementById('budget-flight').value) || 0;
-      const h = Number(document.getElementById('budget-hotel').value) || 0;
-      const t = Number(document.getElementById('budget-transit').value) || 0;
-      const fd = Number(document.getElementById('budget-food').value) || 0;
-      const e = Number(document.getElementById('budget-extra').value) || 0;
-
-      document.getElementById('badge-flight-amt').textContent = f ? `${f.toLocaleString()}원` : '0원';
-      document.getElementById('badge-hotel-amt').textContent = h ? `${h.toLocaleString()}원` : '0원';
-      document.getElementById('badge-transit-amt').textContent = t ? `${t.toLocaleString()}원` : '0원';
-      document.getElementById('badge-food-amt').textContent = fd ? `${fd.toLocaleString()}원` : '0원';
-      document.getElementById('badge-extra-amt').textContent = e ? `${e.toLocaleString()}원` : '0원';
-
-      const total = f + h + t + fd + e;
-      const jpy = Math.round(total / 9.2);
-
-      document.getElementById('total-budget-krw').textContent = `${total.toLocaleString()} 원`;
-      document.getElementById('total-budget-jpy').textContent = `약 ${jpy.toLocaleString()} 円`;
-
-      updatePlanState();
-    }
-
-    function updatePlanState() {
-      const hasSched = (document.getElementById('input-schedule-duration').value.trim() !== '') &&
-                       (document.getElementById('input-schedule-route').value.trim() !== '');
-
-      const hasTransit = (document.getElementById('input-transport-airport').value.trim() !== '') ||
-                         (document.getElementById('input-transport-city').value.trim() !== '');
-
-      const hasSpots = (document.getElementById('input-spot-1').value.trim() !== '') &&
-                       (document.getElementById('input-spot-2').value.trim() !== '');
-
-      const filledFoods = currentFoodList.filter(item => item.name && item.name.trim() !== '');
-      const hasFoods = filledFoods.length >= 2;
-
-      const hasHotel = (document.getElementById('input-hotel-type').value !== '') &&
-                       (document.getElementById('input-hotel-location').value.trim() !== '');
-
-      const hasBudget = calculateTotalBudgetRaw() > 0;
-
-      const states = [hasSched, hasTransit, hasSpots, hasFoods, hasHotel, hasBudget];
-      const fulfilled = states.filter(Boolean).length;
-
-      for (let i = 1; i <= 6; i++) {
-        const ok = states[i - 1];
-        const el = document.getElementById(`check-elem-${i}`);
-        if (ok) {
-          el.className = "check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold";
-          el.querySelector('.check-icon').textContent = '✅';
-        } else {
-          el.className = "check-box-indicator flex items-center gap-1.5 p-2 rounded-lg bg-slate-100 text-slate-500 text-xs";
-          el.querySelector('.check-icon').textContent = '⬜';
-        }
-      }
-
-      document.getElementById('elements-count-text').textContent = `${fulfilled} / 6 완료`;
-      document.getElementById('nav-score-badge').textContent = `${fulfilled}/6`;
-
-      let score = 3;
-      if (fulfilled === 6) score = 10;
-      else if (fulfilled === 5) score = 9;
-      else if (fulfilled === 4) score = 8;
-      else if (fulfilled === 3) score = 7;
-      else if (fulfilled === 2) score = 6;
-      else if (fulfilled === 1) score = 5;
-
-      const scoreEl = document.getElementById('expected-score-text');
-      scoreEl.innerHTML = `${score}점 <span class="text-xs font-normal text-slate-400">/ 10점</span>`;
-      scoreEl.className = score === 10 ? "text-lg font-black text-emerald-600" : "text-lg font-black text-rose-600";
-
-      refreshSpeechScript();
-    }
-
-    function refreshSpeechScript() {
-      const name = document.getElementById('input-student-name').value.trim() || '[발표자 성명]';
-      const city = document.getElementById('input-target-city').value.trim() || '일본';
-      const theme = document.getElementById('input-trip-theme').value.trim() || '나만의 테마 여행';
-      const dur = document.getElementById('input-schedule-duration').value.trim() || '2박 3일';
-      const route = document.getElementById('input-schedule-route').value.trim() || '주요 동선';
-      const transit = document.getElementById('input-transport-airport').value.trim() || '공항 직통 철도';
-      const spot1 = document.getElementById('input-spot-1').value.trim() || '첫 번째 명소';
-      const spot2 = document.getElementById('input-spot-2').value.trim() || '두 번째 명소';
-      const reason1 = document.getElementById('input-spot-reason-1').value.trim() || '역사와 문화를 직접 체험하기 위해';
-      
-      const foodNames = currentFoodList.filter(f => f.name.trim() !== '').map(f => f.name).join(', ') || '현지 대표 미식과 디저트';
-      const hotel = document.getElementById('input-hotel-type').value || '숙소';
-      const total = calculateTotalBudgetRaw();
-
-      const box = document.getElementById('speech-script-box');
-      box.innerHTML = `
-        <p><strong>[도입: 10초]</strong><br>
-        "안녕하십니까! 이번 일본어 회화 여행 계획 발표를 맡은 <strong>${name}</strong>입니다. 제가 기획한 여행 테마는 <strong>'${theme}'</strong>이며, 목적지는 <strong>${city}</strong>입니다."</p>
-
-        <p><strong>[일정 & 번호별 동선: 20초]</strong><br>
-        "저희 일정은 <strong>${dur}</strong> 동안 진행되며, 구글 지도 기반 <strong>${currentRouteStops.join(' ➔ ')}</strong> 순서로 동선을 최적화했습니다. 현지 이동에는 <strong>${transit}</strong>을(를) 활용합니다."</p>
-
-        <p><strong>[명소 2곳 & 미식/간식: 20초]</strong><br>
-        "방문 명소로는 <strong>${spot1}</strong>에서 ${reason1} 시간을 보내고, <strong>${spot2}</strong>을(를) 탐방합니다. 또한 식도락으로 <strong>${foodNames}</strong>을(를) 맛볼 계획입니다."</p>
-
-        <p><strong>[숙소 & 예산 마무리: 10초]</strong><br>
-        "숙소는 아고다와 구글을 통해 비교한 <strong>${hotel}</strong>을(를) 선택했으며, 1인 총 예상 경비는 약 <strong>${total ? total.toLocaleString() + '원' : '예산 산출 중'}</strong>입니다. 경청해 주셔서 감사드리며, 질문 있으시면 말씀해 주세요!"</p>
-      `;
-    }
-
-    function selectQuestion(cardEl) {
-      const qText = cardEl.querySelector('p').textContent.replace(/"/g, '');
-      document.getElementById('my-peer-question').value = qText;
-      onInputChanged();
-      showToast('질문이 내 메모장에 복사되었습니다!', '💬');
-      playBeep(520, 'sine', 0.1);
-    }
-
-    const CANVA_SLIDE_TEMPLATES = [
-      {
-        num: 1,
-        title: "슬라이드 1: 표지 (Title Slide)",
-        time: "0:00 ~ 0:40",
-        getSlideText: d => `[일본어 회화 발표] 나만의 일본 테마 여행\n\n· 여행 테마: ${d.tripTheme || '나만의 테마 여행'}\n· 방문 도시: 일본 ${d.targetCity || '추천 도시'}\n· 발표자: ${d.studentName || '이름 미입력'}`,
-        tip: "캔바/미리캔버스 검색창에 '일본 여행'을 검색해 감성적인 표지 템플릿을 고르세요."
-      },
-      {
-        num: 2,
-        title: "슬라이드 2: 전체 일정표 & 선정 이유",
-        time: "0:40 ~ 1:30",
-        getSlideText: d => `· 여행 기간: ${d.duration || '2박 3일'}\n· 핵심 이동 루트: ${d.route || '1일차 → 2일차 → 3일차'}\n· 테마 선정 이유: ${d.targetCity || '일본'}만의 고유한 매력과 테마를 직접 체험하기 위해 선정`,
-        tip: "화살표 타임라인 그래픽을 활용하면 일정이 한눈에 들어옵니다."
-      },
-      {
-        num: 3,
-        title: "슬라이드 3: 구글 지도 번호별 이동 경로 (1➔2➔3...)",
-        time: "1:30 ~ 2:20",
-        getSlideText: d => `· 공항 ↔ 도심: ${d.transportAirport || '공항 직통 철도'}\n· 시내 이동 및 패스: ${d.transportCity || '지하철 패스'}\n· 구글맵스 상세 동선:\n  ${d.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ')}`,
-        tip: "구글맵 캡처 사진이나 역 번호 스티커를 나란히 배치해 보세요."
-      },
-      {
-        num: 4,
-        title: "슬라이드 4: 대표 명소 2곳 (하이라이트)",
-        time: "2:20 ~ 3:30",
-        getSlideText: d => `1. ${d.spot1 || '대표 명소 1'}\n   - 선정 이유: ${d.spotReason1 || '풍경과 역사를 감상하기 위해'}\n2. ${d.spot2 || '대표 명소 2'}\n   - 선정 이유: ${d.spotReason2 || '문화와 체험을 즐기기 위해'}`,
-        tip: "고화질 사진 2장을 좌우로 배치하고 핵심 키워드로 설명하세요."
-      },
-      {
-        num: 5,
-        title: "슬라이드 5: 오감만족 미식 & 디저트 & 숙소",
-        time: "3:30 ~ 4:20",
-        getSlideText: d => `· 현지 미식 & 디저트 컬렉션:\n${d.foods.map(f => `  - [${f.type}] ${f.name} (${f.note})`).join('\n')}\n· 숙소: ${d.hotelType || '호텔'} (${d.hotelLocation || '역세권'})`,
-        tip: "음식 사진과 편의점 간식 사진을 콜라주 형태로 배치하세요."
-      },
-      {
-        num: 6,
-        title: "슬라이드 6: 1인 예상 경비 분석 & 질의응답",
-        time: "4:20 ~ 5:00",
-        getSlideText: d => {
-          const tot = (d.budgetFlight||0) + (d.budgetHotel||0) + (d.budgetTransit||0) + (d.budgetFood||0) + (d.budgetExtra||0);
-          return `· 1인 총 예상 경비: 약 ${tot.toLocaleString()}원 (약 ${(Math.round(tot/9.2)).toLocaleString()}円)\n· 경비 절약 팁: 대중교통 패스 및 사전 예약 혜택 활용\n· "경청해 주셔서 감사합니다. 질문 있으신가요?"`;
-        },
-        tip: "원형 차트로 항공/숙소/식비 비율을 시각화하면 높은 평가를 받습니다."
-      }
-    ];
-
-    function renderCanvaSlides() {
-      const container = document.getElementById('canva-slides-container');
-      container.innerHTML = '';
-      const data = getFormData();
-
-      CANVA_SLIDE_TEMPLATES.forEach((tpl, idx) => {
-        const text = tpl.getSlideText(data);
-        const card = document.createElement('div');
-        card.className = "p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2";
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-900 text-xs sm:text-sm">${tpl.title}</span>
-            <span class="text-[11px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-semibold">${tpl.time}</span>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-xs text-slate-800 whitespace-pre-wrap">${text}</div>
-          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-            <span>💡 <strong>팁:</strong> ${tpl.tip}</span>
-            <button onclick="copySlideByIndex(${idx})" class="text-indigo-600 hover:text-indigo-800 font-bold shrink-0 ml-2">
-              슬라이드 내용 복사 📋
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function copySlideByIndex(idx) {
-      const data = getFormData();
-      const text = CANVA_SLIDE_TEMPLATES[idx].getSlideText(data);
-      copyTextToClipboard(text, '슬라이드 내용이 복사되었습니다!');
-    }
-
-    function copyAllSlidesScript() {
-      const data = getFormData();
-      let full = `[캔바/미리캔버스 5분 발표 슬라이드 전체 대본]\n\n`;
-      CANVA_SLIDE_TEMPLATES.forEach(tpl => {
-        full += `--- ${tpl.title} (${tpl.time}) ---\n${tpl.getSlideText(data)}\n\n`;
-      });
-      copyTextToClipboard(full, '전체 6장 슬라이드 내용이 모두 복사되었습니다!');
-    }
-
-    function openCanvaGuideModal() {
-      renderCanvaSlides();
-      toggleCanvaModal(true);
-    }
-
-    function toggleCanvaModal(show) {
-      const m = document.getElementById('canva-guide-modal');
-      if (show) {
-        m.classList.remove('hidden');
-        playBeep(520, 'sine', 0.1);
-      } else {
-        m.classList.add('hidden');
-      }
-    }
-
-    function downloadPlanPDF() {
-      const data = getFormData();
-      const name = data.studentName || '학생';
-      const city = data.targetCity || '일본';
-      const theme = data.tripTheme || '테마여행';
-
-      document.getElementById('pdf-student-name').textContent = name;
-      document.getElementById('pdf-trip-theme').textContent = theme;
-      document.getElementById('pdf-target-city').textContent = city;
-
-      document.getElementById('pdf-schedule-content').innerHTML = `<strong>기간:</strong> ${data.duration || '미작성'}<br><strong>동선:</strong> ${data.route || '미작성'}${data.scheduleDetail ? '<br><strong>상세:</strong> ' + data.scheduleDetail : ''}`;
-      document.getElementById('pdf-transport-content').innerHTML = `<strong>공항↔도심:</strong> ${data.transportAirport || '미작성'}<br><strong>시내 이동/패스:</strong> ${data.transportCity || '미작성'}`;
-      document.getElementById('pdf-spots-content').innerHTML = `1. <strong>${data.spot1 || '명소 1'}</strong> (이유: ${data.spotReason1 || '미작성'})<br>2. <strong>${data.spot2 || '명소 2'}</strong> (이유: ${data.spotReason2 || '미작성'})`;
-
-      const foodSummary = data.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(' / ');
-      document.getElementById('pdf-foods-content').innerHTML = foodSummary || '미작성';
-      document.getElementById('pdf-hotel-content').innerHTML = `<strong>유형:</strong> ${data.hotelType || '미선택'} / <strong>위치:</strong> ${data.hotelLocation || '미작성'}`;
-
-      const total = calculateTotalBudgetRaw();
-      const approxJpy = Math.round(total / 9.2);
-      document.getElementById('pdf-budget-content').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span class="text-[10px] text-slate-500">※ 항공·숙박·교통·식비 포함</span>`;
-
-      document.getElementById('pdf-route-timeline').textContent = data.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ');
-      document.getElementById('pdf-question-content').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
-      document.getElementById('pdf-checklist-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
-
-      const element = document.getElementById('pdf-render-wrapper');
-      const btn = document.getElementById('btn-download-pdf');
-      const label = document.getElementById('btn-pdf-label');
-
-      const sanitizedName = name.replace(/[^가-힣a-zA-Z0-9]/g, '_');
-      const sanitizedCity = city.replace(/[^가-힣a-zA-Z0-9]/g, '_');
-      const filename = `[일본어회화]_${sanitizedName}_${sanitizedCity}_여행기획서.pdf`;
-
-      btn.disabled = true;
-      label.textContent = "PDF 생성 중... ⏳";
-      playBeep(440, 'sine', 0.1);
-
-      if (window.html2pdf) {
-        const opt = {
-          margin: [8, 8, 8, 8],
-          filename: filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save().then(() => {
-          btn.disabled = false;
-          label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
-          showToast(`'${filename}' 다운로드가 완료되었습니다!`, '📄');
-          playBeep(880, 'sine', 0.2);
-        }).catch(() => {
-          btn.disabled = false;
-          label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
-          triggerPrintPlan();
-        });
-      } else {
-        btn.disabled = false;
-        label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
-        triggerPrintPlan();
-      }
-    }
-
-    function triggerPrintPlan() {
-      const data = getFormData();
-      document.getElementById('print-student-name').textContent = data.studentName || '미작성';
-      document.getElementById('print-trip-theme').textContent = data.tripTheme || '미작성';
-      document.getElementById('print-target-city').textContent = data.targetCity || '미작성';
-      document.getElementById('print-schedule').innerHTML = `기간: ${data.duration || '-'}<br>동선: ${data.route || '-'}`;
-      document.getElementById('print-transport').innerHTML = `공항: ${data.transportAirport || '-'}<br>시내: ${data.transportCity || '-'}`;
-      document.getElementById('print-spots').innerHTML = `1. ${data.spot1 || '-'} (${data.spotReason1 || '-' })<br>2. ${data.spot2 || '-'} (${data.spotReason2 || '-' })`;
-      
-      const foodSummary = data.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(' / ');
-      document.getElementById('print-foods').innerHTML = foodSummary || '-';
-      document.getElementById('print-hotel').innerHTML = `${data.hotelType || '-'} (${data.hotelLocation || '-'})`;
-      
-      const tot = calculateTotalBudgetRaw();
-      document.getElementById('print-budget').textContent = `약 ${tot.toLocaleString()} 원`;
-      document.getElementById('print-question').textContent = data.peerQuestion || '동료 발표 경청 후 질문 예정';
-
-      window.print();
-    }
-
-    function copyPlanToClipboard() {
-      const d = getFormData();
-      const tot = calculateTotalBudgetRaw();
-      const foodSummary = d.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(', ');
-      const txt = `[일본어 회화 여행 계획서]\n- 작성자: ${d.studentName || '미작성'}\n- 테마: ${d.tripTheme || '미작성'} (${d.targetCity || '미작성'})\n\n1. 일정: ${d.duration || '-'} / ${d.route || '-'}\n2. 교통: 공항(${d.transportAirport || '-'}), 시내(${d.transportCity || '-'})\n3. 관광지: 1) ${d.spot1 || '-'}, 2) ${d.spot2 || '-'}\n4. 미식/간식: ${foodSummary || '-'}\n5. 숙소: ${d.hotelType || '-'} (${d.hotelLocation || '-'})\n6. 총 예산: 약 ${tot.toLocaleString()}원`;
-      copyTextToClipboard(txt, '계획서 텍스트가 복사되었습니다!');
-    }
-
-    function openArchiveModal() {
-      renderSavedPlansList();
-      toggleArchiveModal(true);
-    }
-
-    function toggleArchiveModal(show) {
-      const m = document.getElementById('archive-modal');
-      if (show) {
-        m.classList.remove('hidden');
-        playBeep(520, 'sine', 0.1);
-      } else {
-        m.classList.add('hidden');
-      }
-    }
-
-    function getSavedPlans() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_ARCHIVE) || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveCurrentPlanAsNewSlot() {
-      const current = getFormData();
-      if (!current.studentName && !current.tripTheme) {
-        showToast('저장할 학생 이름 또는 테마를 먼저 입력해 주세요!', '⚠️');
-        return;
-      }
-      const plans = getSavedPlans();
-      current.id = 'plan_' + Date.now();
-      plans.unshift(current);
-      localStorage.setItem(STORAGE_KEY_ARCHIVE, JSON.stringify(plans));
-      renderSavedPlansList();
-      showToast('새 기획서로 보관함에 저장되었습니다!', '💾');
-      playBeep(700, 'sine', 0.1);
-    }
-
-    function renderSavedPlansList() {
-      const container = document.getElementById('saved-plans-list');
-      const plans = getSavedPlans();
-      container.innerHTML = '';
-
-      if (plans.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic p-3 text-center bg-slate-50 rounded-lg">보관함에 저장된 다른 기획서가 없습니다.</p>`;
-        return;
-      }
-
-      plans.forEach((p, index) => {
-        const item = document.createElement('div');
-        item.className = "flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition text-xs";
-        const dateStr = p.savedAt ? new Date(p.savedAt).toLocaleDateString() : '날짜 미상';
-        item.innerHTML = `
+        </div>
+      </div>
+
+      <!-- Element 1: Total Schedule -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-700">필수 요소 1</span>
+          <span class="text-xs text-slate-400">전체 일정표 (기간 및 일차별 동선)</span>
+        </div>
+        <h4 class="text-sm font-bold text-slate-900">전체 일정 및 이동 루트</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <div class="font-bold text-slate-900">${p.tripTheme || '무제 여행'} <span class="text-rose-600 font-semibold">(${p.targetCity || '도시미정'})</span></div>
-            <div class="text-[11px] text-slate-500">${p.studentName || '이름없음'} · ${dateStr}</div>
+            <label class="block text-[11px] text-slate-500 mb-1">일정 기간</label>
+            <input type="text" id="input-schedule-duration" placeholder="예: 2박 3일" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
           </div>
-          <div class="flex gap-1.5">
-            <button onclick="loadPlanFromArchive(${index})" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold text-[11px]">불러오기</button>
-            <button onclick="deletePlanFromArchive(${index})" class="px-2 py-1 bg-slate-200 hover:bg-rose-100 hover:text-rose-700 text-slate-600 rounded text-[11px]">삭제</button>
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] text-slate-500 mb-1">일차별 루트 요약</label>
+            <input type="text" id="input-schedule-route" placeholder="예: 1일차(간사이공항→도톤보리) → 2일차(교토 청수사) → 3일차(USJ)" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
           </div>
-        `;
-        container.appendChild(item);
-      });
-    }
+        </div>
+        <textarea id="input-schedule-detail" rows="2" placeholder="일차별 상세 시간표나 세부 계획을 자유롭게 적어보세요." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()"></textarea>
+      </div>
 
-    function loadPlanFromArchive(index) {
-      const plans = getSavedPlans();
-      const plan = plans[index];
-      if (plan) {
-        setFormData(plan);
-        localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(plan));
-        toggleArchiveModal(false);
-        showToast(`'${plan.tripTheme}' 기획서를 불러왔습니다!`, '📂');
-        playBeep(600, 'sine', 0.1);
-      }
-    }
-
-    function deletePlanFromArchive(index) {
-      const plans = getSavedPlans();
-      plans.splice(index, 1);
-      localStorage.setItem(STORAGE_KEY_ARCHIVE, JSON.stringify(plans));
-      renderSavedPlansList();
-      showToast('기획서가 삭제되었습니다.', '🗑️');
-    }
-
-    function exportBackupFile() {
-      const data = getFormData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const name = (data.studentName || '학생').replace(/[^가-힣a-zA-Z0-9]/g, '_');
-      a.href = url;
-      a.download = `[타비노트_백업]_${name}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('백업 파일(.json)이 다운로드되었습니다!', '💾');
-      playBeep(700, 'sine', 0.1);
-    }
-
-    function importBackupFile(evt) {
-      const file = evt.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          setFormData(parsed);
-          localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(parsed));
-          toggleArchiveModal(false);
-          showToast('백업 파일을 성공적으로 불러왔습니다!', '🎉');
-          playBeep(880, 'sine', 0.15);
-        } catch (err) {
-          showToast('올바른 타비노트 백업 JSON 파일이 아닙니다.', '⚠️');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    // ==========================================
-    // 🚀 학생 기획서 온라인 클라우드 제출 로직
-    // ==========================================
-    async function submitPlanToTeacher() {
-      const data = getFormData();
-      if (!data.studentName) {
-        showToast('학번과 이름을 반드시 입력해 주세요!', '⚠️');
-        switchTab('planner');
-        document.getElementById('input-student-name').focus();
-        return;
-      }
-
-      const hasSched = (data.duration !== '') && (data.route !== '');
-      const hasTransit = (data.transportAirport !== '') || (data.transportCity !== '');
-      const hasSpots = (data.spot1 !== '') && (data.spot2 !== '');
-      const filledFoods = data.foods.filter(f => f.name && f.name.trim() !== '');
-      const hasFoods = filledFoods.length >= 2;
-      const hasHotel = (data.hotelType !== '') && (data.hotelLocation !== '');
-      const totalBudget = (data.budgetFlight||0) + (data.budgetHotel||0) + (data.budgetTransit||0) + (data.budgetFood||0) + (data.budgetExtra||0);
-      const hasBudget = totalBudget > 0;
-      const fulfilled = [hasSched, hasTransit, hasSpots, hasFoods, hasHotel, hasBudget].filter(Boolean).length;
-
-      let score = 3;
-      if (fulfilled === 6) score = 10;
-      else if (fulfilled === 5) score = 9;
-      else if (fulfilled === 4) score = 8;
-      else if (fulfilled === 3) score = 7;
-      else if (fulfilled === 2) score = 6;
-      else if (fulfilled === 1) score = 5;
-
-      const record = {
-        ...data,
-        submittedAt: new Date().toLocaleString('ko-KR'),
-        fulfilledCount: fulfilled,
-        score: score,
-        totalBudget: totalBudget
-      };
-
-      // 1. 해당 기기(태블릿) 로컬 백업 저장
-      let submissions = [];
-      try {
-        submissions = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
-      } catch (e) {}
-      const existingIdx = submissions.findIndex(s => s.studentName === data.studentName);
-      if (existingIdx >= 0) {
-        submissions[existingIdx] = record;
-      } else {
-        submissions.unshift(record);
-      }
-      localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(submissions));
-
-      // 2. 구글 스프레드시트 클라우드 서버로 실시간 POST 전송
-      const gasUrl = getActiveGasUrl();
-      const submitBtn = document.getElementById('btn-submit-plan');
-      const submitBtnText = document.getElementById('submit-btn-text');
-
-      if (!gasUrl) {
-        // 클라우드 URL이 미설정된 경우
-        showToast(`'${data.studentName}' 학생 제출 완료! (교사용 클라우드 URL 설정 필요)`, '⚠️');
-        playBeep(600, 'sine', 0.2);
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtnText.textContent = "클라우드 전송 중... ⏳";
-
-      try {
-        // Google Apps Script는 text/plain으로 보내면 CORS 에러 없이 완벽 수신됨
-        await fetch(gasUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(record)
-        });
-
-        submitBtn.disabled = false;
-        submitBtnText.textContent = "선생님께 기획서 온라인 제출하기 🚀";
-        showToast(`'${data.studentName}' 학생의 기획서가 선생님 화면으로 전송되었습니다! 🚀`, '✅');
-        playBeep(880, 'sine', 0.25);
-      } catch (err) {
-        submitBtn.disabled = false;
-        submitBtnText.textContent = "선생님께 기획서 온라인 제출하기 🚀";
-        showToast('클라우드 전송 중 통신 오류가 발생했습니다. 잠시 후 다시 시도하세요.', '⚠️');
-      }
-    }
-
-    function openTeacherAdminModal() {
-      const authModal = document.getElementById('teacher-auth-modal');
-      const pwInput = document.getElementById('teacher-pw-input');
-      const errText = document.getElementById('teacher-pw-error');
-      
-      errText.classList.add('hidden');
-      pwInput.value = '';
-      authModal.classList.remove('hidden');
-      setTimeout(() => pwInput.focus(), 100);
-      playBeep(520, 'sine', 0.1);
-    }
-
-    function toggleTeacherAuthModal(show) {
-      const modal = document.getElementById('teacher-auth-modal');
-      if (show) modal.classList.remove('hidden');
-      else modal.classList.add('hidden');
-    }
-
-    function verifyTeacherPassword() {
-      const val = document.getElementById('teacher-pw-input').value.trim();
-      const errText = document.getElementById('teacher-pw-error');
-      
-      if (val === '2407') {
-        toggleTeacherAuthModal(false);
-        checkCloudConnectionStatus();
-        fetchCloudSubmissions();
-        toggleTeacherAdminModal(true);
-        showToast('교사 관리자 모드에 접속했습니다.', '👑');
-        playBeep(880, 'sine', 0.15);
-      } else {
-        errText.classList.remove('hidden');
-        playBeep(220, 'square', 0.2);
-      }
-    }
-
-    function toggleTeacherAdminModal(show) {
-      const m = document.getElementById('teacher-admin-modal');
-      if (show) {
-        m.classList.remove('hidden');
-        playBeep(520, 'sine', 0.1);
-      } else {
-        m.classList.add('hidden');
-      }
-    }
-
-    function toggleGasUrlConfig() {
-      const box = document.getElementById('gas-url-config-box');
-      box.classList.toggle('hidden');
-      document.getElementById('input-cloud-api-url').value = getActiveGasUrl();
-    }
-
-    function saveCloudApiUrl() {
-      const url = document.getElementById('input-cloud-api-url').value.trim();
-      localStorage.setItem(STORAGE_KEY_GAS_URL, url);
-      showToast('클라우드 연동 URL이 저장되었습니다!', '💾');
-      checkCloudConnectionStatus();
-      fetchCloudSubmissions();
-    }
-
-    function checkCloudConnectionStatus() {
-      const url = getActiveGasUrl();
-      const dot = document.getElementById('cloud-status-dot');
-      const title = document.getElementById('cloud-status-title');
-      const desc = document.getElementById('cloud-status-desc');
-
-      if (url) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-        title.textContent = "클라우드 서버 상태: 구글 시트 연동 활성";
-        desc.textContent = "학생들이 각자 태블릿에서 제출한 데이터가 이 PC로 실시간 동기화됩니다.";
-      } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
-        title.textContent = "클라우드 서버 상태: 연동 URL 미설정 (로컬 저장소 모드)";
-        desc.textContent = "[⚙️ 연동 URL 설정] 버튼을 눌러 구글 스프레드시트 웹 앱 URL을 등록하세요.";
-      }
-    }
-
-    // ==========================================
-    // 📥 구글 스프레드시트에서 실시간 학생 제출본 조회
-    // ==========================================
-    let cachedSubmissionsList = [];
-
-    async function fetchCloudSubmissions() {
-      const url = getActiveGasUrl();
-      const tbody = document.getElementById('admin-submissions-tbody');
-      
-      if (!url) {
-        // 클라우드 미연동 시 로컬 데이터 표시
-        try {
-          cachedSubmissionsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
-        } catch(e) { cachedSubmissionsList = []; }
-        renderSubmissionsTable(cachedSubmissionsList);
-        return;
-      }
-
-      tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">구글 시트에서 학생 제출본을 실시간으로 가져오는 중입니다... ⏳</td></tr>`;
-
-      try {
-        const response = await fetch(`${url}?t=${Date.now()}`);
-        if (!response.ok) throw new Error('서버 응답 오류');
-        const data = await response.json();
-        
-        if (Array.isArray(data)) {
-          // 최신 제출이 위로 오도록 역순 정렬
-          cachedSubmissionsList = data.reverse();
-          localStorage.setItem(STORAGE_KEY_TEACHER, JSON.stringify(cachedSubmissionsList));
-          renderSubmissionsTable(cachedSubmissionsList);
-          showToast(`구글 시트에서 총 ${cachedSubmissionsList.length}명의 기획서를 가져왔습니다!`, '🔄');
-        } else {
-          throw new Error('응답 형식 불일치');
-        }
-      } catch (err) {
-        console.warn('Cloud fetch failed, fallback to local', err);
-        try {
-          cachedSubmissionsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHER) || '[]');
-        } catch(e) { cachedSubmissionsList = []; }
-        renderSubmissionsTable(cachedSubmissionsList);
-        showToast('클라우드 조회 실패: 로컬 보관 데이터를 표시합니다.', '⚠️');
-      }
-    }
-
-    function renderSubmissionsTable(subs) {
-      document.getElementById('admin-total-submissions').textContent = `${subs.length}명`;
-      const perfect = subs.filter(s => s.fulfilledCount === 6).length;
-      document.getElementById('admin-perfect-submissions').textContent = `${perfect}명`;
-
-      const tbody = document.getElementById('admin-submissions-tbody');
-      tbody.innerHTML = '';
-
-      if (subs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">아직 제출된 학생 기획서가 없습니다.</td></tr>`;
-        return;
-      }
-
-      subs.forEach((s, idx) => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition";
-        tr.innerHTML = `
-          <td class="p-3 text-slate-500 text-[11px]">${s.submittedAt || '-'}</td>
-          <td class="p-3 font-bold text-slate-900">${s.studentName}</td>
-          <td class="p-3">
-            <span class="font-semibold text-rose-700">${s.targetCity || '-'}</span>
-            <span class="text-slate-500 block text-[11px]">${s.tripTheme || '-'}</span>
-          </td>
-          <td class="p-3">
-            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${s.score === 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-              ${s.score}점 (${s.fulfilledCount}/6)
-            </span>
-          </td>
-          <td class="p-3 font-mono font-medium">${(s.totalBudget||0).toLocaleString()}원</td>
-          <td class="p-3 text-right">
-            <button onclick="loadStudentSubmission(${idx})" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[11px] font-semibold">
-              열람
+      <!-- Google Maps Multi-Stops Interactive Timeline -->
+      <div class="bg-gradient-to-br from-slate-900 to-indigo-950 p-5 rounded-xl text-white shadow-md space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-3">
+          <div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/50 text-indigo-200">구글맵스 실시간 경로 연동</span>
+            <h4 class="text-sm sm:text-base font-bold text-white mt-1 flex items-center gap-1.5">
+              🗺️ 번호별 당일 이동 동선 (1➔2➔3➔...)
+            </h4>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="addRouteStop()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition">
+              + 경유지 추가
             </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+            <button onclick="openGoogleMapsRoute()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow">
+              <span>Google 지도에서 길찾기 열기 ➔</span>
+            </button>
+          </div>
+        </div>
 
-    function loadStudentSubmission(idx) {
-      const target = cachedSubmissionsList[idx];
-      if (target) {
-        setFormData(target);
-        toggleTeacherAdminModal(false);
-        switchTab('planner');
-        showToast(`'${target.studentName}' 학생의 제출본을 화면에 불러왔습니다.`, '👁️');
-      }
-    }
+        <p class="text-xs text-slate-300">
+          출발지(공항/역)부터 주요 관광지, 맛집, 숙소를 순서대로 입력하세요. 구글맵에서 대중교통 경로가 바로 시각화됩니다.
+        </p>
 
-    function clearAllSubmissionsPrompt() {
-      if (confirm('교사용 화면의 제출 목록을 초기화하시겠습니까? (구글 스프레드시트 원본 데이터는 보존됩니다)')) {
-        localStorage.removeItem(STORAGE_KEY_TEACHER);
-        cachedSubmissionsList = [];
-        renderSubmissionsTable(cachedSubmissionsList);
-        showToast('화면 목록이 초기화되었습니다.', '🗑️');
-      }
-    }
+        <div id="route-stops-container" class="space-y-2"></div>
+      </div>
 
-    function exportSubmissionsCSV() {
-      if (cachedSubmissionsList.length === 0) {
-        showToast('내보낼 제출 내역이 없습니다.', '⚠️');
-        return;
-      }
+      <!-- Element 2: Transportation -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">필수 요소 2</span>
+          <span class="text-xs text-slate-400">교통 수단 (공항↔도심, 시내 이동)</span>
+        </div>
+        <h4 class="text-sm font-bold text-slate-900">구간별 이용 교통수단 및 패스</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-1">공항 ↔ 숙소/도심 이동</label>
+            <input type="text" id="input-transport-airport" placeholder="예: 간사이공항 난카이 라피트 특급 / 나리타 익스프레스" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-1">도심 내 이동 수단 / 패스</label>
+            <input type="text" id="input-transport-city" placeholder="예: 오사카 메트로 주유패스, 교토 시내버스 1일권" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+          </div>
+        </div>
+      </div>
 
-      let csv = "\uFEFF학번및이름,제출일시,목적지,여행테마,기간,루트,교통수단,명소1,명소2,미식및간식목록,숙소,총예산(원),6대요소충족수,예상점수\n";
-      cachedSubmissionsList.forEach(s => {
-        const foodsStr = s.foods ? s.foods.map(f => `[${f.type}]${f.name}`).join(' | ') : '';
-        csv += `"${s.studentName}","${s.submittedAt}","${s.targetCity}","${s.tripTheme}","${s.duration}","${s.route}","${s.transportAirport} / ${s.transportCity}","${s.spot1}","${s.spot2}","${foodsStr}","${s.hotelType} ${s.hotelLocation}","${s.totalBudget}","${s.fulfilledCount}","${s.score}"\n`;
-      });
+      <!-- Element 3: Attractions (Min 2) -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">필수 요소 3</span>
+          <span class="text-xs text-slate-400">관광지 (반드시 2곳 이상 선택 및 이유 작성)</span>
+        </div>
+        <h4 class="text-sm font-bold text-slate-900">방문 관광지 2곳 이상 & 선정 이유</h4>
+        <div class="space-y-3">
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+            <div class="flex gap-2">
+              <span class="text-xs font-bold text-slate-600 self-center">장소 1</span>
+              <input type="text" id="input-spot-1" placeholder="예: 기요미즈데라(청수사)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+            </div>
+            <input type="text" id="input-spot-reason-1" placeholder="선택 이유: 8세기 말 절벽 위에 세워진 사찰에서 교토 전경을 감상하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+          </div>
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `[일본어회화_수행평가]_학생제출현황_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('제출 현황 CSV 파일이 다운로드되었습니다!', '📊');
-    }
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+            <div class="flex gap-2">
+              <span class="text-xs font-bold text-slate-600 self-center">장소 2</span>
+              <input type="text" id="input-spot-2" placeholder="예: 유니버설 스튜디오 재팬 (USJ)" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+            </div>
+            <input type="text" id="input-spot-reason-2" placeholder="선택 이유: 슈퍼 닌텐도 월드 어트랙션과 테마파크를 직접 체험하기 위해" class="w-full text-[11px] px-3 py-1.5 border border-slate-300 rounded-md bg-white" oninput="onInputChanged()">
+          </div>
+        </div>
+      </div>
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
-        btn.classList.add('text-slate-600', 'border-transparent');
-      });
+      <!-- Element 4: Creative Food & Snacks -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700">필수 요소 4</span>
+          <span class="text-xs text-slate-400">현지 대표 음식 & 창의적 간식 (최소 2개 이상)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900">현지 미식 & 디저트·간식 컬렉션</h4>
+            <p class="text-[11px] text-slate-500">아침/점심/저녁 외에도 편의점 털기, 길거리 간식, 카페 디저트 등을 자유롭게 추가해 보세요!</p>
+          </div>
+          <button onclick="addFoodItem()" class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-xs font-bold transition">
+            + 음식/간식 추가
+          </button>
+        </div>
 
-      const activePanel = document.getElementById(`tab-content-${tabId}`);
-      if (activePanel) activePanel.classList.remove('hidden');
+        <div id="foods-container" class="space-y-2"></div>
+      </div>
 
-      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-      if (activeBtn) {
-        activeBtn.classList.add('active', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
-        activeBtn.classList.remove('text-slate-600', 'border-transparent');
-      }
+      <!-- Element 5: Accommodation & Direct Booking Search -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700">필수 요소 5</span>
+          <span class="text-xs text-slate-400">숙소 형태 & 위치 (실시간 예약 탐색 연동)</span>
+        </div>
+        <h4 class="text-sm font-bold text-slate-900">숙소 형태 & 추천 선택지</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-1">숙소 유형 선택</label>
+            <select id="input-hotel-type" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" onchange="onHotelTypeChange()">
+              <option value="">유형을 선택하세요</option>
+              <option value="비즈니스 호텔">비즈니스 호텔 (가성비, 역 접근성)</option>
+              <option value="전통 료칸(旅館)">전통 료칸 (온천, 가이세키 코스)</option>
+              <option value="게스트하우스/호스텔">게스트하우스/호스텔 (저예산 배낭여행)</option>
+              <option value="캡슐 호텔">캡슐 호텔 (이색 체험, 1인 여행)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-1">숙소 위치 (역세권 등)</label>
+            <input type="text" id="input-hotel-location" placeholder="예: 난바역 또는 우메다역 도보 5분 거리" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-400" oninput="onInputChanged()">
+          </div>
+        </div>
 
-      playBeep(480, 'sine', 0.08);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        <!-- Accommodation Direct Search Links -->
+        <div id="hotel-search-links-box" class="mt-3 p-3 bg-purple-50/60 border border-purple-200 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-900">🔍 아고다 & 구글 실시간 숙소 검색 링크</span>
+            <span class="text-[10px] text-purple-600">도시 및 유형에 맞는 맞춤 검색 결과</span>
+          </div>
+          <div id="hotel-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs"></div>
+        </div>
+      </div>
+    </div>
 
-    function toggleRubricModal(show) {
-      const modal = document.getElementById('rubric-modal');
-      if (show) {
-        modal.classList.remove('hidden');
-        playBeep(520, 'sine', 0.1);
-      } else {
-        modal.classList.add('hidden');
-      }
-    }
+    <!-- Right: Element 6 & Budget Calculator Sidebar -->
+    <div class="space-y-5">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 sticky top-24">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">필수 요소 6</span>
+          <span class="text-xs text-slate-400">대략적인 여행 경비</span>
+        </div>
 
-    function copyTextToClipboard(text, successMsg) {
-      const tempArea = document.createElement("textarea");
-      tempArea.value = text;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      try {
-        document.execCommand('copy');
-        showToast(successMsg, '📋');
-        playBeep(600, 'sine', 0.08);
-      } catch (e) {
-        showToast('복사에 실패했습니다.', '⚠️');
-      }
-      document.body.removeChild(tempArea);
-    }
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900">1인 예상 경비 계산기</h4>
+            <p id="budget-preset-city-name" class="text-[10px] text-rose-600 font-semibold">도시 자동 예산 적용 중</p>
+          </div>
+          <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">100엔 ≒ 920원</span>
+        </div>
 
-    function showToast(msg, icon = '✨') {
-      const toast = document.getElementById('toast-message');
-      document.getElementById('toast-text').textContent = msg;
-      document.getElementById('toast-icon').textContent = icon;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+        <div class="space-y-3">
+          <div>
+            <label class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>항공권 (원)</span>
+              <span id="badge-flight-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+            </label>
+            <input type="number" id="budget-flight" placeholder="예: 350000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+          </div>
 
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
-    }
+          <div>
+            <label class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>숙박비 (원)</span>
+              <span id="badge-hotel-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+            </label>
+            <input type="number" id="budget-hotel" placeholder="예: 200000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+          </div>
 
-    window.onload = function () {
-      updateCitySelectDropdown();
-      renderCities('all');
-      renderRouteStops();
-      renderFoodList();
-      renderHotelOptions();
+          <div>
+            <label class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>현지 교통비 (패스/지하철)</span>
+              <span id="badge-transit-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+            </label>
+            <input type="number" id="budget-transit" placeholder="예: 60000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+          </div>
 
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY_CURRENT);
-        if (saved) {
-          setFormData(JSON.parse(saved));
-        } else {
-          calculateTotalBudget();
-        }
-      } catch (e) {
-        calculateTotalBudget();
-      }
-    };
-  </script>
-</body>
-</html>
-```eof
+          <div>
+            <label class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>식비 및 간식비 (원)</span>
+              <span id="badge-food-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+            </label>
+            <input type="number" id="budget-food" placeholder="예: 150000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+          </div>
 
----
+          <div>
+            <label class="flex justify-between text-xs text-slate-600 mb-1">
+              <span>입장료 & 쇼핑/기타 (원)</span>
+              <span id="badge-extra-amt" class="text-slate-400 font-mono text-[11px]">0원</span>
+            </label>
+            <input type="number" id="budget-extra" placeholder="예: 100000" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg" oninput="calculateTotalBudget()">
+          </div>
+        </div>
 
-### 💡 3분 구글 스프레드시트 무료 클라우드 연동 가이드
+        <!-- Total Budget Summary -->
+        <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-1">
+          <div class="text-[11px] font-semibold text-rose-800">1인 총 예상 경비</div>
+          <div class="flex items-baseline justify-between">
+            <span id="total-budget-krw" class="text-xl font-black text-rose-600">0 원</span>
+            <span id="total-budget-jpy" class="text-xs font-mono text-rose-700">약 0 円</span>
+          </div>
+        </div>
 
-학생들이 서로 다른 기기에서 제출한 내용이 선생님 PC에 뜨도록 하려면 구글 시트를 무료 데이터베이스로 연결해야 합니다. 딱 한 번만 설정해 두시면 됩니다.
+        <!-- Online Submission Button (실시간 클라우드 제출) -->
+        <button onclick="submitPlanToTeacher()" id="btn-submit-plan" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black py-3 rounded-lg transition shadow-md">
+          <span id="submit-btn-text">선생님께 기획서 온라인 제출하기 🚀</span>
+        </button>
 
-#### 1단계: 구글 스프레드시트 생성 및 앱스 스크립트 열기
-1. [Google 드라이브](https://drive.google.com/)에서 **[새로 만들기] ➔ [Google 스프레드시트]**를 생성합니다. (제목 예: `일본어회화_기획서_제출함`)
-2. 상단 메뉴에서 **[확장 프로그램] ➔ [Apps Script]**를 클릭합니다.
+        <!-- Export / PDF / Canva Buttons -->
+        <div class="pt-2 space-y-2">
+          <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span id="btn-pdf-label">기획서 PDF 파일 다운로드 (.pdf)</span>
+          </button>
 
-#### 2단계: 서버 코드 복사 & 붙여넣기
-편집창의 기존 내용을 모두 지우고, 아래 코드를 그대로 붙여넣은 후 저장(💾 아이콘)을 누릅니다:
+          <button onclick="openCanvaGuideModal()" class="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-lg transition shadow-sm">
+            <span>🎨 캔바·미리캔버스 5분 발표 자료 가이드</span>
+          </button>
 
-```javascript
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  lock.tryLock(10000);
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = JSON.parse(e.postData.contents);
-    
-    // 시트 첫 행 헤더가 없으면 자동 생성
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["제출일시", "학번/이름", "방문도시", "여행테마", "기간", "루트", "교통", "명소", "미식/간식", "숙소", "총예산", "점수", "전체데이터JSON"]);
-    }
-    
-    var foodsText = data.foods ? data.foods.map(function(f){ return "[" + f.type + "] " + f.name; }).join(", ") : "";
-    sheet.appendRow([
-      data.submittedAt,
-      data.studentName,
-      data.targetCity,
-      data.tripTheme,
-      data.duration,
-      data.route,
-      data.transportAirport + " / " + data.transportCity,
-      data.spot1 + " & " + data.spot2,
-      foodsText,
-      data.hotelType + " (" + data.hotelLocation + ")",
-      data.totalBudget,
-      data.score,
-      JSON.stringify(data)
-    ]);
-    return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ result: "error", error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="triggerPrintPlan()" class="flex items-center justify-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold py-2 rounded-lg transition">
+              🖨️ 인쇄 / 미리보기
+            </button>
+            <button onclick="copyPlanToClipboard()" class="flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold py-2 rounded-lg transition">
+              📋 텍스트 복사
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var rows = sheet.getDataRange().getValues();
-  var list = [];
-  for (var i = 1; i < rows.length; i++) {
-    try {
-      if (rows[i][12]) {
-        list.push(JSON.parse(rows[i][12]));
-      }
-    } catch(err) {}
-  }
-  return ContentService.createTextOutput(JSON.stringify(list)).setMimeType(ContentService.MimeType.JSON);
-}
+<!-- TAB 4: PRESENTATION & QUESTIONS -->
+<section id="tab-content-presentation" class="tab-panel hidden space-y-6">
+  <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-6 text-white shadow-md">
+    <div class="inline-flex items-center gap-1.5 bg-emerald-500/50 px-3 py-1 rounded-full text-xs font-medium mb-3">
+      <span>🎤 수행평가 발표(5점) & 질문(5점) 대비</span>
+    </div>
+    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">발표 브리핑 & 상호 질문 시뮬레이터</h2>
+    <p class="mt-2 text-sm text-emerald-100 leading-relaxed max-w-3xl">
+      내가 기획한 내용을 바탕으로 자동 구성된 1분 스피치 대본을 연습하고, 동료 학생의 발표 때 던질 수 있는 <strong>예리하고 적절한 질문(5점 만점 요건)</strong>을 준비해 보세요.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left: Speech Script -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">발표 5점 만점 대비</span>
+          <h3 class="text-base font-bold text-slate-900 mt-1">나의 1분 발표 스크립트</h3>
+        </div>
+        <button onclick="refreshSpeechScript()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1">
+          🔄 대본 새로고침
+        </button>
+      </div>
+
+      <div id="speech-script-box" class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 font-normal"></div>
+
+      <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900">
+        📌 <strong>선생님의 발표 팁:</strong> "단순히 지명만 나열하기보다는 '이 테마를 정한 나만의 동기'와 '구글맵스로 확인한 대중교통 환승 요령'을 말하면 유창성과 논리성에서 최고점을 받습니다."
+      </div>
+    </div>
+
+    <!-- Right: Mutual Questions Bank -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">참여/경청 5점 만점 대비</span>
+          <h3 class="text-base font-bold text-slate-900 mt-1">동료 발표 질문 추천 뱅크</h3>
+        </div>
+        <span class="text-xs text-slate-400">질문 1회 이상 주도적 참여</span>
+      </div>
+
+      <p class="text-xs text-slate-600">
+        친구의 발표를 들은 후 아래 카드를 클릭하면 내 메모장에 질문이 자동 복사됩니다.
+      </p>
+
+      <div class="space-y-3">
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">교통 및 동선 질문</span>
+            <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+          </div>
+          <p class="text-xs text-slate-800 font-medium">"구글맵으로 확인하신 이동 동선 중 환승 시간이 가장 촉박하거나 주의해야 할 구간은 어디인가요?"</p>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">명소 & 문화 질문</span>
+            <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+          </div>
+          <p class="text-xs text-slate-800 font-medium">"선정하신 두 명소 중 계절이나 시간대에 따라 더 특별한 경험을 할 수 있는 현지 꿀팁이 있나요?"</p>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">예산 & 가성비 질문</span>
+            <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+          </div>
+          <p class="text-xs text-slate-800 font-medium">"총예산 안에서 교통 패스나 사전 예약 할인을 활용해 경비를 가장 알뜰하게 아낀 항목은 무엇인가요?"</p>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition cursor-pointer" onclick="selectQuestion(this)">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">음식 & 에티켓 질문</span>
+            <span class="text-[10px] text-slate-400">클릭 시 메모 복사</span>
+          </div>
+          <p class="text-xs text-slate-800 font-medium">"소개해주신 대표 음식이나 길거리 디저트를 먹을 때 주의해야 할 일본 특유의 식사 매너가 있는지 궁금합니다."</p>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <label class="block text-xs font-semibold text-slate-600 mb-1">내가 질문할 내용 메모</label>
+        <textarea id="my-peer-question" rows="2" placeholder="위 질문 카드를 클릭하거나 직접 질문할 내용을 메모하세요..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-400" oninput="onInputChanged()"></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <div class="space-y-3 text-xs">
+    <div>
+      <label class="block font-semibold text-slate-700 mb-1">도시 이름 (한글/일본어) <span class="text-rose-500">*</span></label>
+      <input type="text" id="custom-city-name" placeholder="예: 가나자와 (かなざわ) 또는 시즈오카" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-700 mb-1">테마 키워드 <span class="text-rose-500">*</span></label>
+      <input type="text" id="custom-city-badge" placeholder="예: 금박 공예 / 에도 정원" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-700 mb-1">도시 소개 요약</label>
+      <textarea id="custom-city-desc" rows="2" placeholder="이 도시만의 매력을 간단히 적어보세요." class="w-full px-3 py-2 border border-slate-300 rounded-lg"></textarea>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">대표 명소 2곳</label>
+        <input type="text" id="custom-city-spots" placeholder="예: 겐로쿠엔 & 21세기미술관" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+      </div>
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">대표 음식</label>
+        <input type="text" id="custom-city-food" placeholder="예: 가나자와 카레 & 해산물 덮밥" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">공항/접근 교통</label>
+        <input type="text" id="custom-city-airport" placeholder="예: 고마쓰 공항 리무진 버스" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+      </div>
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">시내 교통 수단</label>
+        <input type="text" id="custom-city-transit" placeholder="예: 가나자와 성하마을 순환버스" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+      </div>
+    </div>
+  </div>
+
+  <div class="flex gap-2 pt-2 border-t border-slate-100">
+    <button onclick="toggleCustomCityModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">취소</button>
+    <button onclick="saveCustomCity()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm">+ 도시 등록 및 선택</button>
+  </div>
+</div>
+
+
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px;">
+    <div><strong>작성자:</strong> <span id="print-student-name">-</span></div>
+    <div><strong>여행 테마:</strong> <span id="print-trip-theme">-</span></div>
+    <div><strong>목적지:</strong> <span id="print-target-city">-</span></div>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
+    <tr>
+      <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0; width: 24%;">① 전체 일정표</th>
+      <td style="border: 1px solid #999; padding: 8px;" id="print-schedule">-</td>
+    </tr>
+    <tr>
+      <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">② 교통 수단</th>
+      <td style="border: 1px solid #999; padding: 8px;" id="print-transport">-</td>
+    </tr>
+    <tr>
+      <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">③ 관광지 2곳 이상</th>
+      <td style="border: 1px solid #999; padding: 8px;" id="print-spots">-</td>
+    </tr>
+    <tr>
+      <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">④ 대표 미식 & 간식</th>
+      <td style="border: 1px solid #999; padding: 8px;" id="print-foods">-</td>
+    </tr>
+    <tr>
+      <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑤ 숙소 형태 & 위치</th>
+      <td style="border: 1px solid #999; padding: 8px;" id="print-hotel">-</td>
+    </tr>
+    <tr>
+      <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑥ 대략적인 경비</th>
+      <td style="border: 1px solid #999; padding: 8px;" id="print-budget">-</td>
+    </tr>
+  </table>
+
+  <div style="border: 1px dashed #666; padding: 10px; margin-top: 15px; font-size: 12px; background: #fafafa;">
+    <strong>[동료 발표 질문 메모]</strong>
+    <p style="margin: 5px 0;" id="print-question">-</p>
+  </div>
+</div>
+
+
+<!-- Student Meta Box -->
+<div class="grid grid-cols-3 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 text-xs">
+  <div>
+    <span class="text-slate-400 block font-semibold text-[10px]">작성자 (학번/성명)</span>
+    <span id="pdf-student-name" class="font-bold text-slate-900 text-sm">-</span>
+  </div>
+  <div>
+    <span class="text-slate-400 block font-semibold text-[10px]">여행 테마</span>
+    <span id="pdf-trip-theme" class="font-bold text-rose-700 text-sm">-</span>
+  </div>
+  <div>
+    <span class="text-slate-400 block font-semibold text-[10px]">목적지</span>
+    <span id="pdf-target-city" class="font-bold text-slate-900 text-sm">-</span>
+  </div>
+</div>
+
+<!-- 6 Elements Table -->
+<div class="border border-slate-300 rounded-xl overflow-hidden mb-5 text-xs">
+  <div class="bg-slate-900 text-white px-3 py-2 font-bold flex justify-between items-center text-xs">
+    <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
+    <span id="pdf-checklist-badge" class="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px]">0/6 충족</span>
+  </div>
+  <table class="w-full border-collapse">
+    <tr class="border-b border-slate-200">
+      <td class="w-28 bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">① 전체 일정표</td>
+      <td class="p-3 text-slate-800" id="pdf-schedule-content">-</td>
+    </tr>
+    <tr class="border-b border-slate-200">
+      <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">② 교통 수단</td>
+      <td class="p-3 text-slate-800" id="pdf-transport-content">-</td>
+    </tr>
+    <tr class="border-b border-slate-200">
+      <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">③ 관광지 2곳 이상</td>
+      <td class="p-3 text-slate-800" id="pdf-spots-content">-</td>
+    </tr>
+    <tr class="border-b border-slate-200">
+      <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">④ 대표 미식 & 간식</td>
+      <td class="p-3 text-slate-800" id="pdf-foods-content">-</td>
+    </tr>
+    <tr class="border-b border-slate-200">
+      <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑤ 숙소 형태 & 위치</td>
+      <td class="p-3 text-slate-800" id="pdf-hotel-content">-</td>
+    </tr>
+    <tr>
+      <td class="bg-slate-100 font-bold p-3 text-slate-700 border-r border-slate-200">⑥ 예상 여행 경비</td>
+      <td class="p-3 text-slate-800" id="pdf-budget-content">-</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Google Maps Route Timeline in PDF -->
+<div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs">
+  <span class="font-bold text-slate-900 block mb-1">🗺️ 구글 지도 번호별 경유지 이동 동선</span>
+  <p id="pdf-route-timeline" class="text-slate-700">-</p>
+</div>
+
+<!-- Presentation & Q&A Box -->
+<div class="border border-slate-200 rounded-xl p-4 bg-slate-50 mb-5 text-xs space-y-2">
+  <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
+    <span class="font-bold text-slate-900">🎤 5분 발표 및 동료 평가 준비</span>
+    <span class="text-[10px] text-slate-500">슬라이드 기초 자료</span>
+  </div>
+  <div>
+    <span class="font-semibold text-indigo-700">· 동료 발표 경청 후 질문 예정 내용:</span>
+    <p id="pdf-question-content" class="mt-0.5 text-slate-700 pl-2">미작성</p>
+  </div>
+</div>
+
+<div class="border-t-2 border-dashed border-slate-300 pt-4 flex items-center justify-between text-[11px] text-slate-600">
+  <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
+  <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
+</div>
+
+
+  <div class="p-6 space-y-4 text-xs sm:text-sm">
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900 flex items-start gap-2">
+      <span class="text-base">💡</span>
+      <div>
+        <strong>선생님의 발표 꿀팁:</strong> 캔바나 미리캔버스에서 <strong>[프레젠테이션]</strong> 템플릿을 선택하고, 아래 슬라이드별 내용을 복사하여 넣으면 5분 발표 슬라이드가 순식간에 완성됩니다!
+      </div>
+    </div>
+    <div class="space-y-3" id="canva-slides-container"></div>
+  </div>
+
+  <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+    <button onclick="copyAllSlidesScript()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+      <span>📋 전체 6장 슬라이드 한 번에 복사</span>
+    </button>
+    <button onclick="toggleCanvaModal(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold transition">닫기</button>
+  </div>
+</div>
+
+
+  <div class="p-5 space-y-4">
+    <div class="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+      <div>
+        <span class="text-xs font-bold text-slate-800 block">현재 작성 내용 보관함에 새 저장</span>
+        <span class="text-[11px] text-slate-500">다른 테마로 새로운 계획을 작성할 때 유용합니다.</span>
+      </div>
+      <button onclick="saveCurrentPlanAsNewSlot()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition">
+        + 새 기획서로 저장
+      </button>
+    </div>
+
+    <div class="space-y-2">
+      <h4 class="text-xs font-bold text-slate-700">저장된 기획서 목록</h4>
+      <div id="saved-plans-list" class="space-y-2"></div>
+    </div>
+
+    <div class="pt-3 border-t border-slate-200">
+      <h4 class="text-xs font-bold text-slate-700 mb-1">학교 ↔ 집 이동용 파일 백업</h4>
+      <p class="text-[11px] text-slate-500 mb-2">학교 컴퓨터에서 작성한 내용을 파일로 저장해 집에서 그대로 열어보세요.</p>
+      <div class="flex gap-2">
+        <button onclick="exportBackupFile()" class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">
+          💾 백업 파일 다운로드 (.json)
+        </button>
+        <label class="flex-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg text-center cursor-pointer transition border border-slate-300">
+          📂 백업 파일 불러오기
+          <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="importBackupFile(event)">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+    <button onclick="toggleArchiveModal(false)" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold">닫기</button>
+  </div>
+</div>
+
+
+  <div class="p-5 space-y-4">
+    <!-- Cloud Status Bar -->
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+        <div>
+          <span id="cloud-status-title" class="font-bold text-slate-800">클라우드 서버 상태: 확인 중</span>
+          <p id="cloud-status-desc" class="text-[11px] text-slate-500">구글 스프레드시트 웹 앱과 연동되어 각 기기 제출본을 실시간으로 가져옵니다.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="fetchCloudSubmissions()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center gap-1 transition shadow-sm">
+          🔄 실시간 새로고침
+        </button>
+        <button onclick="toggleGasUrlConfig()" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold transition">
+          ⚙️ 연동 URL 설정
+        </button>
+      </div>
+    </div>
+
+    <!-- Hidden Cloud URL Config Bar -->
+    <div id="gas-url-config-box" class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
+      <label class="block font-bold text-amber-900">구글 웹 앱 배포 URL (Google Apps Script Web App URL)</label>
+      <div class="flex gap-2">
+        <input type="text" id="input-cloud-api-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-1.5 border border-amber-300 rounded bg-white">
+        <button onclick="saveCloudApiUrl()" class="px-3 py-1.5 bg-amber-600 text-white font-bold rounded">저장</button>
+      </div>
+      <p class="text-[11px] text-amber-700">※ 한 번만 설정하면 이 브라우저에 저장되어 학생들의 제출본을 계속 실시간으로 가져옵니다.</p>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
+        <span class="text-[11px] text-slate-500 block">총 제출 인원</span>
+        <span id="admin-total-submissions" class="text-xl font-black text-slate-900">0명</span>
+      </div>
+      <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl">
+        <span class="text-[11px] text-emerald-700 block">10점 만점 충족 인원</span>
+        <span id="admin-perfect-submissions" class="text-xl font-black text-emerald-700">0명</span>
+      </div>
+      <div class="bg-indigo-50 border border-indigo-200 p-3.5 rounded-xl flex items-center justify-between">
+        <div>
+          <span class="text-[11px] text-indigo-700 block">데이터 내보내기</span>
+          <span class="text-xs font-bold text-indigo-900">CSV 엑셀</span>
+        </div>
+        <button onclick="exportSubmissionsCSV()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-sm">
+          다운로드 📥
+        </button>
+      </div>
+    </div>
+
+    <!-- Submissions Table -->
+    <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+          <tr>
+            <th class="p-3">제출 시각</th>
+            <th class="p-3">학번 / 이름</th>
+            <th class="p-3">목적지 & 테마</th>
+            <th class="p-3">6대 요소 점수</th>
+            <th class="p-3">총 예산</th>
+            <th class="p-3 text-right">상세/관리</th>
+          </tr>
+        </thead>
+        <tbody id="admin-submissions-tbody" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+
+    <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
+      <span>※ 학생 제출 데이터는 클라우드 구글 시트에 실시간 영구 보관됩니다.</span>
+      <button onclick="clearAllSubmissionsPrompt()" class="text-rose-600 hover:text-rose-700 font-semibold">
+        제출 내역 전체 초기화
+      </button>
+    </div>
+  </div>
+
+  <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+    <button onclick="toggleTeacherAdminModal(false)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">닫기</button>
+  </div>
+</div>
+
+
+  <div class="p-6 space-y-4 text-xs sm:text-sm">
+    <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
+        <span>1. 여행 계획서 작성하기 (필수 6요소 완성도)</span>
+        <span class="text-rose-600">배점 10점</span>
+      </div>
+      <table class="w-full text-left border-collapse text-xs">
+        <tr class="border-t border-slate-200 bg-rose-50/50">
+          <td class="p-2.5 font-semibold text-rose-900 w-24">10점 (만점)</td>
+          <td class="p-2.5 text-slate-700"><strong>필수 요소 6가지</strong>(전체 일정표, 교통 수단, 관광지 2곳 이상, 음식 2개 이상, 숙소, 대략적인 여행 경비)를 <strong>모두 포함</strong>하여 구체적이고 상세하게 작성함.</td>
+        </tr>
+        <tr class="border-t border-slate-200">
+          <td class="p-2.5 font-semibold text-slate-800">9점</td>
+          <td class="p-2.5 text-slate-600">필수 요소 중 5가지를 포함하여 상세히 작성함.</td>
+        </tr>
+        <tr class="border-t border-slate-200">
+          <td class="p-2.5 font-semibold text-slate-800">8점</td>
+          <td class="p-2.5 text-slate-600">필수 요소 중 4가지를 포함하여 비교적 상세히 작성함.</td>
+        </tr>
+        <tr class="border-t border-slate-200">
+          <td class="p-2.5 font-semibold text-slate-800">7점 ~ 5점</td>
+          <td class="p-2.5 text-slate-600">필수 요소 중 3~1가지만 포함하여 단편적으로 작성함.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
+        <span>2. 여행 계획 발표하기 (유창성 & 전달력)</span>
+        <span class="text-emerald-600">배점 5점</span>
+      </div>
+      <table class="w-full text-left border-collapse text-xs">
+        <tr class="border-t border-slate-200 bg-emerald-50/50">
+          <td class="p-2.5 font-semibold text-emerald-900 w-24">5점 (만점)</td>
+          <td class="p-2.5 text-slate-700">조사한 여행 계획을 바탕으로 자신의 의견이나 생각을 적절하고 <strong>유창하게 발표</strong>할 수 있다.</td>
+        </tr>
+        <tr class="border-t border-slate-200">
+          <td class="p-2.5 font-semibold text-slate-800">4점 ~ 2점</td>
+          <td class="p-2.5 text-slate-600">비교적 적절하게 전달하거나 일부만을 단편적으로 발표함.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="border border-slate-200 rounded-xl overflow-hidden">
+      <div class="bg-slate-100 px-4 py-2 font-bold text-slate-800 flex justify-between">
+        <span>3. 경청 및 상호작용 (동료 피드백 & 질문)</span>
+        <span class="text-blue-600">배점 5점</span>
+      </div>
+      <table class="w-full text-left border-collapse text-xs">
+        <tr class="border-t border-slate-200 bg-blue-50/50">
+          <td class="p-2.5 font-semibold text-blue-900 w-24">5점 (만점)</td>
+          <td class="p-2.5 text-slate-700">다른 학생의 발표를 바른 자세로 경청하고, 발표 내용과 관련된 <strong>적절한 질문을 1회 이상 주도적으로 하여 상호작용에 적극 참여함</strong>.</td>
+        </tr>
+        <tr class="border-t border-slate-200">
+          <td class="p-2.5 font-semibold text-slate-800">3점 ~ 1점</td>
+          <td class="p-2.5 text-slate-600">경청하나 질문을 하지 않고 수동적이거나 집중하지 않음.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+    <button onclick="toggleRubricModal(false)" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">확인 완료</button>
+  </div>
+</div>
