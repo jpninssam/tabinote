@@ -6,8 +6,6 @@
   <title>타비노트 (Tabi Note) - 일본어 회화 일본 테마 여행 플래너</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2pdf.js CDN for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -32,20 +30,35 @@
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* =================================================== */
+    /* 🖨️ A4 PDF 인쇄 전용 스타일 (백지 현상 원천 차단)   */
+    /* =================================================== */
     @media print {
-      body * { visibility: hidden; }
-      #print-sheet-area, #print-sheet-area * { visibility: visible; }
-      #print-sheet-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 20px;
-        background: white !important;
-        color: black !important;
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
       }
-      .no-print { display: none !important; }
+      body * {
+        visibility: hidden !important;
+      }
+      #print-sheet-area, #print-sheet-area * {
+        visibility: visible !important;
+      }
+      #print-sheet-area {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
     }
   </style>
 </head>
@@ -546,25 +559,21 @@
 
             <!-- Export / PDF / Canva Buttons -->
             <div class="pt-2 space-y-2">
+              <!-- 원클릭 인쇄/PDF 저장 버튼 -->
               <button onclick="downloadPlanPDF()" id="btn-download-pdf" class="w-full flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                <span id="btn-pdf-label">기획서 PDF 파일 다운로드 (.pdf)</span>
+                <span id="btn-pdf-label">기획서 PDF 저장 / 인쇄 (.pdf)</span>
               </button>
 
               <button onclick="openCanvaGuideModal()" class="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-lg transition shadow-sm">
                 <span>🎨 캔바·미리캔버스 5분 발표 자료 가이드</span>
               </button>
 
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="triggerPrintPlan()" class="flex items-center justify-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold py-2 rounded-lg transition">
-                  🖨️ 인쇄 / 미리보기
-                </button>
-                <button onclick="copyPlanToClipboard()" class="flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold py-2 rounded-lg transition">
-                  📋 텍스트 복사
-                </button>
-              </div>
+              <button onclick="copyPlanToClipboard()" class="w-full flex items-center justify-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold py-2 rounded-lg transition">
+                📋 계획서 전체 텍스트 복사
+              </button>
             </div>
           </div>
         </div>
@@ -716,143 +725,101 @@
     </div>
   </div>
 
-  <!-- A4 PRINT WORKSHEET -->
+  <!-- =================================================== -->
+  <!-- 📄 정밀 A4 레이아웃 (백지 없는 브라우저 엔진 인쇄 영역) -->
+  <!-- =================================================== -->
   <div id="print-sheet-area" class="hidden">
-    <div style="border: 2px solid #333; padding: 25px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-      <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 15px;">
-        <h2 style="font-size: 20px; font-weight: bold; margin: 0;">[일본어 회화] 나만의 일본 테마 여행 기획서</h2>
-        <p style="font-size: 12px; color: #555; margin: 5px 0 0 0;">평가 영역: 여행 계획(10점) + 발표(5점) + 경청/질의(5점) = 20점 만점</p>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px;">
-        <div><strong>작성자:</strong> <span id="print-student-name">-</span></div>
-        <div><strong>여행 테마:</strong> <span id="print-trip-theme">-</span></div>
-        <div><strong>목적지:</strong> <span id="print-target-city">-</span></div>
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0; width: 24%;">① 전체 일정표</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-schedule">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">② 교통 수단</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-transport">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">③ 관광지 2곳 이상</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-spots">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">④ 대표 미식 & 간식</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-foods">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑤ 숙소 형태 & 위치</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-hotel">-</td>
-        </tr>
-        <tr>
-          <th style="border: 1px solid #999; padding: 8px; background: #f0f0f0;">⑥ 대략적인 경비</th>
-          <td style="border: 1px solid #999; padding: 8px;" id="print-budget">-</td>
-        </tr>
-      </table>
-
-      <div style="border: 1px dashed #666; padding: 10px; margin-top: 15px; font-size: 12px; background: #fafafa;">
-        <strong>[동료 발표 질문 메모]</strong>
-        <p style="margin: 5px 0;" id="print-question">-</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- DEDICATED PDF EXPORT TEMPLATE (백지 방지 및 고해상도 출력 스타일 적용) -->
-  <div id="pdf-render-wrapper" style="position: fixed; left: -9999px; top: 0; width: 794px; min-height: 1120px; background-color: #ffffff; color: #0f172a; padding: 32px; box-sizing: border-box; font-family: Pretendard, sans-serif;">
-    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-      <div>
-        <div style="display: inline-block; padding: 2px 10px; border-radius: 4px; background-color: #ffe4e6; color: #9f1239; font-size: 11px; font-weight: bold; margin-bottom: 6px;">
-          일본어 회화 수행평가 과제물
+    <div style="max-width: 760px; margin: 0 auto; padding: 20px; font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; line-height: 1.5;">
+      
+      <!-- Header -->
+      <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #be123c; background-color: #ffe4e6; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px;">
+            일본어 회화 수행평가 과제물
+          </span>
+          <h2 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.5px;">나만의 일본 테마 여행 기획서</h2>
+          <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
         </div>
-        <h1 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.5px;">나만의 일본 테마 여행 기획서</h1>
-        <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">평가 영역: 여행 계획(10점) + 5분 발표(5점) + 질의응답(5점) [총 20점 만점]</p>
-      </div>
-      <div style="text-align: right;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f43f5e, #f59e0b); display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-left: auto;">
-          旅
+        <div style="text-align: right;">
+          <div style="font-size: 20px; font-weight: 900; color: #f43f5e; line-height: 1;">旅</div>
+          <div style="font-size: 9px; color: #94a3b8; font-family: monospace;">TABI NOTE</div>
         </div>
-        <div style="font-size: 10px; color: #94a3b8; font-family: monospace; margin-top: 4px;">TABI NOTE</div>
       </div>
-    </div>
 
-    <!-- Student Meta Box -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 12px;">
-      <div>
-        <span style="color: #64748b; display: block; font-size: 10px; font-weight: 600; margin-bottom: 2px;">작성자 (학번/성명)</span>
-        <span id="pdf-student-name" style="font-weight: 700; color: #0f172a; font-size: 13px;">-</span>
+      <!-- Student Meta Box -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px;">
+        <div>
+          <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600;">작성자 (학번/성명)</span>
+          <strong id="print-student-name" style="color: #0f172a; font-size: 13px;">-</strong>
+        </div>
+        <div>
+          <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600;">여행 테마</span>
+          <strong id="print-trip-theme" style="color: #be123c; font-size: 13px;">-</strong>
+        </div>
+        <div>
+          <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600;">목적지</span>
+          <strong id="print-target-city" style="color: #0f172a; font-size: 13px;">-</strong>
+        </div>
       </div>
-      <div>
-        <span style="color: #64748b; display: block; font-size: 10px; font-weight: 600; margin-bottom: 2px;">여행 테마</span>
-        <span id="pdf-trip-theme" style="font-weight: 700; color: #be123c; font-size: 13px;">-</span>
-      </div>
-      <div>
-        <span style="color: #64748b; display: block; font-size: 10px; font-weight: 600; margin-bottom: 2px;">목적지</span>
-        <span id="pdf-target-city" style="font-weight: 700; color: #0f172a; font-size: 13px;">-</span>
-      </div>
-    </div>
 
-    <!-- 6 Elements Table -->
-    <div style="border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; margin-bottom: 18px; font-size: 11px;">
-      <div style="background-color: #0f172a; color: #ffffff; padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-        <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
-        <span id="pdf-checklist-badge" style="background-color: #10b981; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 10px;">0/6 충족</span>
+      <!-- 6 Elements Table -->
+      <div style="border: 1px solid #94a3b8; border-radius: 8px; overflow: hidden; margin-bottom: 14px; font-size: 11px;">
+        <div style="background-color: #0f172a; color: #ffffff; padding: 6px 12px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+          <span>📋 여행 계획 필수 6대 요소 (10점 만점 평가 기준)</span>
+          <span id="print-score-badge" style="background-color: #10b981; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 10px;">0/6 충족</span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <th style="width: 125px; background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">① 전체 일정표</th>
+            <td style="padding: 8px 10px; color: #1e293b;" id="print-schedule">-</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">② 교통 수단</th>
+            <td style="padding: 8px 10px; color: #1e293b;" id="print-transport">-</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">③ 관광지 2곳 이상</th>
+            <td style="padding: 8px 10px; color: #1e293b;" id="print-spots">-</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">④ 대표 미식 & 간식</th>
+            <td style="padding: 8px 10px; color: #1e293b;" id="print-foods">-</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">⑤ 숙소 형태 & 위치</th>
+            <td style="padding: 8px 10px; color: #1e293b;" id="print-hotel">-</td>
+          </tr>
+          <tr>
+            <th style="background-color: #f1f5f9; padding: 8px 10px; text-align: left; font-weight: 700; color: #334155; border-right: 1px solid #cbd5e1;">⑥ 예상 여행 경비</th>
+            <td style="padding: 8px 10px; color: #1e293b;" id="print-budget">-</td>
+          </tr>
+        </table>
       </div>
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 120px; background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">① 전체 일정표</td>
-          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-schedule-content">-</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">② 교통 수단</td>
-          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-transport-content">-</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">③ 관광지 2곳 이상</td>
-          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-spots-content">-</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">④ 대표 미식 & 간식</td>
-          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-foods-content">-</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">⑤ 숙소 형태 & 위치</td>
-          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-hotel-content">-</td>
-        </tr>
-        <tr>
-          <td style="background-color: #f1f5f9; font-weight: 700; padding: 10px; color: #334155; border-right: 1px solid #e2e8f0;">⑥ 예상 여행 경비</td>
-          <td style="padding: 10px; color: #1e293b; line-height: 1.5;" id="pdf-budget-content">-</td>
-        </tr>
-      </table>
-    </div>
 
-    <!-- Google Maps Route Timeline in PDF -->
-    <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background-color: #f8fafc; margin-bottom: 18px; font-size: 11px;">
-      <span style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 경유지 이동 동선</span>
-      <p id="pdf-route-timeline" style="color: #334155; margin: 0; line-height: 1.5;">-</p>
-    </div>
-
-    <!-- Presentation & Q&A Box -->
-    <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background-color: #f8fafc; margin-bottom: 20px; font-size: 11px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 6px;">
-        <span style="font-weight: 700; color: #0f172a;">🎤 5분 발표 및 동료 평가 준비</span>
-        <span style="font-size: 10px; color: #64748b;">슬라이드 기초 자료</span>
+      <!-- Google Maps Route Timeline -->
+      <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 14px; font-size: 11px;">
+        <strong style="color: #0f172a; display: block; margin-bottom: 4px;">🗺️ 구글 지도 번호별 경유지 이동 동선</strong>
+        <p id="print-route-timeline" style="margin: 0; color: #334155;">-</p>
       </div>
-      <div>
-        <span style="font-weight: 600; color: #4338ca;">· 동료 발표 경청 후 질문 예정 내용:</span>
-        <p id="pdf-question-content" style="margin: 4px 0 0 0; color: #334155; padding-left: 8px;">미작성</p>
-      </div>
-    </div>
 
-    <div style="border-top: 2px dashed #cbd5e1; padding-top: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #475569;">
-      <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
-      <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
+      <!-- Presentation & Mutual Questions -->
+      <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background-color: #f8fafc; margin-bottom: 16px; font-size: 11px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 6px;">
+          <strong style="color: #0f172a;">🎤 5분 발표 및 동료 평가 준비</strong>
+          <span style="font-size: 10px; color: #64748b;">슬라이드 기초 자료</span>
+        </div>
+        <div>
+          <span style="font-weight: 700; color: #4338ca;">· 동료 발표 경청 후 질문 예정 내용:</span>
+          <p id="print-question" style="margin: 3px 0 0 0; color: #334155; padding-left: 6px;">미작성</p>
+        </div>
+      </div>
+
+      <!-- Signature Footer -->
+      <div style="border-top: 2px dashed #94a3b8; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #475569;">
+        <div><strong>자가진단:</strong> [ ] 일정 [ ] 교통 [ ] 관광지 [ ] 미식/간식 [ ] 숙소 [ ] 경비</div>
+        <div><strong>확인:</strong> 지도교사 ___________________ (인)</div>
+      </div>
+
     </div>
   </div>
 
@@ -1156,10 +1123,8 @@
     const STORAGE_KEY_TEACHER = 'tabinote_teacher_submissions';
     const STORAGE_KEY_CUSTOM_CITIES = 'tabinote_custom_cities';
 
-    // 최신 배포 주소(DEFAULT_GAS_URL)를 기본으로 안정적 반환
     function getActiveGasUrl() {
-      const stored = localStorage.getItem(STORAGE_KEY_GAS_URL);
-      return (stored && stored.trim() !== '') ? stored : DEFAULT_GAS_URL;
+      return DEFAULT_GAS_URL;
     }
 
     let audioCtx = null;
@@ -1989,109 +1954,35 @@
     }
 
     // ==========================================
-    // 📄 PDF 다운로드 (백지 출력 방지 완벽 패치)
+    // 📄 [백지 0%] 브라우저 원본 엔진 인쇄 및 PDF 저장
     // ==========================================
     function downloadPlanPDF() {
       const data = getFormData();
-      const name = data.studentName || '학생';
-      const city = data.targetCity || '일본';
-      const theme = data.tripTheme || '테마여행';
-
-      document.getElementById('pdf-student-name').textContent = name;
-      document.getElementById('pdf-trip-theme').textContent = theme;
-      document.getElementById('pdf-target-city').textContent = city;
-
-      document.getElementById('pdf-schedule-content').innerHTML = `<strong>기간:</strong> ${data.duration || '미작성'}<br><strong>동선:</strong> ${data.route || '미작성'}${data.scheduleDetail ? '<br><strong>상세:</strong> ' + data.scheduleDetail : ''}`;
-      document.getElementById('pdf-transport-content').innerHTML = `<strong>공항↔도심:</strong> ${data.transportAirport || '미작성'}<br><strong>시내 이동/패스:</strong> ${data.transportCity || '미작성'}`;
-      document.getElementById('pdf-spots-content').innerHTML = `1. <strong>${data.spot1 || '명소 1'}</strong> (이유: ${data.spotReason1 || '미작성'})<br>2. <strong>${data.spot2 || '명소 2'}</strong> (이유: ${data.spotReason2 || '미작성'})`;
-
-      const foodSummary = data.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(' / ');
-      document.getElementById('pdf-foods-content').innerHTML = foodSummary || '미작성';
-      document.getElementById('pdf-hotel-content').innerHTML = `<strong>유형:</strong> ${data.hotelType || '미선택'} / <strong>위치:</strong> ${data.hotelLocation || '미작성'}`;
-
-      const total = calculateTotalBudgetRaw();
-      const approxJpy = Math.round(total / 9.2);
-      document.getElementById('pdf-budget-content').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span style="font-size:10px; color:#64748b;">※ 항공·숙박·교통·식비 포함</span>`;
-
-      document.getElementById('pdf-route-timeline').textContent = data.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ');
-      document.getElementById('pdf-question-content').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
-      document.getElementById('pdf-checklist-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
-
-      const element = document.getElementById('pdf-render-wrapper');
-      const btn = document.getElementById('btn-download-pdf');
-      const label = document.getElementById('btn-pdf-label');
-
-      const sanitizedName = name.replace(/[^가-힣a-zA-Z0-9]/g, '_');
-      const sanitizedCity = city.replace(/[^가-힣a-zA-Z0-9]/g, '_');
-      const filename = `[일본어회화]_${sanitizedName}_${sanitizedCity}_여행기획서.pdf`;
-
-      btn.disabled = true;
-      label.textContent = "PDF 생성 중... ⏳";
-      playBeep(440, 'sine', 0.1);
-
-      // 백지 캡처 버그 방지: 뷰포트 뒤쪽으로 잠시 가져옴
-      element.style.position = 'fixed';
-      element.style.left = '0px';
-      element.style.top = '0px';
-      element.style.zIndex = '-50';
-      element.style.visibility = 'visible';
-
-      if (window.html2pdf) {
-        const opt = {
-          margin: [8, 8, 8, 8],
-          filename: filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
-            scale: 2, 
-            useCORS: true, 
-            logging: false,
-            scrollY: 0,
-            scrollX: 0
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save().then(() => {
-          // 캡처 후 다시 화면 밖으로 숨김
-          element.style.left = '-9999px';
-          element.style.zIndex = '';
-          btn.disabled = false;
-          label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
-          showToast(`'${filename}' 다운로드가 완료되었습니다!`, '📄');
-          playBeep(880, 'sine', 0.2);
-        }).catch(err => {
-          element.style.left = '-9999px';
-          element.style.zIndex = '';
-          btn.disabled = false;
-          label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
-          triggerPrintPlan();
-        });
-      } else {
-        element.style.left = '-9999px';
-        element.style.zIndex = '';
-        btn.disabled = false;
-        label.textContent = "기획서 PDF 파일 다운로드 (.pdf)";
-        triggerPrintPlan();
-      }
-    }
-
-    function triggerPrintPlan() {
-      const data = getFormData();
+      
+      // 1. 인쇄 영역에 실시간 작성 데이터 100% 매핑
       document.getElementById('print-student-name').textContent = data.studentName || '미작성';
       document.getElementById('print-trip-theme').textContent = data.tripTheme || '미작성';
       document.getElementById('print-target-city').textContent = data.targetCity || '미작성';
-      document.getElementById('print-schedule').innerHTML = `기간: ${data.duration || '-'}<br>동선: ${data.route || '-'}`;
-      document.getElementById('print-transport').innerHTML = `공항: ${data.transportAirport || '-'}<br>시내: ${data.transportCity || '-'}`;
-      document.getElementById('print-spots').innerHTML = `1. ${data.spot1 || '-'} (${data.spotReason1 || '-' })<br>2. ${data.spot2 || '-'} (${data.spotReason2 || '-' })`;
+      
+      document.getElementById('print-schedule').innerHTML = `<strong>기간:</strong> ${data.duration || '미작성'}<br><strong>동선:</strong> ${data.route || '미작성'}${data.scheduleDetail ? '<br><strong>상세:</strong> ' + data.scheduleDetail : ''}`;
+      document.getElementById('print-transport').innerHTML = `<strong>공항↔도심:</strong> ${data.transportAirport || '미작성'}<br><strong>시내 이동/패스:</strong> ${data.transportCity || '미작성'}`;
+      document.getElementById('print-spots').innerHTML = `1. <strong>${data.spot1 || '명소 1'}</strong> (이유: ${data.spotReason1 || '미작성'})<br>2. <strong>${data.spot2 || '명소 2'}</strong> (이유: ${data.spotReason2 || '미작성'})`;
       
       const foodSummary = data.foods.filter(f => f.name.trim() !== '').map(f => `[${f.type}] ${f.name}`).join(' / ');
-      document.getElementById('print-foods').innerHTML = foodSummary || '-';
-      document.getElementById('print-hotel').innerHTML = `${data.hotelType || '-'} (${data.hotelLocation || '-'})`;
+      document.getElementById('print-foods').innerHTML = foodSummary || '미작성';
+      document.getElementById('print-hotel').innerHTML = `<strong>유형:</strong> ${data.hotelType || '미선택'} / <strong>위치:</strong> ${data.hotelLocation || '미작성'}`;
       
-      const tot = calculateTotalBudgetRaw();
-      document.getElementById('print-budget').textContent = `약 ${tot.toLocaleString()} 원`;
-      document.getElementById('print-question').textContent = data.peerQuestion || '동료 발표 경청 후 질문 예정';
+      const total = calculateTotalBudgetRaw();
+      const approxJpy = Math.round(total / 9.2);
+      document.getElementById('print-budget').innerHTML = `총 <strong>약 ${total.toLocaleString()} 원</strong> (약 ${approxJpy.toLocaleString()} 円)<br><span style="font-size:10px; color:#64748b;">※ 항공·숙박·교통·식비 포함</span>`;
+      
+      document.getElementById('print-route-timeline').textContent = data.routeStops.map((s, i) => `${i+1}번 ${s}`).join(' ➔ ');
+      document.getElementById('print-question').textContent = data.peerQuestion ? `"${data.peerQuestion}"` : '동료 발표 경청 후 질문 예정';
+      document.getElementById('print-score-badge').textContent = document.getElementById('nav-score-badge').textContent + ' 충족';
 
+      playBeep(784, 'sine', 0.12);
+      
+      // 2. 브라우저 내장 인쇄 대화상자 호출 (대상: 'PDF로 저장' 선택 시 즉시 저장됨)
       window.print();
     }
 
@@ -2555,7 +2446,6 @@
     }
 
     window.onload = function () {
-      // 접속 시 항상 최신 웹 앱 URL로 브라우저 동기화
       localStorage.setItem(STORAGE_KEY_GAS_URL, DEFAULT_GAS_URL);
 
       updateCitySelectDropdown();
